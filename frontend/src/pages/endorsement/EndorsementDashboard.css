@@ -1,0 +1,461 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ==============================
+   ENDORSEMENT DASHBOARD
+============================== */
+
+.edb-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left,
+      rgba(74, 222, 128, 0.12),
+      transparent 30%),
+    radial-gradient(circle at bottom right,
+      rgba(34, 197, 94, 0.10),
+      transparent 35%),
+    #f8fafc;
+  font-family: 'Inter', sans-serif;
+  color: #0f172a;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.edb-loaded {
+  opacity: 1;
+}
+
+/* ==============================
+   HEADER
+============================== */
+
+.edb-header {
+  position: relative;
+  margin: 24px;
+  padding: 28px 32px;
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(34, 197, 94, 0.12);
+
+  box-shadow:
+    0 12px 40px rgba(15, 23, 42, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+
+  overflow: hidden;
+}
+
+.edb-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.edb-logo-mark {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    135deg,
+    #4ade80,
+    #22c55e
+  );
+
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+
+  box-shadow:
+    0 0 30px rgba(34, 197, 94, 0.35);
+}
+
+.edb-title {
+  margin: 0 0 4px;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  color: #0f172a;
+}
+
+.edb-subtitle {
+  margin: 0;
+
+  font-size: 15px;
+  color: #64748b;
+}
+
+.edb-header-stripe {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+
+  width: 300px;
+  height: 300px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(34, 197, 94, 0.18),
+      transparent 70%
+    );
+
+  pointer-events: none;
+}
+
+/* ==============================
+   STATS BAR
+============================== */
+
+.edb-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+
+  margin: 0 24px;
+
+  padding: 0 24px;
+
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(34, 197, 94, 0.12);
+
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.06);
+}
+
+.edb-stat {
+  display: flex;
+  flex-direction: column;
+
+  padding: 18px 28px 18px 0;
+}
+
+.edb-stat-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: #16a34a;
+}
+
+.edb-stat-label {
+  font-size: 12px;
+  color: #64748b;
+
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.edb-stat-div {
+  width: 1px;
+  height: 32px;
+
+  background: rgba(34, 197, 94, 0.15);
+
+  margin-right: 28px;
+}
+
+/* ==============================
+   GRID
+============================== */
+
+.edb-cards-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(260px, 1fr));
+
+  gap: 24px;
+
+  padding: 32px 24px 40px;
+}
+
+/* ==============================
+   CARD
+============================== */
+
+.edb-card {
+  position: relative;
+
+  padding: 28px;
+
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(34, 197, 94, 0.12);
+
+  box-shadow:
+    0 12px 35px rgba(15, 23, 42, 0.08);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.edb-loaded .edb-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.edb-card--anim-1 { transition-delay: 0.05s; }
+.edb-card--anim-2 { transition-delay: 0.10s; }
+.edb-card--anim-3 { transition-delay: 0.15s; }
+.edb-card--anim-4 { transition-delay: 0.20s; }
+.edb-card--anim-5 { transition-delay: 0.25s; }
+
+.edb-card:hover:not(.edb-card--uc) {
+  transform: translateY(-8px);
+
+  border-color: rgba(34, 197, 94, 0.22);
+
+  box-shadow:
+    0 20px 45px rgba(34, 197, 94, 0.15);
+}
+
+.edb-card--uc {
+  opacity: 0.75 !important;
+}
+
+/* ==============================
+   GLOW
+============================== */
+
+.edb-card-glow {
+  position: absolute;
+
+  bottom: -60px;
+  right: -60px;
+
+  width: 160px;
+  height: 160px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(34, 197, 94, 0.18),
+      transparent 70%
+    );
+
+  opacity: 0;
+
+  transition: 0.3s ease;
+}
+
+.edb-card:hover .edb-card-glow {
+  opacity: 1;
+}
+
+/* ==============================
+   CARD TOP
+============================== */
+
+.edb-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 22px;
+}
+
+.edb-card-icon {
+  width: 52px;
+  height: 52px;
+
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+
+  background: rgba(34, 197, 94, 0.12);
+
+  color: #16a34a;
+}
+
+.edb-icon--amber,
+.edb-icon--blue,
+.edb-icon--green,
+.edb-icon--purple,
+.edb-icon--teal {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.edb-card-badge {
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.edb-badge--amber,
+.edb-badge--blue,
+.edb-badge--green,
+.edb-badge--purple,
+.edb-badge--teal {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+/* ==============================
+   CARD BODY
+============================== */
+
+.edb-card-title {
+  margin: 0 0 8px;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+.edb-card-sub {
+  margin: 0;
+
+  font-size: 14px;
+  line-height: 1.6;
+
+  color: #64748b;
+}
+
+/* ==============================
+   FOOTER
+============================== */
+
+.edb-card-footer {
+  margin-top: 22px;
+
+  padding-top: 16px;
+
+  border-top: 1px solid rgba(34, 197, 94, 0.12);
+}
+
+.edb-card-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #16a34a;
+
+  transition: gap 0.2s ease;
+}
+
+.edb-card:hover .edb-card-action {
+  gap: 10px;
+}
+
+.edb-card-action--disabled {
+  color: #94a3b8 !important;
+}
+
+/* ==============================
+   UNDER CONSTRUCTION
+============================== */
+
+.edb-uc-ribbon {
+  position: absolute;
+
+  top: 16px;
+  right: -35px;
+
+  width: 140px;
+
+  text-align: center;
+
+  padding: 4px 0;
+
+  transform: rotate(35deg);
+
+  background: rgba(34, 197, 94, 0.12);
+
+  color: #15803d;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+
+@media (max-width: 900px) {
+  .edb-header {
+    margin: 18px;
+    padding: 22px;
+  }
+
+  .edb-stats-bar {
+    margin: 0 18px;
+  }
+
+  .edb-cards-grid {
+    padding: 24px 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .edb-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edb-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .edb-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .edb-stats-bar {
+    flex-wrap: wrap;
+  }
+
+  .edb-stat-div {
+    display: none;
+  }
+
+  .edb-stat {
+    width: 50%;
+  }
+}
