@@ -1,0 +1,379 @@
+/* ── Premium Design Tokens (Green Glow Theme) ────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Brand Greens */
+  --ep-primary: #16a34a;       
+  --ep-primary-hover: #15803d; 
+  --ep-primary-light: #f0fdf4; 
+  --ep-accent: #22c55e;        
+  --ep-success: #059669;       
+  --ep-danger: #dc2626;        
+  
+  /* Surface Colors */
+  --ep-bg: #f8fafc;            
+  --ep-text-main: #0f172a;     
+  --ep-text-muted: #64748b;    
+  --ep-border: #cbd5e1;        
+  
+  /* Ultra-smooth layered shadows */
+  --ep-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --ep-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --ep-shadow-lg: 0 12px 35px rgba(34, 197, 94, 0.08);
+  --ep-shadow-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+  
+  /* Radii & Transitions */
+  --ep-radius-sm: 8px;
+  --ep-radius-md: 12px;
+  --ep-radius-lg: 20px;
+  --ep-transition-fast: all 0.15s ease;
+  --ep-transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Page Shell & Glow Background ────────────────────────────────────────── */
+.ep-page {
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  padding: 40px 20px 100px;
+  color: var(--ep-text-main);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  -webkit-font-smoothing: antialiased;
+  
+  /* Premium Green Glow */
+  background:
+    radial-gradient(circle at top left, rgba(74, 222, 128, 0.12), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.08), transparent 35%),
+    #f8fafc;
+}
+
+.ep-page.ep-loaded { opacity: 1; }
+.ep-container { max-width: 1080px; margin: 0 auto; position: relative; }
+
+/* ── Top Navigation ──────────────────────────────────────────────────────── */
+.ep-top-nav { margin-bottom: 24px; }
+.ep-btn-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255, 255, 255, 0.6); 
+  border: 1px solid rgba(203, 213, 225, 0.6);
+  color: var(--ep-text-muted);
+  font-weight: 600; font-size: 14px; cursor: pointer; padding: 10px 16px;
+  border-radius: var(--ep-radius-sm); transition: var(--ep-transition-fast);
+  backdrop-filter: blur(8px);
+}
+.ep-btn-back:hover { 
+  background: #ffffff; 
+  color: var(--ep-text-main); 
+  border-color: var(--ep-border);
+  transform: translateX(-4px); 
+  box-shadow: var(--ep-shadow-sm);
+}
+
+/* ── Header Banner ───────────────────────────────────────────────────────── */
+.ep-header-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%);
+  color: #fff;
+  border-radius: var(--ep-radius-lg);
+  padding: 48px;
+  margin-bottom: 32px;
+  box-shadow: 0 15px 35px rgba(6, 78, 59, 0.15);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ep-header-glow {
+  position: absolute; top: -40%; right: -10%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.25) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.ep-header-title { 
+  font-size: 34px; font-weight: 800; margin: 0 0 10px 0; 
+  letter-spacing: -0.02em; line-height: 1.2; position: relative; z-index: 2;
+}
+.ep-header-sub { 
+  font-size: 16px; color: #a7f3d0; margin: 0; font-weight: 500; position: relative; z-index: 2;
+}
+
+/* ── Frosted Cards & Animations ──────────────────────────────────────────── */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ep-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--ep-radius-lg);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  box-shadow: var(--ep-shadow-lg);
+  padding: 36px 40px;
+  margin-bottom: 24px;
+  transition: var(--ep-transition);
+  opacity: 0; 
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.ep-card:hover { 
+  border-color: rgba(34, 197, 94, 0.3); 
+  box-shadow: 0 15px 40px rgba(34, 197, 94, 0.12);
+}
+
+.ep-anim-1 { animation-delay: 0.05s; } .ep-anim-2 { animation-delay: 0.10s; }
+.ep-anim-3 { animation-delay: 0.15s; } .ep-anim-4 { animation-delay: 0.20s; }
+.ep-anim-5 { animation-delay: 0.25s; } .ep-anim-6 { animation-delay: 0.30s; }
+.ep-anim-7 { animation-delay: 0.35s; } .ep-anim-8 { animation-delay: 0.40s; }
+
+.ep-card-heading {
+  font-size: 15px; font-weight: 800; color: var(--ep-primary-hover);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 28px;
+  display: flex; align-items: center; gap: 16px;
+}
+.ep-card-heading::after {
+  content: ''; flex-grow: 1; height: 1px; 
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.2), transparent); 
+}
+.ep-flex-between { justify-content: space-between; }
+.ep-flex-between::after { display: none; }
+
+/* ── Layout Utilities ────────────────────────────────────────────────────── */
+.ep-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.ep-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.ep-mt16 { margin-top: 16px; }
+.ep-mt24 { margin-top: 24px; }
+
+/* ── Typography & Labels ─────────────────────────────────────────────────── */
+.ep-label { 
+  display: block; font-size: 13px; font-weight: 700; 
+  color: var(--ep-text-main); margin-bottom: 8px; 
+}
+.ep-hint { 
+  font-size: 12px; color: var(--ep-text-muted); font-weight: 500; 
+  margin-left: 6px; font-style: italic;
+}
+
+/* ── Form Controls ───────────────────────────────────────────────────────── */
+.ep-input-group { position: relative; display: flex; flex-direction: column;}
+.ep-input, .ep-select, .ep-textarea {
+  width: 100%; padding: 12px 16px; 
+  border-radius: var(--ep-radius-md); 
+  border: 1px solid var(--ep-border);
+  font-size: 14px; font-weight: 500; 
+  background: #ffffff; color: var(--ep-text-main);
+  transition: var(--ep-transition-fast); box-sizing: border-box; 
+  font-family: inherit;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+.ep-input:hover, .ep-select:hover, .ep-textarea:hover { 
+  border-color: #94a3b8; 
+}
+.ep-input:focus, .ep-select:focus, .ep-textarea:focus {
+  border-color: var(--ep-accent); 
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), inset 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+.ep-input::placeholder, .ep-textarea::placeholder { color: #94a3b8; font-weight: 400; }
+.ep-textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+.ep-input-sm, .ep-select-sm { padding: 8px 12px; font-size: 13px; border-radius: var(--ep-radius-sm); }
+
+/* ── Custom Radio Buttons (Green Theme) ──────────────────────────────────── */
+.ep-radio-card { 
+  background: rgba(255, 255, 255, 0.6); padding: 20px; 
+  border-radius: var(--ep-radius-md); border: 1px solid rgba(203, 213, 225, 0.6); 
+  box-shadow: var(--ep-shadow-sm);
+}
+.ep-radio-card-sm { padding: 16px; }
+.ep-radio-group { display: flex; flex-direction: column; gap: 14px; }
+.ep-radio-inline { flex-direction: row; gap: 28px; align-items: center; margin-top: 10px; }
+
+.ep-custom-radio-label {
+  display: inline-flex; align-items: center; font-size: 14px; font-weight: 600;
+  cursor: pointer; color: #334155; position: relative;
+  transition: var(--ep-transition-fast);
+}
+.ep-custom-radio-label:hover { color: var(--ep-primary-hover); }
+.ep-custom-radio-label input[type="radio"] { position: absolute; opacity: 0; cursor: pointer; }
+.ep-radio-circle {
+  height: 18px; width: 18px; border: 2px solid #cbd5e1; border-radius: 50%;
+  margin-right: 10px; display: inline-flex; align-items: center; justify-content: center;
+  transition: var(--ep-transition-fast); background: #fff; position: relative;
+}
+.ep-radio-circle::after {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ep-accent); transform: scale(0); 
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ep-custom-radio-label input:checked ~ .ep-radio-circle { 
+  border-color: var(--ep-accent); 
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); 
+}
+.ep-custom-radio-label input:checked ~ .ep-radio-circle::after { transform: scale(1); }
+
+/* ── GST Toggle Buttons ──────────────────────────────────────────────────── */
+.ep-gst-toggle-wrap { 
+  background: var(--ep-primary-light); padding: 20px; 
+  border-radius: var(--ep-radius-md); border: 1px solid #bbf7d0; 
+}
+.ep-toggle-buttons { display: flex; gap: 12px; margin-top: 12px; }
+.ep-toggle-btn {
+  flex: 1; padding: 12px; border-radius: var(--ep-radius-sm); 
+  border: 1px solid var(--ep-border); background: #fff;
+  font-weight: 700; font-size: 14px; color: var(--ep-text-muted); 
+  cursor: pointer; transition: var(--ep-transition-fast); 
+  box-shadow: var(--ep-shadow-sm);
+}
+.ep-toggle-btn.active { 
+  background: var(--ep-primary); color: #fff; 
+  border-color: var(--ep-primary); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25); 
+}
+.ep-toggle-btn.active.danger { 
+  background: #fff; color: var(--ep-text-main); 
+  border-color: var(--ep-border); box-shadow: var(--ep-shadow-sm); 
+}
+
+/* ── Financial Calc Box ──────────────────────────────────────────────────── */
+.ep-calc-box {
+  background: linear-gradient(145deg, #064e3b, #0f172a);
+  border-radius: var(--ep-radius-lg); margin-top: 24px; 
+  overflow: hidden; color: #fff;
+  box-shadow: 0 15px 30px rgba(6, 78, 59, 0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.ep-calc-header {
+  background: rgba(255,255,255,0.05); padding: 16px 24px; 
+  font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; gap: 10px; 
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-transform: uppercase; letter-spacing: 0.05em; color: #a7f3d0;
+}
+.ep-calc-body { padding: 24px; }
+.ep-calc-row {
+  display: flex; justify-content: space-between; font-size: 14px; 
+  padding: 10px 0; color: #cbd5e1;
+}
+.ep-calc-border { 
+  border-bottom: 1px dashed rgba(255,255,255,0.15); 
+  padding-bottom: 16px; margin-bottom: 8px; 
+}
+.ep-calc-subtotal { color: #f8fafc; font-weight: 600; }
+.ep-calc-val { font-weight: 700; font-variant-numeric: tabular-nums; color: #fff; }
+.ep-gst-row { display: none; color: #a7f3d0; font-weight: 600; animation: slideUpFade 0.3s forwards; }
+.ep-gst-row.visible { display: flex; }
+.ep-gst-row .ep-calc-val { color: #a7f3d0; }
+.ep-calc-total {
+  margin-top: 16px; padding-top: 24px; 
+  border-top: 1px solid rgba(255,255,255,0.15);
+  font-weight: 800; font-size: 18px; align-items: center; color: #fff;
+}
+.ep-total-highlight { 
+  background: var(--ep-accent); padding: 8px 16px; 
+  border-radius: var(--ep-radius-sm); font-size: 20px; 
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 12px rgba(34,197,94,0.3); 
+  color: #fff;
+}
+
+/* ── Table & Interactive Icons ───────────────────────────────────────────── */
+.ep-table-wrap { 
+  overflow-x: auto; border: 1px solid rgba(203, 213, 225, 0.6); 
+  border-radius: var(--ep-radius-md); box-shadow: var(--ep-shadow-sm); 
+  background: #fff;
+}
+.ep-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+.ep-table th { 
+  background: #f8fafc; padding: 14px 16px; 
+  border-bottom: 1px solid var(--ep-border); 
+  font-weight: 700; color: var(--ep-text-muted); white-space: nowrap; 
+}
+.ep-table td { 
+  padding: 14px 16px; border-bottom: 1px solid var(--ep-border); 
+  vertical-align: middle; color: var(--ep-text-main); 
+}
+.ep-table tr:last-child td { border-bottom: none; }
+.ep-table tbody tr { transition: var(--ep-transition-fast); }
+.ep-table tbody tr:hover { background: var(--ep-primary-light); }
+.ep-table-row-anim { animation: slideUpFade 0.3s ease-out; }
+
+.ep-row-btns-top { display: flex; gap: 8px; }
+.ep-btn-icon {
+  width: 32px; height: 32px; border-radius: var(--ep-radius-sm); border: none; 
+  font-size: 18px; font-weight: bold; display: inline-flex; align-items: center; 
+  justify-content: center; cursor: pointer; transition: var(--ep-transition-fast);
+}
+.ep-btn-add { background: #dcfce7; color: var(--ep-success); border: 1px solid #bbf7d0; }
+.ep-btn-add:hover { background: var(--ep-success); color: #fff; transform: scale(1.05); }
+.ep-btn-del { background: #fee2e2; color: var(--ep-danger); border: 1px solid #fecaca; }
+.ep-btn-del:hover:not(:disabled) { background: var(--ep-danger); color: #fff; transform: scale(1.05); }
+.ep-btn-del:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Document Uploads ────────────────────────────────────────────────────── */
+.ep-upload-grid { display: grid; gap: 16px; }
+.ep-upload-row {
+  display: flex; align-items: center; justify-content: space-between; padding: 20px 24px;
+  background: rgba(255,255,255,0.6); border-radius: var(--ep-radius-md); 
+  border: 1px dashed #cbd5e1; transition: var(--ep-transition-fast);
+}
+.ep-upload-row:hover { border-color: var(--ep-accent); background: var(--ep-primary-light); }
+.ep-upload-label-box { flex: 1; }
+.ep-upload-title { font-size: 14px; font-weight: 700; color: var(--ep-text-main); margin-bottom: 4px; }
+.ep-upload-sub { font-size: 12px; color: var(--ep-text-muted); font-weight: 500;}
+
+.ep-upload-control { display: flex; align-items: center; gap: 16px; flex-direction: row-reverse;}
+.ep-file-input { display: none; }
+.ep-file-btn {
+  background: #fff; border: 1px solid var(--ep-border); padding: 10px 20px; 
+  border-radius: var(--ep-radius-sm); font-size: 13px; font-weight: 700; 
+  cursor: pointer; color: var(--ep-text-main); transition: var(--ep-transition-fast);
+  box-shadow: var(--ep-shadow-sm);
+}
+.ep-file-btn:hover { background: #f8fafc; border-color: #94a3b8; box-shadow: var(--ep-shadow-md); }
+.ep-file-btn.uploaded { background: #dcfce7; color: var(--ep-success); border-color: #86efac; box-shadow: none; }
+.ep-file-badge { font-size: 12px; color: var(--ep-success); font-weight: 800; background: #bbf7d0; padding: 6px 12px; border-radius: 20px; }
+
+/* ── Submit / Generate Button ────────────────────────────────────────────── */
+.ep-generate-wrap { text-align: center; margin: 48px 0; }
+.ep-btn-generate {
+  background: linear-gradient(135deg, var(--ep-accent), var(--ep-primary));
+  color: #fff; border: none; cursor: pointer; font-size: 16px; font-weight: 800;
+  padding: 18px 48px; border-radius: var(--ep-radius-md); 
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 20px rgba(22, 163, 74, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  position: relative; overflow: hidden;
+}
+.ep-glow-effect::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-20deg); transition: 0.5s;
+}
+.ep-btn-generate:hover { 
+  transform: translateY(-3px); 
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 15px 25px rgba(22, 163, 74, 0.4); 
+}
+.ep-btn-generate:hover::before { left: 150%; }
+
+/* ── Hidden Report Container ─────────────────────────────────────────────── */
+.actual-report-container {
+  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+  font-family: 'Inter', sans-serif;
+  color: #000;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ep-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .ep-header-banner { padding: 32px; }
+  .ep-header-title { font-size: 28px; }
+  .ep-card { padding: 24px; }
+}
+
+@media (max-width: 650px) {
+  .ep-grid-2, .ep-grid-3 { grid-template-columns: 1fr; }
+  .ep-upload-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .ep-upload-control { width: 100%; justify-content: space-between; }
+}

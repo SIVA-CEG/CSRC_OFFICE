@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MyTapals.css";
 
@@ -60,7 +60,13 @@ export default function MyTapals({ defaultTab = "new" }) {
   const [selectedTapal, setSelectedTapal] = useState(null);
   const [transferTo, setTransferTo] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  // Advanced Search States
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     setActiveTab(defaultTab);
@@ -93,9 +99,59 @@ export default function MyTapals({ defaultTab = "new" }) {
 
   const allTapals = [...assigned, ...transferred, ...completed];
 
-  const filteredTapals = allTapals.filter((t) =>
-    Object.values(t).join(" ").toLowerCase().includes(search.toLowerCase())
-  );
+  // Helper function to parse "DD-MM-YYYY" into a comparable Date object
+  const parseDateString = (dateStr) => {
+    if (!dateStr) return null;
+    const [day, month, year] = dateStr.split('-');
+    return new Date(`${year}-${month}-${day}`);
+  };
+
+  // Advanced Filtering Logic
+  const filteredTapals = useMemo(() => {
+    return allTapals.filter((t) => {
+      // 1. General Text Search
+      const matchesSearch = Object.values(t).join(" ").toLowerCase().includes(search.toLowerCase());
+      
+      // 2. Category Filter
+      const matchesCategory = filterCategory === "" || t.category === filterCategory;
+      
+      // 3. Type Filter
+      const matchesType = filterType === "" || t.type === filterType;
+
+      // 4. Date Range Filter
+      let matchesDate = true;
+      if (fromDate || toDate) {
+        const tapalDate = parseDateString(t.date);
+        
+        if (tapalDate) {
+          const start = fromDate ? new Date(fromDate) : null;
+          const end = toDate ? new Date(toDate) : null;
+
+          // Set time to midnight for accurate day comparison
+          if (start) start.setHours(0, 0, 0, 0);
+          if (end) end.setHours(23, 59, 59, 999);
+
+          if (start && end) {
+            matchesDate = tapalDate >= start && tapalDate <= end;
+          } else if (start) {
+            matchesDate = tapalDate >= start;
+          } else if (end) {
+            matchesDate = tapalDate <= end;
+          }
+        } else {
+          matchesDate = false; // Exclude if date format is invalid and a date filter is applied
+        }
+      }
+
+      return matchesSearch && matchesCategory && matchesType && matchesDate;
+    });
+  }, [allTapals, search, filterCategory, filterType, fromDate, toDate]);
+
+
+  // Extract unique categories and types for the dropdowns
+  const uniqueCategories = [...new Set(allTapals.map(t => t.category))].filter(Boolean);
+  const uniqueTypes = [...new Set(allTapals.map(t => t.type))].filter(Boolean);
+
 
   return (
     <div className="mytapal-page">
@@ -181,15 +237,112 @@ export default function MyTapals({ defaultTab = "new" }) {
         <div className="tapal-card">
           <h2>Advanced Tapal Search</h2>
 
-          <div className="search-box">
-            <input
-              placeholder="Search by Tapal ID, category, type, from, subject, status..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          {/* Advanced Filter Layout */}
+          <div className="search-filters-grid" style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
+            gap: "16px", 
+            marginBottom: "24px",
+            background: "#f8fafc",
+            padding: "20px",
+            borderRadius: "12px",
+            border: "1px solid #e2e8f0"
+          }}>
+            
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#475569" }}>
+                General Search
+              </label>
+              <input
+                placeholder="Search by ID, from, subject, status..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#475569" }}>
+                Category
+              </label>
+              <select 
+                value={filterCategory} 
+                onChange={(e) => setFilterCategory(e.target.value)}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#fff" }}
+              >
+                <option value="">All Categories</option>
+                {uniqueCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#475569" }}>
+                Tapal Type
+              </label>
+              <select 
+                value={filterType} 
+                onChange={(e) => setFilterType(e.target.value)}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#fff" }}
+              >
+                <option value="">All Types</option>
+                {uniqueTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#475569" }}>
+                From Date
+              </label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#475569" }}>
+                To Date
+              </label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+               <button 
+                onClick={() => {
+                  setSearch("");
+                  setFilterCategory("");
+                  setFilterType("");
+                  setFromDate("");
+                  setToDate("");
+                }}
+                style={{
+                  padding: "10px 16px",
+                  background: "#e2e8f0",
+                  color: "#475569",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  width: "100%"
+                }}
+              >
+                Clear Filters
+              </button>
+            </div>
           </div>
 
-          <TapalTable title="Search Results" data={filteredTapals} completed />
+          <TapalTable title={`Search Results (${filteredTapals.length})`} data={filteredTapals} completed />
         </div>
       )}
 

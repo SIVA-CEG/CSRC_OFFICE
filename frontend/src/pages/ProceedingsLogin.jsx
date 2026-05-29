@@ -4,7 +4,8 @@ import './ProceedingsLogin.css';
 
 export default function ProceedingsLogin() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ userId: '', password: '' });
+  // Added "role" to the form state
+  const [form, setForm] = useState({ userId: '', password: '', role: 'assistant' });
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
@@ -21,9 +22,12 @@ export default function ProceedingsLogin() {
       return;
     }
     setLoading(true);
+    
     setTimeout(() => {
       setLoading(false);
-      navigate('/dashboard');
+      // Save the selected role to localStorage so other pages can adapt their logic
+      localStorage.setItem('userRole', form.role);
+      navigate('/endorsements/dashboard'); // Redirecting straight to the dashboard
     }, 1400);
   };
 
@@ -63,6 +67,26 @@ export default function ProceedingsLogin() {
           </div>
 
           <form className="pl-form" onSubmit={handleSubmit} noValidate>
+            
+            {/* NEW: Role Selection */}
+            <div className="pl-field">
+              <label htmlFor="role">Login As</label>
+              <div className="pl-input-wrap">
+                <span className="pl-input-icon">🏢</span>
+                <select
+                  id="role"
+                  name="role"
+                  value={form.role}
+                  onChange={handleChange}
+                  className="pl-select"
+                >
+                  <option value="assistant">Assistant</option>
+                  <option value="superintendent">Superintendent</option>
+                  <option value="director">Director</option>
+                </select>
+              </div>
+            </div>
+
             <div className="pl-field">
               <label htmlFor="userId">User ID</label>
               <div className="pl-input-wrap">

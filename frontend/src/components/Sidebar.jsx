@@ -20,58 +20,20 @@ const tapalItems = [
   { label: 'Tapals Completed', path: '/my-tapals/completed', icon: '✅' },
   { label: 'Tapal Search', path: '/my-tapals/search', icon: '🔍' },
 ];
+
 const endorsementItems = [
-  {
-    label: 'Dashboard',
-    path: '/endorsements/dashboard',
-    icon: '📊',
-  },
-  {
-    label: 'New Requests',
-    path: '/endorsements/new-requests',
-    icon: '📥',
-  },
-  {
-    label: 'Processing',
-    path: '/endorsements/processing',
-    icon: '⚙️',
-  },
-  {
-    label: 'Completed',
-    path: '/endorsements/completed',
-    icon: '✅',
-  },
-  {
-    label: 'Create Endorsement',
-    path: '/endorsements/create',
-    icon: '📝',
-  },
-  {
-    label: 'Search',
-    path: '/endorsements/search',
-    icon: '🔍',
-  },
+  { label: 'Dashboard', path: '/endorsements/dashboard', icon: '📊' },
+  { label: 'New Requests', path: '/endorsements/new-requests', icon: '📥' },
+  { label: 'Processing', path: '/endorsements/processing', icon: '⚙️' },
+  { label: 'Completed', path: '/endorsements/completed', icon: '✅' },
+  { label: 'Create Endorsement', path: '/endorsements/create', icon: '📝' },
+  { label: 'Search', path: '/endorsements/search', icon: '🔍' },
 ];
 
 const navSections = [
-  {
-    label: 'Master',
-    icon: '⚙️',
-    path: '/master',
-    children: masterItems,
-  },
-  {
-    label: 'My Tapals',
-    icon: '📬',
-    path: '/my-tapals',
-    children: tapalItems,
-  },
-  {
-  label: 'Endorsements',
-  icon: '📑',
-  path: '/endorsements',
-  children: endorsementItems,
-},
+  { label: 'Master', icon: '⚙️', path: '/master', children: masterItems },
+  { label: 'My Tapals', icon: '📬', path: '/my-tapals', children: tapalItems },
+  { label: 'Endorsements', icon: '📑', path: '/endorsements', children: endorsementItems },
   { label: 'Projects', icon: '🔬', path: '/projects' },
   { label: 'DST INSPIRE', icon: '🌟', path: '/dst-inspire' },
   { label: 'DST INSPIRE Faculty', icon: '👨‍🏫', path: '/dst-inspire-faculty' },
@@ -83,35 +45,36 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState(null);
 
+  // Automatically expand the section if the user navigates directly via URL
   useEffect(() => {
-  if (location.pathname.startsWith('/master')) {
-    setOpenSection('Master');
-  } else if (location.pathname.startsWith('/my-tapals')) {
-    setOpenSection('My Tapals');
-  } else if (location.pathname.startsWith('/endorsements')) {
-    setOpenSection('Endorsements');
-  } else {
-    setOpenSection(null);
-  }
-}, [location.pathname]);
+    if (location.pathname.startsWith('/master')) {
+      setOpenSection('Master');
+    } else if (location.pathname.startsWith('/my-tapals')) {
+      setOpenSection('My Tapals');
+    } else if (location.pathname.startsWith('/endorsements')) {
+      setOpenSection('Endorsements');
+    } else {
+      setOpenSection(null);
+    }
+  }, [location.pathname]);
 
   const toggleSection = (label, path, hasChildren) => {
     if (hasChildren) {
+      // Toggle accordion open/close
       setOpenSection(openSection === label ? null : label);
 
+      // Auto-navigate to the default child if clicking a parent that isn't currently active
       if (label === 'My Tapals' && !location.pathname.startsWith('/my-tapals')) {
         navigate('/my-tapals/new-internal');
       }
-
       if (label === 'Master' && !location.pathname.startsWith('/master')) {
         navigate('/master/campus');
       }
-
       if (label === 'Endorsements' && !location.pathname.startsWith('/endorsements')) {
         navigate('/endorsements/dashboard');
       }
-
     } else {
+      // If no children, just navigate straight to the path
       navigate(path);
     }
   };

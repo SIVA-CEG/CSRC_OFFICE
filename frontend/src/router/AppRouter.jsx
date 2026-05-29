@@ -5,6 +5,9 @@ import LoginHub from '../pages/LoginHub';
 import ProceedingsLogin from '../pages/ProceedingsLogin';
 import Dashboard from '../pages/Dashboard';
 
+/* =======================
+   MASTER IMPORTS
+======================= */
 import MasterLayout from '../pages/master/MasterLayout';
 import Campus from '../pages/master/Campus';
 import Departments from '../pages/master/Departments';
@@ -23,9 +26,10 @@ import MyTapals from '../pages/tapal/MyTapals';
 ======================= */
 import EndorsementDashboard from '../pages/endorsement/EndorsementDashboard';
 import NewRequests from '../pages/endorsement/new-requests/NewRequests';
+import Processing from '../pages/endorsement/processing/Processing'; 
+import Completed from '../pages/endorsement/completed/Completed'; 
 import SearchEndorsements from '../pages/endorsement/search/SearchEndorsements';
-
-
+import NewEndorsementPage from '../pages/endorsement/create/NewEndorsementPage';
 
 export default function AppRouter() {
   return (
@@ -58,42 +62,17 @@ export default function AppRouter() {
           <Route path="search" element={<MyTapals defaultTab="search" />} />
         </Route>
 
+        {/* ENDORSEMENTS */}
         <Route path="/endorsements" element={<MasterLayout />}>
-  <Route
-    index
-    element={<Navigate to="dashboard" replace />}
-  />
-
-  <Route
-    path="dashboard"
-    element={<EndorsementDashboard />}
-  />
-
-  <Route
-    path="new-requests"
-    element={<NewRequests />}
-  />
-
-  <Route
-    path="processing"
-    element={<UnderConstruction module="Endorsement Processing" />}
-  />
-
-  <Route
-    path="completed"
-    element={<UnderConstruction module="Completed Endorsements" />}
-  />
-
-  <Route
-    path="create"
-    element={<UnderConstruction module="Create Endorsement" />}
-  />
-
-  <Route
-    path="search"
-    element={<SearchEndorsements />}
-  />
-</Route>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          
+          <Route path="dashboard" element={<EndorsementDashboard />} />
+          <Route path="new-requests" element={<NewRequests />} />
+          <Route path="processing" element={<Processing />} />
+          <Route path="completed" element={<Completed />} />
+          <Route path="create" element={<NewEndorsementPage />} />
+          <Route path="search" element={<SearchEndorsements />} />
+        </Route>
 
         {/* OTHER MODULES */}
         <Route
