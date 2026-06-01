@@ -21,15 +21,28 @@ import Schemes from '../pages/master/Schemes';
 import UnderConstruction from '../components/UnderConstruction';
 import MyTapals from '../pages/tapal/MyTapals';
 
+
 /* =======================
    ENDORSEMENT IMPORTS
 ======================= */
 import EndorsementDashboard from '../pages/endorsement/EndorsementDashboard';
 import NewRequests from '../pages/endorsement/new-requests/NewRequests';
-import Processing from '../pages/endorsement/processing/Processing'; 
+import Transferred from '../pages/endorsement/transferred/Transferred'; 
 import Completed from '../pages/endorsement/completed/Completed'; 
 import SearchEndorsements from '../pages/endorsement/search/SearchEndorsements';
 import NewEndorsementPage from '../pages/endorsement/create/NewEndorsementPage';
+
+
+/* =======================
+   PROJECT IMPORTS
+======================= */
+
+import ProjectDashboard from '../pages/projects/ProjectDashboard';
+import FreshSanction from '../pages/projects/FreshSanction';
+import RenewalSanction from '../pages/projects/RenewalSanction';
+import ProjectRequestsPage from '../pages/projects/ProjectRequestPage';
+import OfficeReappropriation from '../pages/projects/OfficeReappropriationPage';
+
 
 export default function AppRouter() {
   return (
@@ -68,17 +81,23 @@ export default function AppRouter() {
           
           <Route path="dashboard" element={<EndorsementDashboard />} />
           <Route path="new-requests" element={<NewRequests />} />
-          <Route path="processing" element={<Processing />} />
+          <Route path="transferred" element={<Transferred />} />
           <Route path="completed" element={<Completed />} />
           <Route path="create" element={<NewEndorsementPage />} />
           <Route path="search" element={<SearchEndorsements />} />
         </Route>
 
+        {/* PROJECTS */}
+
+        <Route path="/projects" element={<MasterLayout />}>
+          <Route index element={<ProjectDashboard />} />
+          <Route path="fresh-sanction" element={<FreshSanction />} />
+          <Route path="renewal-sanction" element={<RenewalSanction />} />
+          <Route path="project-requests" element={<ProjectRequestsPage />} />
+          <Route path="office-reappropriation" element={<OfficeReappropriation />} />
+        </Route>
+
         {/* OTHER MODULES */}
-        <Route
-          path="/projects"
-          element={<UnderConstruction module="Projects" />}
-        />
 
         <Route
           path="/dst-inspire"

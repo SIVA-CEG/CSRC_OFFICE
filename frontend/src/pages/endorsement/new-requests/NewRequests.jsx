@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import "./NewRequests.css";
 import EndorsementDetailModal from "./EndorsementDetailModal";
 import { useNavigate } from "react-router-dom";
+import { useEndorsementContext } from "../EndorsementContext"; 
+// Or if the folder structure changed:
+// import { useEndorsementContext } from "../../EndorsementContext";
 
-// ── Shared Staff List (Can be moved to a context/util later) ─────────────────
+// ── Shared Staff List ─────────────────────────────────────────────────────────
 export const STAFF_LIST = [
   { id: 1, name: "Mr. R. Senthilkumar", role: "assistant" },
   { id: 2, name: "Mrs. K. Priya",       role: "assistant" },
@@ -43,16 +46,15 @@ export const DUMMY_ENDORSEMENTS = [
     endorsementRequired: "yes",
     endorsementFormat: "ANRF",
     coPIs: [
-      { campus: "ACT Campus", department: "Crystal Growth Centre", facultyId: "101", name: "Dr. C. Anchana Devi", designation: "Assistant Professor", role: "COPI", dob: "10-03-1981", dos: "22-07-2010", superannuation: "10-03-2041" }
+      { campus: "ACT Campus", department: "Crystal Growth Centre", name: "Dr. C. Anchana Devi", designation: "Assistant Professor", role: "COPI" }
     ],
     extInvs: [
       { name: "Dr. C. Anchana Devi", designation: "Assistant Professor", institute: "Women's Christian College, Chennai" }
     ],
-    files: { proposal: "proposal_copy.pdf", writeup: "writeup_signed.pdf", budget: "budget_signed.pdf", endorsementFile: "endorsement_fmt.pdf", overhead: null },
+    files: { proposal: "proposal_copy.pdf", writeup: "writeup_signed.pdf", budget: "budget_signed.pdf" },
     status: "PENDING",
-    remarks: "",
-    overheadExemption: "",
     transferHistory: [],
+    signatures: {},
   },
   {
     id: 1894,
@@ -84,11 +86,10 @@ export const DUMMY_ENDORSEMENTS = [
     endorsementFormat: "DST",
     coPIs: [],
     extInvs: [],
-    files: { proposal: "proposal_dst.pdf", writeup: "writeup_dst.pdf", budget: "budget_dst.pdf", endorsementFile: null, overhead: null },
+    files: { proposal: "proposal_dst.pdf", writeup: "writeup_dst.pdf", budget: "budget_dst.pdf" },
     status: "PENDING",
-    remarks: "",
-    overheadExemption: "",
     transferHistory: [],
+    signatures: {},
   },
   {
     id: 1886,
@@ -119,14 +120,13 @@ export const DUMMY_ENDORSEMENTS = [
     endorsementRequired: "yes",
     endorsementFormat: "CSRC",
     coPIs: [
-      { campus: "MIT Campus", department: "Department of Manufacturing Engineering", facultyId: "202", name: "Dr. K. Rajkumar", designation: "Professor", role: "COPI", dob: "20-11-1970", dos: "15-03-2001", superannuation: "20-11-2030" },
+      { campus: "MIT Campus", department: "Department of Manufacturing Engineering", name: "Dr. K. Rajkumar", designation: "Professor", role: "COPI" }
     ],
     extInvs: [],
-    files: { proposal: "proposal_meity.pdf", writeup: "writeup_meity.pdf", budget: "budget_meity.pdf", endorsementFile: "fmt_csrc.pdf", overhead: "overhead_exemption.pdf" },
+    files: { proposal: "proposal_meity.pdf", writeup: "writeup_meity.pdf", budget: "budget_meity.pdf" },
     status: "PENDING",
-    remarks: "",
-    overheadExemption: "Exemption letter attached",
     transferHistory: [],
+    signatures: {},
   },
 ];
 
@@ -135,15 +135,53 @@ function formatCurrency(val) {
   return n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
 
-// ── Transfer Cell Component ───────────────────────────────────────────────────
+// ── Inline Signature Upload Cell ──────────────────────────────────────────────
+function SignatureCell({ row, onSignatureChange }) {
+  const fileRef = useRef(null);
+  const sig = row.signatures?.assistant || null;
+
+  const handleFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => onSignatureChange(row.id, ev.target.result);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  return (
+    <div className="nr-sig-cell">
+      <input
+        type="file"
+        ref={fileRef}
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleFile}
+      />
+      {sig ? (
+        <div className="nr-sig-preview-wrap" title="Click to change">
+          <img src={sig} alt="Signature" className="nr-sig-preview-img" />
+          <button className="nr-sig-change-btn" onClick={() => fileRef.current?.click()}>✏️</button>
+        </div>
+      ) : (
+        <button className="nr-sig-upload-btn" onClick={() => fileRef.current?.click()}>
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          Upload Sign
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Transfer Cell ─────────────────────────────────────────────────────────────
 function TransferCell({ row, onTransfer, userRole }) {
   const [open, setOpen]         = useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [confirming, setConfirming] = useState(false);
 
-  // Logic: Assistants can transfer to other Assistants or Superintendents.
-  // Superintendents transfer to Director.
-  const eligible = userRole === "superintendent" 
+  const eligible = userRole === "superintendent"
     ? STAFF_LIST.filter(s => s.role === "director")
     : STAFF_LIST.filter(s => s.role === "assistant" || s.role === "superintendent");
 
@@ -159,8 +197,8 @@ function TransferCell({ row, onTransfer, userRole }) {
   return (
     <div className="nr-transfer-cell">
       {!open ? (
-        <button className="nr-transfer-btn" onClick={() => setOpen(true)} title="Initiate Processing">
-          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button className="nr-transfer-btn" onClick={() => setOpen(true)}>
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
           </svg>
@@ -173,19 +211,13 @@ function TransferCell({ row, onTransfer, userRole }) {
             value={selectedId}
             onChange={e => setSelectedId(e.target.value)}
           >
-            <option value="">-- Select {userRole === 'superintendent' ? 'Director' : 'Staff'} --</option>
+            <option value="">-- Select Staff --</option>
             {eligible.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.name} ({s.role})
-              </option>
+              <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
             ))}
           </select>
           <div className="nr-transfer-actions">
-            <button
-              className="nr-transfer-ok"
-              onClick={() => { if (selectedId) setConfirming(true); }}
-              disabled={!selectedId}
-            >OK</button>
+            <button className="nr-transfer-ok" onClick={() => { if (selectedId) setConfirming(true); }} disabled={!selectedId}>OK</button>
             <button className="nr-transfer-cancel" onClick={() => { setOpen(false); setSelectedId(""); }}>✕</button>
           </div>
           {confirming && (
@@ -202,42 +234,86 @@ function TransferCell({ row, onTransfer, userRole }) {
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export default function NewRequests({ onTransferToProcessing }) {
+export default function NewRequests() {
   const navigate = useNavigate();
-  const [endorsements, setEndorsements] = useState(DUMMY_ENDORSEMENTS);
+
+const {
+  activeRequests,
+  addTransferred,
+} = useEndorsementContext();
+
+const [endorsements, setEndorsements] = useState(activeRequests);
   const [selected, setSelected]         = useState(null);
   const [mounted, setMounted]           = useState(false);
-  
-  // Get the logged in user's role from local storage
-  const [userRole, setUserRole] = useState("assistant");
+  const [userRole, setUserRole]         = useState("assistant");
+  const [search, setSearch]             = useState("");
+  const [currentPage, setCurrentPage]   = useState(1);
+  const rowsPerPage = 15;
 
-  useEffect(() => { 
-    setTimeout(() => setMounted(true), 50); 
-    const role = localStorage.getItem('userRole') || 'assistant';
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 50);
+    const role = localStorage.getItem("userRole") || "assistant";
     setUserRole(role);
   }, []);
+  useEffect(() => {
+  setEndorsements(activeRequests);
+}, [activeRequests]);
 
-  const handleTransfer = (id, staff) => {
-    const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
-    setEndorsements(prev => {
-      const item = prev.find(e => e.id === id);
-      if (!item) return prev;
-      const updated = {
-        ...item,
-        status: "PROCESSING",
-        transferHistory: [
-          ...(item.transferHistory || []),
-          // Initial transfer marks the start of processing
-          { from: "PI", fromRole: null, to: staff, date: today, signature: null }
-        ],
-        currentHolder: staff,
-      };
-      
-      if (onTransferToProcessing) onTransferToProcessing(updated);
-      
-      return prev.filter(e => e.id !== id);
-    });
+  // Handle inline signature upload in table row
+  const handleSignatureChange = (id, dataUrl) => {
+    setEndorsements(prev =>
+      prev.map(e =>
+        e.id === id
+          ? { ...e, signatures: { ...(e.signatures || {}), assistant: dataUrl } }
+          : e
+      )
+    );
   };
+
+  // Transfer out → send to Transferred page
+  const handleTransfer = (id, staff) => {
+  const today = new Date()
+    .toLocaleDateString("en-GB")
+    .replace(/\//g, "-");
+
+  const item = endorsements.find(e => e.id === id);
+
+  if (!item) return;
+
+  const updated = {
+    ...item,
+    status: "TRANSFERRED",
+    transferredTo: staff,
+    transferHistory: [
+      ...(item.transferHistory || []),
+      {
+        from: "Office",
+        fromRole: userRole,
+        to: staff,
+        date: today,
+      },
+    ],
+    currentHolder: staff,
+  };
+
+  addTransferred(updated);
+};
+
+  // Search filter
+  const filtered = useMemo(() => {
+    const s = search.toLowerCase();
+    if (!s) return endorsements;
+    return endorsements.filter(e =>
+      e.piName?.toLowerCase().includes(s) ||
+      String(e.id).includes(s) ||
+      e.fundingAgency?.toLowerCase().includes(s) ||
+      e.tapalNo?.toLowerCase().includes(s)
+    );
+  }, [endorsements, search]);
+
+  useEffect(() => { setCurrentPage(1); }, [search]);
+  const totalPages  = Math.ceil(filtered.length / rowsPerPage);
+  const currentRows = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   return (
     <div className={`nr-page ${mounted ? "nr-loaded" : ""}`}>
@@ -264,6 +340,24 @@ export default function NewRequests({ onTransferToProcessing }) {
 
       {/* Table */}
       <div className="nr-table-wrap">
+        {/* Search Bar */}
+        <div className="nr-search-bar">
+          <div className="nr-search-inner">
+            <svg className="nr-search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by PI Name, Proposal ID, Agency or Tapal No..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            {search && (
+              <button className="nr-search-clear" onClick={() => setSearch("")}>✕</button>
+            )}
+          </div>
+        </div>
+
         <table className="nr-table">
           <thead>
             <tr>
@@ -273,22 +367,27 @@ export default function NewRequests({ onTransferToProcessing }) {
               <th>Tapal No</th>
               <th>PI</th>
               <th>Scheme</th>
-              <th>Funding Agency</th>
+              <th>Agency</th>
               <th>Cost (₹)</th>
               <th>View</th>
+              <th>Signature</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {endorsements.length === 0 && (
-              <tr><td colSpan={10} className="nr-empty-row">No pending requests</td></tr>
+            {currentRows.length === 0 && (
+              <tr>
+                <td colSpan={11} className="nr-empty-row">
+                  {search ? `No results for "${search}"` : "No pending requests"}
+                </td>
+              </tr>
             )}
-            {endorsements.map((row, i) => (
+            {currentRows.map((row, i) => (
               <tr key={row.id} className="nr-row">
                 <td>
                   <div className="nr-sl">
                     <span className="nr-radio"/>
-                    {i + 1}
+                    {(currentPage - 1) * rowsPerPage + i + 1}
                   </div>
                 </td>
                 <td className="nr-date">{row.appliedOn}</td>
@@ -311,14 +410,32 @@ export default function NewRequests({ onTransferToProcessing }) {
                   </button>
                 </td>
                 <td>
-                  <TransferCell row={row} onTransfer={handleTransfer} userRole={userRole}/>
+                  <SignatureCell row={row} onSignatureChange={handleSignatureChange} />
+                </td>
+                <td>
+                  <TransferCell row={row} onTransfer={handleTransfer} userRole={userRole} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="nr-pagination">
+            <span className="nr-page-text">
+              Showing {(currentPage - 1) * rowsPerPage + 1}–{Math.min(currentPage * rowsPerPage, filtered.length)} of {filtered.length}
+            </span>
+            <div className="nr-page-btns">
+              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="nr-page-btn">Prev</button>
+              <span className="nr-page-indicator">{currentPage} / {totalPages}</span>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="nr-page-btn">Next</button>
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Detail Modal */}
       {selected && (
         <EndorsementDetailModal
           item={selected}

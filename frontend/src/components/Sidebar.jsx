@@ -24,17 +24,25 @@ const tapalItems = [
 const endorsementItems = [
   { label: 'Dashboard', path: '/endorsements/dashboard', icon: '📊' },
   { label: 'New Requests', path: '/endorsements/new-requests', icon: '📥' },
-  { label: 'Processing', path: '/endorsements/processing', icon: '⚙️' },
+  { label: 'Transferred', path: '/endorsements/transferred', icon: '⚙️' },
   { label: 'Completed', path: '/endorsements/completed', icon: '✅' },
   { label: 'Create Endorsement', path: '/endorsements/create', icon: '📝' },
   { label: 'Search', path: '/endorsements/search', icon: '🔍' },
+];
+
+const projectItems = [
+  { label: 'Fresh Sanction', path: '/projects/fresh-sanction', icon: '✨' },
+  { label: 'Renewal Sanction', path: '/projects/renewal-sanction', icon: '🔄' },
+  { label: 'Project Requests', path: '/projects/project-requests', icon: '📩' },
+  { label: 'Office Reappropriation', path: '/projects/office-reappropriation', icon: '💼' },
+  // Add other items here as you build them
 ];
 
 const navSections = [
   { label: 'Master', icon: '⚙️', path: '/master', children: masterItems },
   { label: 'My Tapals', icon: '📬', path: '/my-tapals', children: tapalItems },
   { label: 'Endorsements', icon: '📑', path: '/endorsements', children: endorsementItems },
-  { label: 'Projects', icon: '🔬', path: '/projects' },
+  { label: 'Projects', icon: '🔬', path: '/projects', children: projectItems }, // Updated to include children
   { label: 'DST INSPIRE', icon: '🌟', path: '/dst-inspire' },
   { label: 'DST INSPIRE Faculty', icon: '👨‍🏫', path: '/dst-inspire-faculty' },
   { label: 'Women Scientist', icon: '👩‍🔬', path: '/women-scientist' },
@@ -46,38 +54,33 @@ export default function Sidebar() {
   const [openSection, setOpenSection] = useState(null);
 
   // Automatically expand the section if the user navigates directly via URL
-  useEffect(() => {
-    if (location.pathname.startsWith('/master')) {
-      setOpenSection('Master');
-    } else if (location.pathname.startsWith('/my-tapals')) {
-      setOpenSection('My Tapals');
-    } else if (location.pathname.startsWith('/endorsements')) {
-      setOpenSection('Endorsements');
-    } else {
-      setOpenSection(null);
-    }
-  }, [location.pathname]);
+useEffect(() => {
+  if (location.pathname.startsWith('/master')) {
+    setOpenSection('Master');
+  } else if (location.pathname.startsWith('/my-tapals')) {
+    setOpenSection('My Tapals');
+  } else if (location.pathname.startsWith('/endorsements')) {
+    setOpenSection('Endorsements');
+  } else if (location.pathname.startsWith('/projects')) { // Add this
+    setOpenSection('Projects');
+  } else {
+    setOpenSection(null);
+  }
+}, [location.pathname]);
 
-  const toggleSection = (label, path, hasChildren) => {
-    if (hasChildren) {
-      // Toggle accordion open/close
-      setOpenSection(openSection === label ? null : label);
-
-      // Auto-navigate to the default child if clicking a parent that isn't currently active
-      if (label === 'My Tapals' && !location.pathname.startsWith('/my-tapals')) {
-        navigate('/my-tapals/new-internal');
-      }
-      if (label === 'Master' && !location.pathname.startsWith('/master')) {
-        navigate('/master/campus');
-      }
-      if (label === 'Endorsements' && !location.pathname.startsWith('/endorsements')) {
-        navigate('/endorsements/dashboard');
-      }
-    } else {
-      // If no children, just navigate straight to the path
-      navigate(path);
-    }
-  };
+const toggleSection = (label, path, hasChildren) => {
+  if (hasChildren) {
+    setOpenSection(openSection === label ? null : label);
+    
+    // Auto-navigate to sub-page if clicking parent
+    if (label === 'My Tapals' && !location.pathname.startsWith('/my-tapals')) navigate('/my-tapals/new-internal');
+    if (label === 'Master' && !location.pathname.startsWith('/master')) navigate('/master/campus');
+    if (label === 'Endorsements' && !location.pathname.startsWith('/endorsements')) navigate('/endorsements/dashboard');
+    if (label === 'Projects' && !location.pathname.startsWith('/projects')) navigate('/projects');
+  } else {
+    navigate(path);
+  }
+};
 
   return (
     <aside className="sidebar">

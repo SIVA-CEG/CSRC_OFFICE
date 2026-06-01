@@ -5,8 +5,8 @@ import './Dashboard.css';
 
 const modules = [
   { id: 'master', title: 'MASTER', icon: '⚙️', desc: 'Manage campus, departments, faculties and more', route: '/master', active: true },
-  { id: 'tapals', title: 'MY TAPALS', icon: '📬', desc: 'Inward & outward tapal management', route: '/my-tapals', active: false },
-  { id: 'endorsements', title: 'ENDORSEMENTS', icon: '✅', desc: 'Approval and endorsement workflows', route: '/endorsements', active: false },
+  { id: 'tapals', title: 'MY TAPALS', icon: '📬', desc: 'Inward & outward tapal management', route: '/my-tapals', active: true },
+  { id: 'endorsements', title: 'ENDORSEMENTS', icon: '✅', desc: 'Approval and endorsement workflows', route: '/endorsements', active: true },
   { id: 'projects', title: 'PROJECTS', icon: '🔬', desc: 'Research project tracking & management', route: '/projects', active: false },
   { id: 'dst-inspire', title: 'DST INSPIRE', icon: '🌟', desc: 'DST INSPIRE scheme management', route: '/dst-inspire', active: false },
   { id: 'dst-inspire-faculty', title: 'DST INSPIRE FACULTY', icon: '👨‍🏫', desc: 'Faculty award and fellowship tracking', route: '/dst-inspire-faculty', active: false },

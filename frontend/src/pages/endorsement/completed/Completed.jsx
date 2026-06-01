@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Completed.css";
+import html2pdf from "html2pdf.js";
 
 // ── Endorsement Report Renderer (Read-Only Final Version) ─────────────────────
 function FinalEndorsementReport({ form, signatures }) {
@@ -56,14 +57,38 @@ function FinalEndorsementReport({ form, signatures }) {
   return (
     <div className="cmp-er-a4" id="printable-report">
       <div className="cmp-er-header">
-        <div className="cmp-er-logo-placeholder cmp-er-logo-left">AU</div>
-        <div className="cmp-er-header-center">
-          <div className="cmp-er-center-title">Centre for Sponsored Research and Consultancy</div>
-          <div className="cmp-er-center-sub">(Formerly Centre for Technology Development and Transfer)</div>
-          <div className="cmp-er-center-univ">Anna University, Chennai 600 025.</div>
-        </div>
-        <div className="cmp-er-logo-placeholder cmp-er-logo-right">CSRC</div>
-      </div>
+
+  <div className="cmp-er-logo-left">
+    <img
+      src="/src/assets/anna-university-logo.png"
+      alt="Anna University"
+      className="cmp-er-logo"
+    />
+  </div>
+
+  <div className="cmp-er-header-center">
+    <div className="cmp-er-center-title">
+      Centre for Sponsored Research and Consultancy
+    </div>
+
+    <div className="cmp-er-center-sub">
+      (Formerly Centre for Technology Development and Transfer)
+    </div>
+
+    <div className="cmp-er-center-univ">
+      Anna University, Chennai 600 025.
+    </div>
+  </div>
+
+  <div className="cmp-er-logo-right">
+    <img
+      src="/src/assets/csrc-logo.png"
+      alt="CSRC"
+      className="cmp-er-logo"
+    />
+  </div>
+
+</div>
       <div className="cmp-er-director-line">
         <div className="cmp-er-dir-name">{form.directorName || "Dr. S. BALASIVANANDHA PRABU"}</div>
         <div className="cmp-er-dir-role">PROFESSOR AND DIRECTOR</div>
@@ -96,25 +121,24 @@ function FinalEndorsementReport({ form, signatures }) {
           <div><span className="cmp-er-foot-label">Place:</span> Chennai-25.</div>
         </div>
         <div className="cmp-er-sig-block">
-          {assistantSig && (
-            <div className="cmp-er-sig-item">
-              {assistantSig.image ? <img src={assistantSig.image} alt="Asst. Sig" className="cmp-er-sig-img"/> : <div className="cmp-er-sig-blank"/>}
-              <div className="cmp-er-sig-role">ASST</div>
-            </div>
-          )}
-          {superintendentSig && (
-            <div className="cmp-er-sig-item">
-              {superintendentSig.image ? <img src={superintendentSig.image} alt="Supdt. Sig" className="cmp-er-sig-img"/> : <div className="cmp-er-sig-blank"/>}
-              <div className="cmp-er-sig-role">SUPDT</div>
-            </div>
-          )}
-          {directorSig && (
-            <div className="cmp-er-sig-item">
-              {directorSig.image ? <img src={directorSig.image} alt="Dir. Sig" className="cmp-er-sig-img"/> : <div className="cmp-er-sig-blank"/>}
-              <div className="cmp-er-sig-role">DIRECTOR</div>
-            </div>
-          )}
-        </div>
+
+  <div className="cmp-er-sig-item">
+    {directorSig?.image ? (
+      <img
+        src={directorSig.image}
+        alt="Director Signature"
+        className="cmp-er-sig-img"
+      />
+    ) : (
+      <div className="cmp-er-sig-blank" />
+    )}
+
+    <div className="cmp-er-sig-role">
+      DIRECTOR
+    </div>
+  </div>
+
+</div>
       </div>
 
       <div className="cmp-er-page-footer">
@@ -135,8 +159,26 @@ function CompletedModal({ item, onClose }) {
   });
 
   const handleDownloadPDF = () => {
-    window.print();
-  };
+  const element = document.getElementById("printable-report");
+
+  html2pdf()
+    .set({
+      margin: 5,
+      filename: `Completed_Endorsement_${item.id}.pdf`,
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: {
+        scale: 4,
+        useCORS: true
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      }
+    })
+    .from(element)
+    .save();
+};
 
   return (
     <div className="cmp-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>

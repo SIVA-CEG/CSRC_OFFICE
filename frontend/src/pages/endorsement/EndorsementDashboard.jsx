@@ -12,13 +12,12 @@ const CARDS = [
     count: 3,
   },
   {
-    id: "processing",
-    icon: "⚙️",
-    title: "Processing",
-    subtitle: "Under review",
+    id: "transferred",
+    icon: "🔄",
+    title: "Transferred",
+    subtitle: "In transition between offices",
     color: "blue",
     count: 7,
-    underConstruction: true,
   },
   {
     id: "completed",
@@ -27,7 +26,6 @@ const CARDS = [
     subtitle: "Approved & closed",
     color: "green",
     count: 24,
-    underConstruction: true,
   },
   {
     id: "create",
@@ -68,8 +66,8 @@ export default function EndorsementDashboard({ onNavigate }) {
       navigate("/endorsements/create");
       break;
 
-    case "processing":
-      navigate("/endorsements/processing");
+    case "transferred":
+      navigate("/endorsements/transferred");
       break;
 
     case "completed":

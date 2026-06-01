@@ -100,7 +100,7 @@
 .cmp-full-row { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 16px; }
 .cmp-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
 .cmp-value { font-size: 15px; font-weight: 600; color: #0f172a; }
-.cmp-title-val { font-style: italic; color: #166534; line-height: 1.5; }
+.cmp-title-val { font-style: italic; color: #000; line-height: 1.5; }
 
 /* Transfer History */
 .cmp-transfer-hist { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 8px; }
@@ -124,7 +124,19 @@
   position: relative;
 }
 .cmp-er-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.cmp-er-logo-placeholder { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
+.cmp-er-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+}
+
+.cmp-er-logo-left,
+.cmp-er-logo-right {
+  width: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .cmp-er-header-center { text-align: center; flex: 1; }
 .cmp-er-center-title { font-size: 20px; font-weight: bold; text-transform: uppercase; }
 .cmp-er-center-sub { font-size: 14px; font-style: italic; margin: 4px 0; }
@@ -134,7 +146,7 @@
 .cmp-er-dir-role { font-size: 14px; }
 .cmp-er-divider { border: 0; border-top: 2px solid #000; margin: 15px 0; }
 
-.cmp-er-doc-title { text-align: center; font-size: 22px; font-weight: bold; text-decoration: underline; margin: 20px 0; letter-spacing: 1px; color: #166534; }
+.cmp-er-doc-title { text-align: center; font-size: 22px; font-weight: bold; text-decoration: underline; margin: 20px 0; letter-spacing: 1px; color: #000; }
 .cmp-er-ref-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
 
 .cmp-er-proj-title-wrap { margin-bottom: 20px; font-size: 16px; line-height: 1.6; text-align: justify; }
