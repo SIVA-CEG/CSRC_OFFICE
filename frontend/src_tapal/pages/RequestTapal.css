@@ -1,0 +1,40 @@
+.search-input {
+  width: 340px;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 14px;
+  background: #fff;
+  margin-bottom: 18px;
+}
+
+.tab-btn {
+  border: 1px solid #d1d5db;
+  background: white;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  transform: translateY(-1px);
+}
+
+.tab-btn.active {
+  background: linear-gradient(
+    135deg,
+    #ccfbf1,
+    #f0fdfa
+  );
+  border-color: #14b8a6;
+  color: #0f766e;
+}
+
+.table-action-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

@@ -1,10 +1,19 @@
 /* OfficeReappropriationPage.css */
 .orq-page {
-  max-width: 1100px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 32px 24px 64px;
-  font-family: "Inter", "Segoe UI", sans-serif;
-  position: relative;
+  padding: 32px;
+  min-height: 100vh;
+
+  background:
+    radial-gradient(circle at top right,
+      rgba(99,102,241,0.08),
+      transparent 25%),
+    radial-gradient(circle at bottom left,
+      rgba(14,165,233,0.08),
+      transparent 25%);
+
+  font-family: "Inter", sans-serif;
 }
 
 /* ── Toast ── */
@@ -32,43 +41,82 @@
 }
 
 /* ── Header ── */
-.orq-header { margin-bottom: 24px; }
-.orq-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 6px 0 4px;
-  letter-spacing: -0.4px;
+.orq-header {
+  padding: 28px 32px;
+
+  background: rgba(255,255,255,0.75);
+
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255,255,255,0.4);
+
+  border-radius: 24px;
+
+  box-shadow:
+    0 8px 32px rgba(15,23,42,.08);
+
+  margin-bottom: 24px;
 }
-.orq-subtitle { font-size: 13.5px; color: #64748b; margin: 0; }
+
+.orq-title {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: #0f172a;
+}
+
+.orq-subtitle {
+  font-size: 15px;
+  color: #64748b;
+}
 
 /* ── Toolbar ── */
 .orq-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
+  background: #fff;
+
+  border-radius: 20px;
+
+  padding: 18px;
+
+  box-shadow:
+    0 4px 20px rgba(15,23,42,.05);
+
+  border: 1px solid #e2e8f0;
+
+  margin-bottom: 22px;
 }
 
 .orq-filters { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .orq-filter-btn {
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: 1.5px solid #e2e8f0;
-  background: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  height: 42px;
+
+  border-radius: 14px;
+
+  font-weight: 700;
+
+  transition: .25s ease;
+
+  border: 1px solid #e2e8f0;
 }
-.orq-filter-btn:hover { border-color: #6366f1; color: #6366f1; }
-.orq-filter-btn.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+
+.orq-filter-btn:hover {
+  transform: translateY(-2px);
+}
+
+.orq-filter-btn.active {
+  background:
+    linear-gradient(
+      135deg,
+      #6366f1,
+      #4f46e5
+    );
+
+  color: white;
+
+  box-shadow:
+    0 8px 20px rgba(99,102,241,.25);
+}
 
 .orq-filter-count {
   background: rgba(0,0,0,0.1);
@@ -110,12 +158,16 @@
 
 /* ── Main Table ── */
 .orq-table-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  background: white;
+
+  border-radius: 24px;
+
   overflow: hidden;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-  margin-bottom: 32px;
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 10px 40px rgba(15,23,42,.08);
 }
 
 .orq-main-table {
@@ -139,12 +191,15 @@
 }
 
 .orq-row {
-  border-bottom: 1px solid #f1f5f9;
-  cursor: pointer;
-  transition: background 0.12s;
+  transition: .25s ease;
+}
+
+.orq-row:hover {
+  background: #f8fafc;
+
+  transform: scale(1.002);
 }
 .orq-row:last-child { border-bottom: none; }
-.orq-row:hover { background: #f8fafc; }
 .orq-main-table td { padding: 13px 14px; vertical-align: middle; }
 
 .orq-id-cell { font-weight: 700; font-size: 12px; color: #6366f1; font-family: monospace; }
@@ -212,21 +267,32 @@
 
 /* ── Status badge ── */
 .orq-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+  border-radius: 999px;
+
+  padding: 6px 14px;
+
+  font-weight: 700;
+
+  backdrop-filter: blur(10px);
+}
+
+.orq-badge-approved {
+  background: rgba(16,185,129,.15);
+  color: #059669;
+}
+
+.orq-badge-pending {
+  background: rgba(245,158,11,.15);
+  color: #b45309;
+}
+
+.orq-badge-declined {
+  background: rgba(239,68,68,.15);
+  color: #dc2626;
 }
 .orq-badge-dot { width: 7px; height: 7px; border-radius: 50%; }
-.orq-badge-pending  { background: #fef3c7; color: #92400e; }
 .orq-badge-pending  .orq-badge-dot { background: #f59e0b; }
-.orq-badge-approved { background: #d1fae5; color: #064e3b; }
 .orq-badge-approved .orq-badge-dot { background: #10b981; }
-.orq-badge-declined { background: #fee2e2; color: #7f1d1d; }
 .orq-badge-declined .orq-badge-dot { background: #ef4444; }
 
 /* ── History section ── */
@@ -316,14 +382,18 @@
 @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
 
 .orq-drawer {
-  width: min(600px, 96vw);
-  height: 100%;
-  background: #fff;
-  box-shadow: -8px 0 40px rgba(0,0,0,0.12);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: drawer-in 0.26s cubic-bezier(0.22,1,0.36,1);
+  width: min(760px,96vw);
+
+  background: #ffffff;
+
+  border-left: 1px solid #e2e8f0;
+
+  box-shadow:
+    -20px 0 60px rgba(15,23,42,.15);
+
+  border-top-left-radius: 28px;
+
+  border-bottom-left-radius: 28px;
 }
 @keyframes drawer-in {
   from { transform: translateX(60px); opacity: 0; }
@@ -400,9 +470,21 @@
   gap: 10px;
 }
 .orq-info-grid > div {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: white;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 16px;
+
+  padding: 14px;
+
+  transition: .25s ease;
+}
+
+.orq-info-grid > div:hover {
+  border-color: #6366f1;
+
+  transform: translateY(-2px);
 }
 .orq-info-grid span {
   display: block;
@@ -547,3 +629,122 @@
   color: #6366f1;
 }
 .page-breadcrumb span:hover { text-decoration: underline; }
+
+.orq-btn-approve {
+  background:
+    linear-gradient(
+      135deg,
+      #10b981,
+      #059669
+    );
+
+  box-shadow:
+    0 8px 20px rgba(16,185,129,.25);
+}
+
+.orq-btn-decline {
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #dc2626
+    );
+
+  box-shadow:
+    0 8px 20px rgba(239,68,68,.25);
+}
+
+.orq-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ── Global & Layout Polish ── */
+.orq-page {
+  --bg-gradient: radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.05), transparent 50%),
+                 radial-gradient(circle at 0% 100%, rgba(14, 165, 233, 0.05), transparent 50%);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* ── Premium Card Component ── */
+/* Apply this to all main containers (Table, Header, Drawer) */
+.orq-card-premium {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Refined Toolbar ── */
+.orq-toolbar {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  padding: 12px;
+}
+
+.orq-filter-btn {
+  border: 1px solid #e2e8f0;
+  background: transparent;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.orq-filter-btn.active {
+  background: #0f172a; /* Sophisticated Dark Mode look */
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+/* ── Polished Table ── */
+.orq-main-table { border-collapse: separate; border-spacing: 0 4px; }
+
+.orq-row {
+  background: #ffffff;
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.orq-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+}
+
+/* ── Modern Badges ── */
+.orq-badge {
+  padding: 4px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.orq-badge-approved { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.orq-badge-pending { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+
+/* ── Premium Drawer ── */
+.orq-drawer {
+  background: #ffffff;
+  border-left: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: -20px 0 40px rgba(0,0,0,0.08);
+}
+
+/* ── Button Enhancements ── */
+.orq-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.orq-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.orq-btn:active { transform: translateY(0); }
+

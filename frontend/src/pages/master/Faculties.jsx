@@ -8095,16 +8095,28 @@ export default function Faculties() {
   }
 ]);
 
-  const [currentFaculty, setCurrentFaculty] = useState({
-    name: "", designation: "", department: "", campus: "", status: "Active",
-  });
+const [currentFaculty, setCurrentFaculty] = useState({
+  staffId: "",
+  name: "",
+  designation: "",
+  department: "",
+  campus: "",
+  status: "Active",
+});
 
-  const openAddModal = () => {
-    setEditIndex(null);
-    setError("");
-    setCurrentFaculty({ name: "", designation: "", department: "", campus: "", status: "Active" });
-    setShowModal(true);
-  };
+const openAddModal = () => {
+  setEditIndex(null);
+  setError("");
+  setCurrentFaculty({
+    staffId: "",
+    name: "",
+    designation: "",
+    department: "",
+    campus: "",
+    status: "Active",
+  });
+  setShowModal(true);
+};
 
   const openEditModal = (item, actualIndex) => {
     setEditIndex(actualIndex);
@@ -8116,8 +8128,13 @@ export default function Faculties() {
   const saveFaculty = () => {
     setError("");
 
-    if (!currentFaculty.name.trim() || !currentFaculty.designation.trim() || 
-        !currentFaculty.department.trim() || !currentFaculty.campus.trim()) {
+    if (
+  !currentFaculty.staffId.trim() ||
+  !currentFaculty.name.trim() ||
+  !currentFaculty.designation.trim() ||
+  !currentFaculty.department.trim() ||
+  !currentFaculty.campus.trim()
+) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -8127,13 +8144,17 @@ export default function Faculties() {
       updated[editIndex] = currentFaculty;
       setFaculties(updated);
     } else {
-      setFaculties([...faculties, {
-        name: currentFaculty.name.trim(),
-        designation: currentFaculty.designation.trim(),
-        department: currentFaculty.department.trim(),
-        campus: currentFaculty.campus.trim(),
-        status: currentFaculty.status,
-      }]);
+      setFaculties([
+  ...faculties,
+  {
+    staffId: currentFaculty.staffId.trim(),
+    name: currentFaculty.name.trim(),
+    designation: currentFaculty.designation.trim(),
+    department: currentFaculty.department.trim(),
+    campus: currentFaculty.campus.trim(),
+    status: currentFaculty.status,
+  },
+]);
     }
     setShowModal(false);
   };
@@ -8149,7 +8170,8 @@ export default function Faculties() {
     return faculties.filter((item) => {
       if (!item) return false;
       return (
-        (item.name ?? "").toLowerCase().includes(searchLower) ||
+        (item.staffId ?? "").toLowerCase().includes(searchLower) ||
+  (item.name ?? "").toLowerCase().includes(searchLower) ||
         (item.designation ?? "").toLowerCase().includes(searchLower) ||
         (item.department ?? "").toLowerCase().includes(searchLower) ||
         (item.campus ?? "").toLowerCase().includes(searchLower)
@@ -8202,6 +8224,7 @@ export default function Faculties() {
         <table className="fac-table">
           <thead>
             <tr>
+              <th>Staff ID</th>
               <th>Name</th>
               <th>Designation</th>
               <th>Department</th>
@@ -8218,6 +8241,7 @@ export default function Faculties() {
                 
                 return (
                   <tr key={index}>
+                    <td>{item.staffId}</td>
                     <td style={{ fontWeight: "600", color: "#166534" }}>{item.name}</td>
                     <td>{item.designation}</td>
                     <td>{item.department}</td>
@@ -8242,7 +8266,7 @@ export default function Faculties() {
               })
             ) : (
               <tr>
-                <td colSpan="6" className="empty-state">No faculty members found</td>
+                <td colSpan="7" className="empty-state">No faculty members found</td>
               </tr>
             )}
           </tbody>
@@ -8282,7 +8306,29 @@ export default function Faculties() {
           <div className="modal-card">
             <h2>{editIndex !== null ? "Edit Faculty" : "Add Faculty"}</h2>
             <div className="modal-grid">
-              <input type="text" placeholder="Full Name *" value={currentFaculty.name} onChange={(e) => setCurrentFaculty({ ...currentFaculty, name: e.target.value })} />
+  <input
+    type="text"
+    placeholder="Staff ID *"
+    value={currentFaculty.staffId}
+    onChange={(e) =>
+      setCurrentFaculty({
+        ...currentFaculty,
+        staffId: e.target.value,
+      })
+    }
+  />
+
+  <input
+    type="text"
+    placeholder="Full Name *"
+    value={currentFaculty.name}
+    onChange={(e) =>
+      setCurrentFaculty({
+        ...currentFaculty,
+        name: e.target.value,
+      })
+    }
+  />
               <input type="text" placeholder="Designation *" value={currentFaculty.designation} onChange={(e) => setCurrentFaculty({ ...currentFaculty, designation: e.target.value })} />
               <input type="text" placeholder="Department *" value={currentFaculty.department} onChange={(e) => setCurrentFaculty({ ...currentFaculty, department: e.target.value })} />
               <input type="text" placeholder="Campus *" value={currentFaculty.campus} onChange={(e) => setCurrentFaculty({ ...currentFaculty, campus: e.target.value })} />

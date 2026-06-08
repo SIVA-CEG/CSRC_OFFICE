@@ -6,8 +6,10 @@ const projectModules = [
   { label: 'Fresh Sanctions', icon: '✨', path: 'fresh-sanction' },
   { label: 'Renewal Sanctions', icon: '🔄', path: 'renewal-sanction' },
   { label: 'CSRC Proceedings', icon: '📜', path: 'proceedings' },
-  { label: 'Project Requests', icon: '📩', path: 'requests' },
-  { label: 'Payment Claims', icon: '💳', path: 'payment-claims' },
+
+  // Project Requests (contains Reappropriation & Extension)
+  { label: 'Project Requests', icon: '📩', path: 'project-requests' },
+
   { label: 'ZBA Claim Requests', icon: '🏦', path: 'zba-claims' },
   { label: 'TSA(H) Claim Requests', icon: '🏥', path: 'tsa-claims' },
   { label: 'CMRG Claim Requests', icon: '📊', path: 'cmrg-claims' },
@@ -18,19 +20,26 @@ const projectModules = [
 export default function ProjectDashboard() {
   const navigate = useNavigate();
 
+  const handleNavigation = (path) => {
+    navigate(`/projects/${path}`);
+  };
+
   return (
     <div className="project-dashboard">
       <header className="project-header">
         <h1>Projects Dashboard</h1>
-        <p>Manage and track all project-related sanctions and claims.</p>
+        <p>
+          Manage and track all project-related sanctions, requests,
+          proceedings, and claims.
+        </p>
       </header>
-      
+
       <div className="project-grid">
         {projectModules.map((item) => (
-          <div 
-            key={item.path} 
+          <div
+            key={item.path}
             className="project-card"
-            onClick={() => navigate(`/projects/${item.path}`)}
+            onClick={() => handleNavigation(item.path)}
           >
             <div className="card-icon">{item.icon}</div>
             <h3>{item.label}</h3>

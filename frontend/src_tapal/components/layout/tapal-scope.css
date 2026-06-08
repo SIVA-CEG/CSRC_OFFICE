@@ -1,0 +1,152 @@
+/* =====================================================
+   tapal-scope.css
+   Scoped overrides — only affects .tapal-scope wrapper
+   ===================================================== */
+
+.tapal-scope,
+.tapal-scope * {
+  box-sizing: border-box;
+}
+
+/* Root shell */
+.tapal-scope {
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(135deg, #f7fbff 0%, #eef9f6 100%);
+  color: #1f2937;
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  display: flex;
+  overflow-x: hidden;
+}
+
+/* ── Sidebar ── */
+.tapal-scope .sidebar {
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(18px) !important;
+  border-right: 1px solid #dbe4ea !important;
+  box-shadow: 10px 0 35px rgba(15, 23, 42, 0.06) !important;
+}
+
+.tapal-scope .sidebar-brand h2 {
+  color: #115e59 !important;
+}
+
+.tapal-scope .sidebar-brand p {
+  color: #6b7280 !important;
+}
+
+.tapal-scope .brand-icon {
+  background: linear-gradient(135deg, #0f766e, #14b8a6) !important;
+  color: #fff !important;
+}
+
+.tapal-scope .sidebar-section-label {
+  color: #9ca3af !important;
+}
+
+.tapal-scope .sidebar-item {
+  color: #4b5563 !important;
+  background: transparent !important;
+}
+
+.tapal-scope .sidebar-item:hover {
+  background: #f0fdfa !important;
+  color: #115e59 !important;
+}
+
+.tapal-scope .sidebar-item.active {
+  background: linear-gradient(135deg, #ccfbf1, #f0fdfa) !important;
+  color: #115e59 !important;
+  box-shadow: 0 10px 25px rgba(15, 118, 110, 0.12) !important;
+}
+
+.tapal-scope .sidebar-item.active::before {
+  background: #0f766e !important;
+}
+
+.tapal-scope .sidebar-icon {
+  background: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important;
+}
+
+.tapal-scope .sidebar-footer {
+  background: linear-gradient(135deg, #0f766e, #14b8a6) !important;
+  color: #fff !important;
+}
+
+/* ── Main content — sits right next to sidebar, no gap ── */
+.tapal-scope .main-content {
+  margin-left: 0 !important;       /* sidebar is in normal flow, no gap needed */
+  width: calc(100% - 240px) !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  background: linear-gradient(135deg, #f7fbff 0%, #eef9f6 100%) !important;
+  overflow-x: auto !important;
+}
+
+/* ── Header ── */
+.tapal-scope .top-header {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-bottom: 1px solid #dbe4ea !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04) !important;
+}
+
+.tapal-scope .top-header h1 {
+  color: #115e59 !important;
+  font-size: 22px !important;
+}
+
+.tapal-scope .top-header p {
+  color: #6b7280 !important;
+}
+
+.tapal-scope .mini-stat {
+  background: #ffffff !important;
+  border: 1px solid #dbe4ea !important;
+}
+
+.tapal-scope .mini-stat span {
+  color: #6b7280 !important;
+}
+
+.tapal-scope .mini-stat strong {
+  color: #115e59 !important;
+}
+
+/* ── Page body ── */
+.tapal-scope .page-body {
+  padding: 28px 30px !important;
+  background: transparent !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.tapal-scope .page-title {
+  color: #115e59 !important;
+}
+
+.tapal-scope .page-subtitle {
+  color: #6b7280 !important;
+}
+
+/* ── Cards & tables ── */
+.tapal-scope .card {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+}
+
+.tapal-scope .table-wrapper {
+  width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.tapal-scope .data-table {
+  min-width: 900px !important;
+}

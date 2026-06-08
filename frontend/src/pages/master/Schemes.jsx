@@ -5,7 +5,7 @@ const initialSchemes = [
   {
     schemeCode: "4211",
     schemeName: "Advanced Research Grant (ARG) Program",
-    accountType: "ZBA",
+    accountType: "TSA(H)",
     bank: "UNION BANK OF INDIA",
     accountNo: "349902010052015",
     mobile: "0",
@@ -30,7 +30,7 @@ const initialSchemes = [
   {
     schemeCode: "1827",
     schemeName: "Capacity Building and Human Resources Development",
-    accountType: "ZBA",
+    accountType: "TSA(H)",
     bank: "STATE BANK OF INDIA",
     accountNo: "43549381038",
     mobile: "0",
@@ -55,7 +55,7 @@ const initialSchemes = [
   {
     schemeCode: "1023",
     schemeName: "Core Research Grant (erstwhile SERB Scheme)",
-    accountType: "ZBA",
+    accountType: "TSA(H)",
     bank: "UNION BANK OF INDIA, SDA",
     accountNo: "349902010052378",
     mobile: "0",

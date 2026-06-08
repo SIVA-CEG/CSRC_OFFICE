@@ -24,18 +24,39 @@ const tapalItems = [
 const endorsementItems = [
   { label: 'Dashboard', path: '/endorsements/dashboard', icon: '📊' },
   { label: 'New Requests', path: '/endorsements/new-requests', icon: '📥' },
-  { label: 'Transferred', path: '/endorsements/transferred', icon: '⚙️' },
+  { label: 'Transferred', path: '/endorsements/transferred', icon: "🔄" },
   { label: 'Completed', path: '/endorsements/completed', icon: '✅' },
   { label: 'Create Endorsement', path: '/endorsements/create', icon: '📝' },
   { label: 'Search', path: '/endorsements/search', icon: '🔍' },
 ];
 
 const projectItems = [
+  { label: 'Dashboard', path: '/projects', icon: '📊' },
   { label: 'Fresh Sanction', path: '/projects/fresh-sanction', icon: '✨' },
   { label: 'Renewal Sanction', path: '/projects/renewal-sanction', icon: '🔄' },
-  { label: 'Project Requests', path: '/projects/project-requests', icon: '📩' },
-  { label: 'Office Reappropriation', path: '/projects/office-reappropriation', icon: '💼' },
-  // Add other items here as you build them
+
+  {
+    label: 'Project Requests',
+    path: '/projects/project-requests',
+    icon: '📩',
+    children: [
+      {
+        label: 'Reappropriation Claims',
+        path: '/projects/office-reappropriation',
+        icon: '💼',
+      },
+      {
+        label: 'Project Extension',
+        path: '/projects/project-extension',
+        icon: '⏳',
+      },
+    ],
+  },
+  { label: 'ZBA Claim Requests', path: '/projects/zba-claims', icon: '🏦' },
+  { label: 'TSA(H) Claim Requests', path: '/projects/tsa-claims', icon: '🏥' },
+  { label: 'CMRG Claim Requests', path: '/projects/cmrg-claims', icon: '📊' },
+  { label: 'Search', path: '/projects/search', icon: '🔍' },
+  { label: 'Reports', path: '/projects/reports', icon: '📑' },
 ];
 
 const navSections = [
@@ -52,6 +73,12 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState(null);
+const [openProjectRequest, setOpenProjectRequest] = useState(
+  location.pathname.startsWith('/projects/office-reappropriation') ||
+  location.pathname.startsWith('/projects/project-extension')
+);
+
+  
 
   // Automatically expand the section if the user navigates directly via URL
 useEffect(() => {
@@ -65,6 +92,15 @@ useEffect(() => {
     setOpenSection('Projects');
   } else {
     setOpenSection(null);
+  }
+}, [location.pathname]);
+
+useEffect(() => {
+  if (
+    location.pathname.startsWith('/projects/office-reappropriation') ||
+    location.pathname.startsWith('/projects/project-extension')
+  ) {
+    setOpenProjectRequest(true);
   }
 }, [location.pathname]);
 
@@ -114,22 +150,70 @@ const toggleSection = (label, path, hasChildren) => {
               {hasChildren && isOpen && (
                 <div className="sidebar-children">
                   {section.children.map((child) => {
-                    const childActive = location.pathname === child.path;
+  const childActive =
+    location.pathname === child.path ||
+    (child.children &&
+      child.children.some((sub) => location.pathname === sub.path));
 
-                    return (
-                      <div
-                        key={child.path}
-                        className={`sidebar-child ${childActive ? 'sidebar-child--active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(child.path);
-                        }}
-                      >
-                        <span className="sidebar-child-icon">{child.icon}</span>
-                        {child.label}
-                      </div>
-                    );
-                  })}
+  return (
+    <div key={child.path}>
+      <div
+        className={`sidebar-child ${
+          childActive ? 'sidebar-child--active' : ''
+        }`}
+        onClick={(e) => {
+          e.stopPropagation();
+
+          if (child.children) {
+            setOpenProjectRequest((prev) => !prev);
+          } else {
+            navigate(child.path);
+          }
+        }}
+      >
+        <span className="sidebar-child-icon">{child.icon}</span>
+
+        <span className="sidebar-child-label">
+          {child.label}
+        </span>
+
+        {child.children && (
+          <span
+            className={`sidebar-chevron ${
+              openProjectRequest ? 'open' : ''
+            }`}
+          >
+            ▾
+          </span>
+        )}
+      </div>
+
+      {child.children && openProjectRequest && (
+        <div className="sidebar-grandchildren">
+          {child.children.map((sub) => (
+            <div
+              key={sub.path}
+              className={`sidebar-child sidebar-grandchild ${
+                location.pathname === sub.path
+                  ? 'sidebar-child--active'
+                  : ''
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(sub.path);
+              }}
+            >
+              <span className="sidebar-child-icon">
+                {sub.icon}
+              </span>
+              {sub.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+})}
                 </div>
               )}
             </div>

@@ -1,0 +1,143 @@
+.search-page{
+  padding:30px;
+  background:#f5f7fb;
+  min-height:100vh;
+}
+
+.search-header{
+  margin-bottom:25px;
+}
+
+.search-header h1{
+  font-size:32px;
+  color:#1e293b;
+  margin-bottom:5px;
+}
+
+.search-header p{
+  color:#64748b;
+}
+
+.search-card{
+  background:#fff;
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.search-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+
+.search-grid select{
+  height:55px;
+  border:1px solid #dbe4f0;
+  border-radius:12px;
+  padding:0 15px;
+  font-size:15px;
+}
+
+.date-section{
+  margin-top:30px;
+}
+
+.date-row{
+  display:grid;
+  grid-template-columns:250px 1fr 1fr;
+  gap:20px;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.date-row label{
+  font-weight:600;
+  color:#1e293b;
+}
+
+.date-row input{
+  height:55px;
+  border:1px solid #dbe4f0;
+  border-radius:12px;
+  padding:0 15px;
+}
+
+.button-row{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-top:30px;
+}
+
+.search-btn{
+  background:#06b6d4;
+  color:white;
+  border:none;
+  padding:14px 40px;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.clear-btn{
+  background:#f59e0b;
+  color:white;
+  border:none;
+  padding:14px 40px;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.results-card{
+  margin-top:30px;
+  background:white;
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.results-card table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.results-card th{
+  background:#0f172a;
+  color:white;
+  padding:15px;
+  text-align:left;
+}
+
+.results-card td{
+  padding:15px;
+  border-bottom:1px solid #e5e7eb;
+}
+
+.results-card tr:hover{
+  background:#f8fafc;
+}    
+.project-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.project-table th{
+  background:#334155;
+  color:#ffffff;
+  padding:16px;
+  border:1px solid #475569;
+  font-weight:600;
+  text-align:left;
+}
+.project-table td{
+  color:#1e293b;
+  font-weight:500;
+}
+
+.project-table a{
+  color:#1d4ed8;
+  text-decoration:none;
+  font-weight:600;
+}

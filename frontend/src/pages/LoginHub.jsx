@@ -4,13 +4,13 @@ import './LoginHub.css';
 
 const modules = [
   {
-    id: 'tapal',
-    title: 'TAPAL LOGIN',
-    icon: '📬',
-    desc: 'Inward & Outward Tapal Management',
-    route: null,
-    wip: true,
-  },
+  id: 'tapal',
+  title: 'TAPAL LOGIN',
+  icon: '📬',
+  desc: 'Inward & Outward Tapal Management',
+  route: '/tapal-login',   // ← add this
+  wip: false,              // ← change to false
+},
   {
     id: 'salary',
     title: 'STAFF SALARY CLAIMS',

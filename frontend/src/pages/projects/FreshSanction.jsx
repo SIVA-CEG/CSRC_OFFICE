@@ -59,6 +59,7 @@ export default function FreshSanction() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [page, setPage] = useState('list');
   const [editProject, setEditProject] = useState(null);
+  const [assignmentCodes, setAssignmentCodes] = useState({});
 
   const openView = (item) => {
     setSelectedProject(item);
@@ -71,10 +72,20 @@ export default function FreshSanction() {
   setPage('edit');
 };
   const handleApprove = (id) => {
-    const item = requests.find(r => r.id === id);
-    setHistory([...history, { ...item, assignedTo: assignments[id] || 'N/A', approvedDate: new Date().toLocaleDateString() }]);
-    setRequests(requests.filter(r => r.id !== id));
-  };
+  const item = requests.find(r => r.id === id);
+
+  setHistory([
+    ...history,
+    {
+      ...item,
+      assignedTo: assignments[id] || 'N/A',
+      assignmentCode: assignmentCodes[id] || '',
+      approvedDate: new Date().toLocaleDateString()
+    }
+  ]);
+
+  setRequests(requests.filter(r => r.id !== id));
+};
 
   const renderActions = (item) => (
     <>
@@ -574,17 +585,48 @@ if (page === 'view' && selectedProject) {
               <td>{item.cost}</td>
               <td>
                 {activeTab === 'pending' ? (
-                  <select 
-                    onChange={(e) => setAssignments({...assignments, [item.id]: e.target.value})}
-                    value={assignments[item.id] || ''}
-                  >
-                    <option value="">Select</option>
-                    <option value="ZBA">ZBA</option>
-                    <option value="TSA(H)">TSA(H)</option>
-                    <option value="CMRG">CMRG</option>
-                  </select>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+  <select
+    onChange={(e) =>
+      setAssignments({
+        ...assignments,
+        [item.id]: e.target.value
+      })
+    }
+    value={assignments[item.id] || ""}
+  >
+    <option value="">Select</option>
+    <option value="ZBA">ZBA</option>
+    <option value="TSA(H)">TSA(H)</option>
+    <option value="CMRG">CMRG</option>
+  </select>
+
+  {(assignments[item.id] === "ZBA" ||
+    assignments[item.id] === "TSA(H)" ||
+    assignments[item.id] === "CMRG") && (
+    <input
+      type="text"
+      placeholder={`Enter ${assignments[item.id]} Code`}
+      value={assignmentCodes[item.id] || ""}
+      onChange={(e) =>
+        setAssignmentCodes({
+          ...assignmentCodes,
+          [item.id]: e.target.value
+        })
+      }
+      className="edit-input"
+    />
+  )}
+</div>
                 ) : (
-                  <strong>{item.assignedTo}</strong>
+                  <div>
+  <strong>{item.assignedTo}</strong>
+  {item.assignmentCode && (
+    <div style={{ fontSize: "12px", color: "#666" }}>
+      Code: {item.assignmentCode}
+    </div>
+  )}
+</div>
                 )}
               </td>
               <td>

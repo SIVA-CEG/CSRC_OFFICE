@@ -12,10 +12,10 @@ const CARDS = [
     count: 3,
   },
   {
-    id: "transferred",
+    id: "Transferred",
     icon: "🔄",
     title: "Transferred",
-    subtitle: "In transition between offices",
+    subtitle: "Items transferred to you",
     color: "blue",
     count: 7,
   },
@@ -66,7 +66,7 @@ export default function EndorsementDashboard({ onNavigate }) {
       navigate("/endorsements/create");
       break;
 
-    case "transferred":
+    case "Transferred":
       navigate("/endorsements/transferred");
       break;
 

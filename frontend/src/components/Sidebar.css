@@ -261,3 +261,27 @@
     transform: translateY(0);
   }
 }
+.sidebar-grandchildren {
+  margin-left: 20px;
+  border-left: 1px solid rgba(255,255,255,0.15);
+  padding-left: 10px;
+}
+
+.sidebar-grandchild {
+  font-size: 13px;
+  padding-left: 12px;
+}
+.sidebar-grandchildren {
+  margin-left: 18px;
+  border-left: 1px solid rgba(255,255,255,0.12);
+  padding-left: 10px;
+}
+
+.sidebar-grandchild {
+  font-size: 13px;
+  padding-left: 10px;
+}
+
+.sidebar-grandchild:hover {
+  transform: translateX(3px);
+}
