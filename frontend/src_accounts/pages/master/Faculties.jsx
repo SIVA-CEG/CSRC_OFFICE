@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "./Faculties.css";
+import Layout from '../../components/Layout';
 
 export default function Faculties() {
   const [search, setSearch] = useState("");
@@ -8191,6 +8192,10 @@ const openAddModal = () => {
   const currentRows = filteredFaculties.slice(indexOfFirstRow, indexOfLastRow);
 
   return (
+    <Layout
+      title="Faculties"
+      subtitle="Manage Faculty Details"
+    >
     <div className="fac-page">
       <div className="fac-header">
         <div>
@@ -8354,5 +8359,6 @@ const openAddModal = () => {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

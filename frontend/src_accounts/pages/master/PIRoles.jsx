@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "./PIRoles.css";
+import Layout from '../../components/Layout';
 
 export default function PIRoles() {
   const [search, setSearch] = useState("");
@@ -113,6 +114,10 @@ export default function PIRoles() {
   const currentRows = filteredRoles.slice(indexOfFirstRow, indexOfLastRow);
 
   return (
+    <Layout
+      title="PI Roles"
+      subtitle="Manage Principal Investigator Roles"
+    >
     <div className="pi-role-page">
       <div className="pi-role-header">
         <div>
@@ -254,5 +259,6 @@ export default function PIRoles() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

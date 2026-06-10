@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "./UserActivation.css";
+import Layout from '../../components/Layout';
 
 export default function UserActivation() {
   const [view, setView] = useState("table"); // 'table' | 'form'
@@ -54194,6 +54195,10 @@ export default function UserActivation() {
   };
 
   return (
+    <Layout
+      title="User Activation"
+      subtitle="Manage User Access & Activation"
+    >
     <div className="ua-page">
       {/* ════════════════════════════════════════════════════════════════════════ */}
       {/* TABLE VIEW */}
@@ -54401,5 +54406,6 @@ export default function UserActivation() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

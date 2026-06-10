@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Schemes.css";
+import Layout from '../../components/Layout';
 
 const initialSchemes = [
   {
@@ -255,6 +256,10 @@ export default function Schemes() {
   );
 
   return (
+    <Layout
+      title="Schemes"
+      subtitle="Manage Scheme Details"
+    >
     <div className="scheme-page">
       <div className="scheme-header">
         <div>
@@ -435,5 +440,6 @@ export default function Schemes() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

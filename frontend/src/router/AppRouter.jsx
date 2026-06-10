@@ -113,6 +113,21 @@ import PaymentLock from '../../src_accounts/pages/payments/PaymentLock';
 
 
 
+/* =======================
+  ACCOUNTS MASTER IMPORTS
+======================= */
+
+import AccountsCampus          from '../../src_accounts/pages/master/Campus';
+import AccountsDepartments     from '../../src_accounts/pages/master/Departments';
+import AccountsBeneficiaries   from '../../src_accounts/pages/master/Beneficiaries';
+import AccountsDesignation     from '../../src_accounts/pages/master/Designation';
+import AccountsFaculties       from '../../src_accounts/pages/master/Faculties';
+import AccountsUserActivation  from '../../src_accounts/pages/master/UserActivation';
+import AccountsPIRoles         from '../../src_accounts/pages/master/PIRoles';
+import AccountsSchemes         from '../../src_accounts/pages/master/Schemes';
+
+
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -201,6 +216,18 @@ export default function AppRouter() {
 
 <Route path="/accounts/master" element={<Master />} />
 <Route path="/accounts/budget" element={<Budget />} />
+
+
+{/* Accounts Master */}
+<Route path="/accounts/master/campus" element={<AccountsCampus />} />
+<Route path="/accounts/master/departments" element={<AccountsDepartments />} />
+<Route path="/accounts/master/beneficiaries" element={<AccountsBeneficiaries />} />
+<Route path="/accounts/master/designation" element={<AccountsDesignation />} />
+<Route path="/accounts/master/faculties" element={<AccountsFaculties />} />
+<Route path="/accounts/master/user-activation" element={<AccountsUserActivation />} />
+<Route path="/accounts/master/pi-roles" element={<AccountsPIRoles />} />
+<Route path="/accounts/master/schemes" element={<AccountsSchemes />} />
+
 
 {/* Banking */}
 <Route path="/accounts/banking" element={<Banking />} />

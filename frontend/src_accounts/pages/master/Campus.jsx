@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Layout from '../../components/Layout';
 import "./Campus.css";
 
 export default function Campus() {
@@ -152,6 +153,10 @@ export default function Campus() {
   );
 
   return (
+    <Layout
+      title="Campus"
+      subtitle="Manage Campus Details"
+    >
     <div className="campus-page">
       <div className="campus-header">
         <div>
@@ -270,5 +275,7 @@ export default function Campus() {
         </div>
       )}
     </div>
+
+    </Layout>
   );
 }

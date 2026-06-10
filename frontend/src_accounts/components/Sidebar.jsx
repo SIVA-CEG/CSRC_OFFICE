@@ -6,14 +6,14 @@ const NAV = [
   {
     label: 'Master', icon: '◈', path: '/master',
     children: [
-      { label: 'Campus', path: '/master/campus' },
-      { label: 'Departments', path: '/master/departments' },
-      { label: 'Designation', path: '/master/designation' },
-      { label: 'Faculties', path: '/master/faculties' },
-      { label: 'Beneficiaries', path: '/master/beneficiaries' },
-      { label: 'Schemes', path: '/master/schemes' },
-      { label: 'PI Roles', path: '/master/pi-roles' },
-      { label: 'User Activation', path: '/master/user-activation' },
+      { label: 'Campus', path: '/accounts/master/campus' },
+      { label: 'Departments', path: '/accounts/master/departments' },
+      { label: 'Designation', path: '/accounts/master/designation' },
+      { label: 'Faculties', path: '/accounts/master/faculties' },
+      { label: 'Beneficiaries', path: '/accounts/master/beneficiaries' },
+      { label: 'Schemes', path: '/accounts/master/schemes' },
+      { label: 'PI Roles', path: '/accounts/master/pi-roles' },
+      { label: 'User Activation', path: '/accounts/master/user-activation' },
     ]
   },
   { label: 'Budget', icon: '◉', path: '/accounts/budget' },
@@ -75,7 +75,22 @@ const NAV = [
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [openGroups, setOpenGroups] = useState({});
+  const [openGroups, setOpenGroups] = useState(() => {
+  const initial = {};
+
+  NAV.forEach(item => {
+    if (
+      item.children &&
+      item.children.some(child =>
+        location.pathname.startsWith(child.path)
+      )
+    ) {
+      initial[item.label] = true;
+    }
+  });
+
+  return initial;
+});
   const [openSubs, setOpenSubs] = useState({});
 
   const toggle = (label) => setOpenGroups(p => ({ ...p, [label]: !p[label] }));
@@ -137,7 +152,9 @@ export default function Sidebar() {
             </div>
 
             {/* Level-1 children */}
-            {item.children && openGroups[item.label] && (
+            {item.children &&
+ (openGroups[item.label] ||
+  item.children.some(child => location.pathname.startsWith(child.path))) && (
               <div style={sideStyles.childGroup}>
                 {item.children.map(child => (
                   <div key={child.label}>
@@ -161,7 +178,9 @@ export default function Sidebar() {
                     </div>
 
                     {/* Level-2 children */}
-                    {child.children && openSubs[child.label] && (
+                    {child.children &&
+ (openSubs[child.label] ||
+  child.children.some(gc => location.pathname === gc.path)) && (
                       <div style={sideStyles.grandchildGroup}>
                         {child.children.map(gc => (
                           <div

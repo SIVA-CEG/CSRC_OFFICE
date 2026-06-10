@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Departments.css";
+import Layout from '../../components/Layout';
 
 export default function Departments() {
   const [search, setSearch] = useState("");
@@ -635,6 +636,10 @@ export default function Departments() {
 });
 
   return (
+    <Layout
+      title="Departments"
+      subtitle="Manage Department Details"
+    >
     <div className="dept-page">
       <div className="dept-header">
         <div>
@@ -813,5 +818,6 @@ export default function Departments() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

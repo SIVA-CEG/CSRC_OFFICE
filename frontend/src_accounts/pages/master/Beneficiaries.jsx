@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Beneficiaries.css";
+import Layout from "../../components/Layout"
 
 export default function Beneficiaries() {
   const [search, setSearch] = useState("");
@@ -28712,6 +28713,10 @@ export default function Beneficiaries() {
   });
 
   return (
+    <Layout
+      title="Beneficiaries"
+      subtitle="Manage Beneficiary Details"
+    >
     <div className="bnf-page">
       <div className="bnf-header">
         <div>
@@ -28888,5 +28893,6 @@ export default function Beneficiaries() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

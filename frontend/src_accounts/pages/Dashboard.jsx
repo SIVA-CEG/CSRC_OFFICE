@@ -7,7 +7,7 @@ const CARDS = [
     label: 'Master',
     icon: '◈',
     description: 'Master data & configuration settings',
-    path: '/master',
+    path: '/accounts/master',
     color: '#f59e0b',
     glow: 'rgba(245,158,11,0.20)',
   },

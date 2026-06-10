@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "./Designation.css";
+import Layout from '../../components/Layout';
 
 export default function Designation() {
   const [search, setSearch] = useState("");
@@ -138,6 +139,11 @@ export default function Designation() {
   const currentRows = filteredDesignations.slice(indexOfFirstRow, indexOfLastRow);
 
   return (
+    <Layout
+      title="Designation"
+      subtitle="Manage Designations"
+    >
+
     <div className="desig-page">
       <div className="desig-header">
         <div>
@@ -279,5 +285,6 @@ export default function Designation() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

@@ -41,15 +41,15 @@ import PaymentLock from '../../src_accounts/pages/payments/PaymentLock';
 /* =======================
    MASTER IMPORTS
 ======================= */
-import MasterLayout    from '../../src_accounts/pages/master/MasterLayout';
-import Campus          from '../../src_accounts/pages/master/Campus';
-import Departments     from '../../src_accounts/pages/master/Departments';
-import Beneficiaries   from '../../src_accounts/pages/master/Beneficiaries';
-import Designation     from '../../src_accounts/pages/master/Designation';
-import Faculties       from '../../src_accounts/pages/master/Faculties';
-import UserActivation  from '../../src_accounts/pages/master/UserActivation';
-import PIRoles         from '../../src_accounts/pages/master/PIRoles';
-import Schemes         from '../../src_accounts/pages/master/Schemes';
+import AccountsMasterLayout    from '../../src_accounts/pages/master/MasterLayout';
+import AccountsCampus          from '../../src_accounts/pages/master/Campus';
+import AccountsDepartments     from '../../src_accounts/pages/master/Departments';
+import AccountsBeneficiaries   from '../../src_accounts/pages/master/Beneficiaries';
+import AccountsDesignation     from '../../src_accounts/pages/master/Designation';
+import AccountsFaculties       from '../../src_accounts/pages/master/Faculties';
+import AccountsUserActivation  from '../../src_accounts/pages/master/UserActivation';
+import AccountsPIRoles         from '../../src_accounts/pages/master/PIRoles';
+import AccountsSchemes         from '../../src_accounts/pages/master/Schemes';
 
 
 
