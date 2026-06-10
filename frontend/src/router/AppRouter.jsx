@@ -23,6 +23,7 @@ import CompletedTapal   from '../../src_tapal/pages/CompletedTapal';
 import TapalSearch      from '../../src_tapal/pages/TapalSearch';
 
 
+
 /* =======================
    MASTER IMPORTS
 ======================= */
@@ -65,6 +66,51 @@ import TSAClaims           from '../pages/projects/TSAHOfficePage';
 import CMRGClaims          from '../pages/projects/CMRGOfficePage';
 import SearchProjects      from '../pages/projects/Search';
 import Reports             from '../pages/projects/Reports';
+
+
+
+/* =======================
+   ACCOUNTS IMPORTS
+======================= */
+
+import AccountsLogin from '../pages/AccountsLogin';
+import AccountsDashboard from '../../src_accounts/pages/Dashboard';
+import Master from '../../src_accounts/pages/Master';
+import Budget from '../../src_accounts/pages/Budget';
+import Banking from '../../src_accounts/pages/banking/Banking';
+import Bank from '../../src_accounts/pages/banking/bank/Bank';
+import NewEntry from '../../src_accounts/pages/banking/bank/NewEntry';
+import OriginalStatements from '../../src_accounts/pages/banking/bank/OriginalStatements';
+import CurrentStatements from '../../src_accounts/pages/banking/bank/CurrentStatements';
+import FundTransfer from '../../src_accounts/pages/banking/fundtransfer/FundTransfer';
+import RevenueAccount from '../../src_accounts/pages/banking/fundtransfer/RevenueAccount';
+import ProjectAccount from '../../src_accounts/pages/banking/fundtransfer/ProjectAccount';
+import MOPRAccount from '../../src_accounts/pages/banking/fundtransfer/MOPRAccount';
+import TTDFAccount from '../../src_accounts/pages/banking/fundtransfer/TTDFAccount';
+import ConsultancyAccount from '../../src_accounts/pages/banking/fundtransfer/ConsultancyAccount';
+import TECAccount from '../../src_accounts/pages/banking/fundtransfer/TECAccount';
+import TAXAccount from '../../src_accounts/pages/banking/fundtransfer/TAXAccount';
+import Receipts from '../../src_accounts/pages/receipts/Receipts';
+import ProjectAcR from '../../src_accounts/pages/receipts/ProjectAc';
+import MoPRAc from '../../src_accounts/pages/receipts/MoPRAc';
+import TTDFAcR from '../../src_accounts/pages/receipts/TTDFAc';
+import RevenueAcR from '../../src_accounts/pages/receipts/RevenueAc';
+import TaxAcR from '../../src_accounts/pages/receipts/TaxAc';
+import ReceiptLock from '../../src_accounts/pages/receipts/ReceiptLock';
+import Payments from '../../src_accounts/pages/payments/Payments';
+import RevenueAcP from '../../src_accounts/pages/payments/RevenueAc';
+import ProjectAcP from '../../src_accounts/pages/payments/ProjectAc';
+import MOPRAcP from '../../src_accounts/pages/payments/MOPRAc';
+import TTDFAcP from '../../src_accounts/pages/payments/TTDFAc';
+import TaxAcP from '../../src_accounts/pages/payments/TaxAc';
+import UnspentAmount from '../../src_accounts/pages/payments/UnspentAmount';
+import AdvSettlement from '../../src_accounts/pages/payments/AdvSettlement';
+import BankClearance from '../../src_accounts/pages/payments/BankClearance';
+import VoucherClearance from '../../src_accounts/pages/payments/VoucherClearance';
+import PaymentTypes from '../../src_accounts/pages/payments/PaymentTypes';
+import SubheadTypes from '../../src_accounts/pages/payments/SubheadTypes';
+import PaymentLock from '../../src_accounts/pages/payments/PaymentLock';
+
 
 
 export default function AppRouter() {
@@ -145,6 +191,58 @@ export default function AppRouter() {
         <Route path="/dst-inspire"         element={<UnderConstruction module="DST INSPIRE" />} />
         <Route path="/dst-inspire-faculty" element={<UnderConstruction module="DST INSPIRE Faculty" />} />
         <Route path="/women-scientist"     element={<UnderConstruction module="Women Scientist" />} />
+
+
+        {/* ── ACCOUNTS ── */}
+
+<Route path="/accounts-login" element={<AccountsLogin />} />
+
+<Route path="/accounts" element={<AccountsDashboard />} />
+
+<Route path="/accounts/master" element={<Master />} />
+<Route path="/accounts/budget" element={<Budget />} />
+
+{/* Banking */}
+<Route path="/accounts/banking" element={<Banking />} />
+<Route path="/accounts/banking/bank" element={<Bank />} />
+<Route path="/accounts/banking/bank/new-entry" element={<NewEntry />} />
+<Route path="/accounts/banking/bank/original-statements" element={<OriginalStatements />} />
+<Route path="/accounts/banking/bank/current-statements" element={<CurrentStatements />} />
+
+<Route path="/accounts/banking/fund-transfer" element={<FundTransfer />} />
+<Route path="/accounts/banking/fund-transfer/revenue-account" element={<RevenueAccount />} />
+<Route path="/accounts/banking/fund-transfer/project-account" element={<ProjectAccount />} />
+<Route path="/accounts/banking/fund-transfer/mopr-account" element={<MOPRAccount />} />
+<Route path="/accounts/banking/fund-transfer/ttdf-account" element={<TTDFAccount />} />
+<Route path="/accounts/banking/fund-transfer/consultancy-account" element={<ConsultancyAccount />} />
+<Route path="/accounts/banking/fund-transfer/tec-account" element={<TECAccount />} />
+<Route path="/accounts/banking/fund-transfer/tax-account" element={<TAXAccount />} />
+
+{/* Receipts */}
+<Route path="/accounts/receipts" element={<Receipts />} />
+<Route path="/accounts/receipts/project-account" element={<ProjectAcR />} />
+<Route path="/accounts/receipts/mopr-account" element={<MoPRAc />} />
+<Route path="/accounts/receipts/ttdf-account" element={<TTDFAcR />} />
+<Route path="/accounts/receipts/revenue-account" element={<RevenueAcR />} />
+<Route path="/accounts/receipts/tax-account" element={<TaxAcR />} />
+<Route path="/accounts/receipts/receipt-lock" element={<ReceiptLock />} />
+
+{/* Payments */}
+<Route path="/accounts/payments" element={<Payments />} />
+<Route path="/accounts/payments/revenue-account" element={<RevenueAcP />} />
+<Route path="/accounts/payments/project-account" element={<ProjectAcP />} />
+<Route path="/accounts/payments/mopr-account" element={<MOPRAcP />} />
+<Route path="/accounts/payments/ttdf-account" element={<TTDFAcP />} />
+<Route path="/accounts/payments/tax-account" element={<TaxAcP />} />
+<Route path="/accounts/payments/unspent-amount" element={<UnspentAmount />} />
+<Route path="/accounts/payments/advance-settlement" element={<AdvSettlement />} />
+<Route path="/accounts/payments/bank-clearance" element={<BankClearance />} />
+<Route path="/accounts/payments/voucher-clearance" element={<VoucherClearance />} />
+<Route path="/accounts/payments/payment-types" element={<PaymentTypes />} />
+<Route path="/accounts/payments/subhead-types" element={<SubheadTypes />} />
+<Route path="/accounts/payments/payment-lock" element={<PaymentLock />} />
+
+
 
         <Route path="*" element={<Navigate to="/" replace />} />
 

@@ -27,14 +27,14 @@ const modules = [
     route: '/proceedings-login',
     wip: false,
   },
-  {
-    id: 'accounts',
-    title: 'ACCOUNTS LOGIN',
-    icon: '🏦',
-    desc: 'Financial & Accounts Management',
-    route: null,
-    wip: true,
-  },
+{
+  id: 'accounts',
+  title: 'ACCOUNTS LOGIN',
+  icon: '🏦',
+  desc: 'Financial & Accounts Management',
+  route: '/accounts-login',   // ← was null
+  wip: false,
+},
 ];
 
 export default function LoginHub() {
