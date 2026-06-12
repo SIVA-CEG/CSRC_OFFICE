@@ -55,7 +55,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  overflow: hidden;
+  overflow: visible;
   background: rgba(255,255,255,0.75);
   backdrop-filter: blur(15px);
   border-radius: 18px;
@@ -90,6 +90,7 @@
 =========================== */
 
 .sanctioned-table td {
+  
   padding: 16px;
   font-size: 14px;
   border-bottom: 1px solid rgba(0,0,0,0.06);
@@ -504,4 +505,208 @@
 
 .detail-page{
   padding:25px;
+}
+
+
+/* =====================================================
+   NEW PROJECT FLOW STYLES (Assistant/Superintendent/Director)
+===================================================== */
+
+/* Top Navigation */
+
+.fs-top-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.fs-btn-back {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #1e3a8a;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.fs-btn-back:hover {
+  background: #2563eb;
+}
+
+.fs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.fs-role-chip {
+  padding: 8px 16px;
+  border-radius: 30px;
+  background: linear-gradient(135deg,#2563eb,#1e40af);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Search */
+
+.fs-search-bar {
+  margin-bottom: 20px;
+}
+
+.fs-search-inner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.fs-search-inner input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+}
+
+.fs-search-clear {
+  border: none;
+  background: #ef4444;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* Stage Badge */
+
+.fs-stage-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 30px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Transfer Cell */
+
+.fs-transfer-cell {
+  position: relative;
+  overflow: visible;
+}
+.fs-transfer-btn {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    #7c3aed,
+    #5b21b6
+  );
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.fs-transfer-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Transfer Popup */
+.fs-transfer-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 280px;
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  z-index: 9999;
+  box-shadow: 0 12px 30px rgba(0,0,0,.15);
+}
+
+.fs-transfer-confirm {
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.fs-transfer-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 12px;
+}
+
+.fs-transfer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.fs-transfer-ok {
+  flex: 1;
+  border: none;
+  background: #10b981;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.fs-transfer-cancel {
+  flex: 1;
+  border: none;
+  background: #ef4444;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* History */
+
+.fs-history-section {
+  margin-top: 25px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+}
+
+.fs-history-item {
+  background: #f8fafc;
+  border-left: 4px solid #2563eb;
+  padding: 12px 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.fs-history-item strong {
+  color: #1e3a8a;
+}
+
+/* Status Colors */
+
+.fs-status-pending {
+  color: #d97706;
+  font-weight: 700;
+}
+
+.fs-status-transferred {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.fs-status-completed {
+  color: #10b981;
+  font-weight: 700;
 }

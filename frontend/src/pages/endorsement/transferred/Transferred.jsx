@@ -451,7 +451,7 @@ export default function Transferred() {
 
   const pageTitle    = userRole === "superintendent" ? "Transferred to Me" : "Transferred Endorsements";
   const pageSubtitle = userRole === "superintendent"
-    ? "Proposals forwarded by the Assistant — verify details, upload your signature & forward to Director"
+    ? "Proposals transferred by you — verified details, uploaded your signature & forwarded to Director"
     : "Proposals you have forwarded — track their current stage and endorsement progress";
 
   // Keep selected in sync with latest data from context

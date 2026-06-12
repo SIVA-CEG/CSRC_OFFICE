@@ -941,3 +941,155 @@
   background: #981f1f;
   box-shadow: 0 8px 20px rgba(181,42,42,0.32);
 }
+
+/* =====================================================
+   PROJECT CONTEXT ROLE / TRANSFER FLOW
+===================================================== */
+
+.oex-role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    var(--teal),
+    var(--teal-lit)
+  );
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  box-shadow: 0 8px 20px rgba(26,107,94,.18);
+}
+
+.oex-stage-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--blue-bg);
+  color: var(--blue);
+  border: 1px solid var(--blue-rule);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Transfer */
+
+.oex-transfer-cell {
+  position: relative;
+  overflow: visible;
+}
+
+.oex-transfer-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 9px 15px;
+  background: linear-gradient(
+    135deg,
+    #7c3aed,
+    #5b21b6
+  );
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .25s ease;
+}
+
+.oex-transfer-btn:hover {
+  transform: translateY(-2px);
+}
+
+.oex-transfer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,17,24,.45);
+  backdrop-filter: blur(3px);
+  z-index: 99998;
+}
+
+.oex-transfer-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 360px;
+  max-width: 95vw;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  z-index: 99999;
+  box-shadow: 0 25px 60px rgba(0,0,0,.25);
+}
+
+.oex-transfer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.oex-transfer-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.oex-transfer-select:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+
+.oex-transfer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.oex-transfer-ok {
+  flex: 1;
+  border: none;
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--green);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.oex-transfer-cancel {
+  flex: 1;
+  border: none;
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--red);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Transfer History */
+
+.oex-history-transfer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+
+.oex-history-transfer-item {
+  background: var(--paper-warm);
+  border-left: 4px solid var(--teal);
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.oex-history-transfer-item strong {
+  color: var(--teal);
+}

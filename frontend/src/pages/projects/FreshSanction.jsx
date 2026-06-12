@@ -1,657 +1,481 @@
-import React, { useState } from 'react';
-import './FreshSanction.css'; // Assuming you use the same styles
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useProjectContext, PROJECT_STAFF } from './ProjectContext';
+import './FreshSanction.css';
 
-const initialRequests = [
-  {
-    id: 1,
-    refNo: 'CRG/2026/001',
-    title: 'Advanced Material Science',
-    cost: '50,00,000',
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const userRole = () => localStorage.getItem('userRole') || 'assistant';
+const userName = () => localStorage.getItem('userName') || 'Office';
 
-    fundingAgency: 'SERB',
+// ── Transfer Cell (mirrors endorsement pattern) ───────────────────────────────
+function TransferCell({ item, onTransfer }) {
+  const role = userRole();
+  const [open, setOpen]         = useState(false);
+  const [selectedId, setSelectedId] = useState('');
+  const [confirming, setConfirming] = useState(false);
 
-    pi: {
-      name: 'Dr. A. Kumar',
-      department: 'Mechanical Engineering',
-      campus: 'CEG Campus'
-    },
+  const eligible = role === 'superintendent'
+    ? PROJECT_STAFF.filter(s => s.role === 'director')
+    : PROJECT_STAFF.filter(s => s.role === 'superintendent');
 
-    period: '01-01-2026 to 31-12-2028',
-
-    installments: [
-      {
-        installmentNo: '1st Installment',
-        amount: '20,00,000'
-      }
-    ]
-  },
-
-  {
-    id: 2,
-    refNo: 'DST/2026/005',
-    title: 'AI in Healthcare',
-    cost: '25,00,000',
-
-    fundingAgency: 'DST',
-
-    pi: {
-      name: 'Dr. B. Singh',
-      department: 'Information Technology',
-      campus: 'MIT Campus'
-    },
-
-    period: '01-02-2026 to 31-01-2029',
-
-    installments: [
-      {
-        installmentNo: '1st Installment',
-        amount: '10,00,000'
-      }
-    ]
-  }
-];
-
-export default function FreshSanction() {
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'history'
-  const [requests, setRequests] = useState(initialRequests);
-  const [history, setHistory] = useState([]);
-  const [assignments, setAssignments] = useState({});
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [page, setPage] = useState('list');
-  const [editProject, setEditProject] = useState(null);
-  const [assignmentCodes, setAssignmentCodes] = useState({});
-
-  const openView = (item) => {
-    setSelectedProject(item);
-    setPage('view');
+  const handleOk = () => {
+    const staff = PROJECT_STAFF.find(s => s.id === parseInt(selectedId));
+    if (!staff) return;
+    onTransfer(item, staff);
+    setOpen(false);
+    setSelectedId('');
+    setConfirming(false);
   };
 
-
-  const handleEdit = (item) => {
-  setEditProject(JSON.parse(JSON.stringify(item)));
-  setPage('edit');
-};
-  const handleApprove = (id) => {
-  const item = requests.find(r => r.id === id);
-
-  setHistory([
-    ...history,
-    {
-      ...item,
-      assignedTo: assignments[id] || 'N/A',
-      assignmentCode: assignmentCodes[id] || '',
-      approvedDate: new Date().toLocaleDateString()
-    }
-  ]);
-
-  setRequests(requests.filter(r => r.id !== id));
-};
-
-  const renderActions = (item) => (
-    <>
-      <button className="btn-view" onClick={() => openView(item)}>View</button>
-      {activeTab === 'pending' && (
-        <>
-          <button
-  className="btn-edit"
-  onClick={() => handleEdit(item)}
->
-  Edit
-</button>
-          <button className="btn-approve" onClick={() => handleApprove(item.id)}>Approve</button>
-        </>
+  return (
+    <div className="fs-transfer-cell">
+      {!open ? (
+        <button className="fs-transfer-btn" onClick={() => setOpen(true)}>
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+          </svg>
+          Transfer
+        </button>
+      ) : (
+        <div className="fs-transfer-popup">
+          <select
+            className="fs-transfer-select"
+            value={selectedId}
+            onChange={e => setSelectedId(e.target.value)}
+          >
+            <option value="">-- Select Staff --</option>
+            {eligible.map(s => (
+              <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
+            ))}
+          </select>
+          <div className="fs-transfer-actions">
+            <button className="fs-transfer-ok"
+              onClick={() => { if (selectedId) setConfirming(true); }}
+              disabled={!selectedId}>OK</button>
+            <button className="fs-transfer-cancel"
+              onClick={() => { setOpen(false); setSelectedId(''); }}>✕</button>
+          </div>
+          {confirming && (
+            <div className="fs-transfer-confirm">
+              <span>Transfer to <b>{PROJECT_STAFF.find(s => s.id === parseInt(selectedId))?.name}</b>?</span>
+              <button className="fs-transfer-ok" onClick={handleOk}>Confirm</button>
+              <button className="fs-transfer-cancel" onClick={() => setConfirming(false)}>Back</button>
+            </div>
+          )}
+        </div>
       )}
-    </>
+    </div>
   );
+}
 
-  if (page === 'edit' && editProject) {
+// ── Edit Form ─────────────────────────────────────────────────────────────────
+function EditForm({ item, onSave, onCancel }) {
+  const [draft, setDraft] = useState(JSON.parse(JSON.stringify(item)));
+
   return (
     <div className="detail-page">
-
-      <button
-        className="back-btn"
-        onClick={() => {
-          setPage('list');
-          setEditProject(null);
-        }}
-      >
-        ← Back
-      </button>
-
+      <button className="back-btn" onClick={onCancel}>← Back</button>
       <div className="detail-card">
-
-        <h2>Edit Fresh Sanction Project</h2>
-
+        <h2>Edit Fresh Sanction</h2>
         <div className="detail-grid">
-
           <div>
             <label>Reference No</label>
-            <input
-              className="edit-input"
-              value={editProject.refNo}
-              onChange={(e) =>
-                setEditProject({
-                  ...editProject,
-                  refNo: e.target.value
-                })
-              }
-            />
+            <input className="edit-input" value={draft.refNo}
+              onChange={e => setDraft({ ...draft, refNo: e.target.value })} />
           </div>
-
           <div>
             <label>Funding Agency</label>
-            <select
-  className="edit-input"
-  value={editProject.fundingAgency}
-  onChange={(e) =>
-    setEditProject({
-      ...editProject,
-      fundingAgency: e.target.value
-    })
-  }
->
-  <option value="SERB">SERB</option>
-  <option value="DST">DST</option>
-  <option value="DRDO">DRDO</option>
-  <option value="ISRO">ISRO</option>
-  <option value="ICMR">ICMR</option>
-  <option value="CSIR">CSIR</option>
-</select>
+            <select className="edit-input" value={draft.fundingAgency}
+              onChange={e => setDraft({ ...draft, fundingAgency: e.target.value })}>
+              {['SERB','DST','DRDO','ISRO','ICMR','CSIR','MeitY','DBT','MNRE'].map(a =>
+                <option key={a}>{a}</option>)}
+            </select>
           </div>
-
           <div>
             <label>Project Title</label>
-            <input
-              className="edit-input"
-              value={editProject.title}
-              onChange={(e) =>
-                setEditProject({
-                  ...editProject,
-                  title: e.target.value
-                })
-              }
-            />
+            <input className="edit-input" value={draft.title}
+              onChange={e => setDraft({ ...draft, title: e.target.value })} />
           </div>
-
           <div>
-            <label>Total Cost</label>
-            <input
-              className="edit-input"
-              value={editProject.cost}
-              onChange={(e) =>
-                setEditProject({
-                  ...editProject,
-                  cost: e.target.value
-                })
-              }
-            />
+            <label>Total Cost (₹)</label>
+            <input className="edit-input" value={draft.cost}
+              onChange={e => setDraft({ ...draft, cost: e.target.value })} />
           </div>
-
-  <div>
-  <label>From Date</label>
-
-  <input
-    type="date"
-    className="edit-input"
-    value={editProject.fromDate || ""}
-    onChange={(e) =>
-      setEditProject({
-        ...editProject,
-        fromDate: e.target.value
-      })
-    }
-  />
-</div>
-
-<div>
-  <label>To Date</label>
-
-  <input
-    type="date"
-    className="edit-input"
-    value={editProject.toDate || ""}
-    onChange={(e) =>
-      setEditProject({
-        ...editProject,
-        toDate: e.target.value
-      })
-    }
-  />
-</div>
-
-        </div>
-
-        <h3>Principal Investigator</h3>
-
-        <div className="detail-grid">
-
           <div>
-            <label>Name</label>
-            <input
-              className="edit-input"
-              value={editProject.pi.name}
-              onChange={(e) =>
-                setEditProject({
-                  ...editProject,
-                  pi: {
-                    ...editProject.pi,
-                    name: e.target.value
-                  }
-                })
-              }
-            />
+            <label>PI Name</label>
+            <input className="edit-input" value={draft.pi.name}
+              onChange={e => setDraft({ ...draft, pi: { ...draft.pi, name: e.target.value } })} />
           </div>
-
           <div>
             <label>Department</label>
-            <select
-  className="edit-input"
-  value={editProject.pi.department}
-  onChange={(e) =>
-    setEditProject({
-      ...editProject,
-      pi: {
-        ...editProject.pi,
-        department: e.target.value
-      }
-    })
-  }
->
-  <option>Information Technology</option>
-  <option>Computer Science Engineering</option>
-  <option>Mechanical Engineering</option>
-  <option>Civil Engineering</option>
-  <option>ECE</option>
-  <option>EEE</option>
-  <option>Biomedical Engineering</option>
-</select>
+            <input className="edit-input" value={draft.pi.department}
+              onChange={e => setDraft({ ...draft, pi: { ...draft.pi, department: e.target.value } })} />
           </div>
-
           <div>
             <label>Campus</label>
-            <select
-  className="edit-input"
-  value={editProject.pi.campus}
-  onChange={(e) =>
-    setEditProject({
-      ...editProject,
-      pi: {
-        ...editProject.pi,
-        campus: e.target.value
-      }
-    })
-  }
->
-  <option>CEG Campus</option>
-  <option>MIT Campus</option>
-  <option>ACT Campus</option>
-  <option>SAP Campus</option>
-</select>
+            <select className="edit-input" value={draft.pi.campus}
+              onChange={e => setDraft({ ...draft, pi: { ...draft.pi, campus: e.target.value } })}>
+              {['CEG Campus','MIT Campus','ACT Campus','SAP Campus'].map(c =>
+                <option key={c}>{c}</option>)}
+            </select>
           </div>
-
+          <div>
+            <label>Project Period</label>
+            <input className="edit-input" value={draft.period}
+              onChange={e => setDraft({ ...draft, period: e.target.value })} />
+          </div>
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            marginTop: "25px"
-          }}
-        >
-
-          <button
-            className="btn-approve"
-            onClick={() => {
-
-              setRequests(
-                requests.map((req) =>
-                  req.id === editProject.id
-                    ? editProject
-                    : req
-                )
-              );
-
-              setPage("list");
-              setEditProject(null);
-            }}
-          >
-            Save Changes
-          </button>
-
-          <button
-            className="btn-edit"
-            onClick={() => {
-              setPage("list");
-              setEditProject(null);
-            }}
-          >
-            Cancel
-          </button>
-
+        <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          <button className="btn-approve" onClick={() => onSave(draft)}>💾 Save Changes</button>
+          <button className="btn-edit" onClick={onCancel}>Cancel</button>
         </div>
-
       </div>
-
     </div>
   );
 }
 
-if (page === 'view' && selectedProject) {
+// ── View Page ─────────────────────────────────────────────────────────────────
+function ViewPage({ item, onBack }) {
   return (
     <div className="detail-page">
-
-      <button
-        className="back-btn"
-        onClick={() => {
-          setPage('list');
-          setSelectedProject(null);
-        }}
-      >
-        ← Back
-      </button>
-
+      <button className="back-btn" onClick={onBack}>← Back</button>
       <div className="detail-card">
-
-        <h2>{selectedProject.title}</h2>
-
+        <h2>{item.title}</h2>
         <div className="detail-grid">
-
-          <div>
-            <span>Reference No</span>
-            <strong>{selectedProject.refNo}</strong>
-          </div>
-
-          <div>
-            <span>Funding Agency</span>
-            <strong>{selectedProject.fundingAgency}</strong>
-          </div>
-
-          <div>
-            <span>Total Cost</span>
-            <strong>₹ {selectedProject.cost}</strong>
-          </div>
-
-          <div>
-            <span>Project Period</span>
-            <strong>{selectedProject.period}</strong>
-          </div>
-
+          <div><span>Reference No</span><strong>{item.refNo}</strong></div>
+          <div><span>Funding Agency</span><strong>{item.fundingAgency}</strong></div>
+          <div><span>Total Cost</span><strong>₹ {item.cost}</strong></div>
+          <div><span>Project Period</span><strong>{item.period}</strong></div>
         </div>
-
         <h3>Principal Investigator</h3>
-
         <div className="detail-grid">
-
-          <div>
-            <span>Name</span>
-            <strong>{selectedProject.pi.name}</strong>
-          </div>
-
-          <div>
-            <span>Department</span>
-            <strong>{selectedProject.pi.department}</strong>
-          </div>
-
-          <div>
-            <span>Campus</span>
-            <strong>{selectedProject.pi.campus}</strong>
-          </div>
-
+          <div><span>Name</span><strong>{item.pi.name}</strong></div>
+          <div><span>Department</span><strong>{item.pi.department}</strong></div>
+          <div><span>Campus</span><strong>{item.pi.campus}</strong></div>
         </div>
-
-        {/* HEADWISE SPLIT */}
-
-<div className="sanctioned-inst-card">
-
-  <div className="sanctioned-inst-header">
-    <h3>Head Wise Budget Split</h3>
-  </div>
-
-  <div className="table-scroll-wrap">
-
-    <table className="sanctioned-table sanctioned-detail-table">
-
-      <thead>
-        <tr>
-          <th>Sl.No</th>
-          <th>Head</th>
-          <th>Amount (₹)</th>
-        </tr>
-      </thead>
-
-      <tbody>
-
-        <tr className="detail-group-row">
-          <td>A</td>
-          <td>Non Recurring Heads</td>
-          <td></td>
-        </tr>
-
-        <tr>
-          <td>1</td>
-          <td>Equipment</td>
-          <td>20,00,000</td>
-        </tr>
-
-        <tr className="detail-group-row">
-          <td>B</td>
-          <td>Recurring Heads</td>
-          <td></td>
-        </tr>
-
-        <tr>
-          <td>1</td>
-          <td>Manpower</td>
-          <td>10,00,000</td>
-        </tr>
-
-        <tr>
-          <td>2</td>
-          <td>Consumables & Accessories</td>
-          <td>4,00,000</td>
-        </tr>
-
-        <tr>
-          <td>3</td>
-          <td>Travel</td>
-          <td>2,00,000</td>
-        </tr>
-
-        <tr>
-          <td>4</td>
-          <td>Contingency</td>
-          <td>1,00,000</td>
-        </tr>
-
-        <tr className="detail-group-row">
-          <td>C</td>
-          <td>Overhead</td>
-          <td>10,00,000</td>
-        </tr>
-
-        <tr>
-          <td>5</td>
-          <td>Registrar A/C (5%)</td>
-          <td>3,33,333</td>
-        </tr>
-
-        <tr>
-          <td>6</td>
-          <td>Dean Campus A/C (4%)</td>
-          <td>2,66,667</td>
-        </tr>
-
-        <tr>
-          <td>7</td>
-          <td>CSRC Revenue (4%)</td>
-          <td>2,66,667</td>
-        </tr>
-
-        <tr>
-          <td>8</td>
-          <td>PI PDF (2%)</td>
-          <td>1,33,333</td>
-        </tr>
-
-        <tr className="detail-group-row">
-          <td>D</td>
-          <td>SSR Budget</td>
-          <td>3,00,000</td>
-        </tr>
-
-        <tr className="detail-total-row">
-          <td colSpan="2">
-            Total Project Cost
-          </td>
-          <td>
-            {selectedProject.cost}
-          </td>
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-</div>
-
-<div className="sanctioned-inst-card">
-
-  <div className="sanctioned-inst-header">
-    <h3>Installment Wise Sanction</h3>
-  </div>
-
-  <table className="sanctioned-table sanctioned-detail-table">
-
-    <thead>
-      <tr>
-        <th>Installment</th>
-        <th>Amount (₹)</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-
-    <tbody>
-
-      {selectedProject.installments.map((inst,index)=>(
-        <tr key={index}>
-          <td>{inst.installmentNo}</td>
-          <td>{inst.amount}</td>
-          <td>
-            <span className="pending-badge">
-              Pending Release
-            </span>
-          </td>
-        </tr>
-      ))}
-
-    </tbody>
-
-  </table>
-
-</div>
-
+        {item.assignedAccount && (
+          <div className="fs-account-badge">
+            Account: <strong>{item.assignedAccount}</strong>
+            {item.accountCode && <> &nbsp;| Code: <strong>{item.accountCode}</strong></>}
+          </div>
+        )}
+        <div className="sanctioned-inst-card">
+          <div className="sanctioned-inst-header"><h3>Installment Wise Sanction</h3></div>
+          <table className="sanctioned-table sanctioned-detail-table">
+            <thead><tr><th>Installment</th><th>Amount (₹)</th><th>Status</th></tr></thead>
+            <tbody>
+              {item.installments.map((inst, i) => (
+                <tr key={i}>
+                  <td>{inst.installmentNo}</td>
+                  <td>{inst.amount}</td>
+                  <td><span className="pending-badge">Pending Release</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {item.transferHistory?.length > 0 && (
+          <div className="fs-history-section">
+            <h3>Transfer History</h3>
+            {item.transferHistory.map((h, i) => (
+              <div key={i} className="fs-history-item">
+                <span className="fs-history-date">{h.date}</span>
+                <span className="fs-history-arrow">→</span>
+                <span className="fs-history-to">{h.to?.name || h.to}</span>
+                <span className={`fs-role-badge fs-role-${h.to?.role}`}>{h.to?.role}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
     </div>
   );
 }
 
+// ── Stage Badge ───────────────────────────────────────────────────────────────
+function StageBadge({ role }) {
+  const map = {
+    superintendent: { label: 'With Superintendent', cls: 'fs-stage-supdt' },
+    director:       { label: 'With Director',       cls: 'fs-stage-dir'   },
+    assistant:      { label: 'With Assistant',      cls: 'fs-stage-asst'  },
+  };
+  const { label, cls } = map[role] || { label: 'Pending', cls: 'fs-stage-asst' };
+  return <span className={`fs-stage-badge ${cls}`}>{label}</span>;
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+export default function FreshSanction() {
+  const navigate  = useNavigate();
+  const role      = userRole();
+  const [mounted, setMounted] = useState(false);
+
+  const {
+    freshActive,   setFreshActive,
+    freshTransferred,
+    freshCompleted,
+    fresh_transfer,
+    fresh_complete,
+    fresh_updateTransferred,
+    fresh_forwardToDirector,
+  } = useProjectContext();
+
+  const [page, setPage]                   = useState('list');
+  const [selectedItem, setSelectedItem]   = useState(null);
+  const [editItem, setEditItem]           = useState(null);
+  const [search, setSearch]               = useState('');
+  const [activeTab, setActiveTab]         = useState('active'); // active | transferred | completed
+  const [assignments, setAssignments]     = useState({});
+  const [assignmentCodes, setAssignmentCodes] = useState({});
+
+  useEffect(() => { setTimeout(() => setMounted(true), 50); }, []);
+
+  // ── Data source by role and tab ────────────────────────────────────────────
+  const myTransferred = useMemo(() =>
+    freshTransferred.filter(i =>
+      role === 'superintendent' ? i.currentHolder?.role === 'superintendent' :
+      role === 'director'       ? i.currentHolder?.role === 'director'       :
+      true
+    ), [freshTransferred, role]);
+
+  const activeSource =
+    activeTab === 'active'      ? (role === 'assistant' ? freshActive : myTransferred) :
+    activeTab === 'transferred' ? freshTransferred :
+    freshCompleted;
+
+  // Search filter
+  const filtered = useMemo(() => {
+    const s = search.toLowerCase();
+    if (!s) return activeSource;
+    return activeSource.filter(i =>
+      i.title?.toLowerCase().includes(s) ||
+      i.refNo?.toLowerCase().includes(s) ||
+      i.fundingAgency?.toLowerCase().includes(s) ||
+      i.pi?.name?.toLowerCase().includes(s)
+    );
+  }, [activeSource, search]);
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const handleTransfer = (item, toStaff) => {
+    const withAccount = {
+      ...item,
+      assignedAccount: assignments[item.id] || item.assignedAccount || '',
+      accountCode:     assignmentCodes[item.id] || item.accountCode || '',
+    };
+    fresh_transfer(withAccount, toStaff);
+  };
+
+  const handleForwardToDirector = (item, toStaff) => {
+    fresh_forwardToDirector(item, toStaff);
+  };
+
+  const handleComplete = (item) => {
+    fresh_complete(item);
+  };
+
+  const handleSaveEdit = (updated) => {
+    if (role === 'assistant') {
+      setFreshActive(prev => prev.map(i => i.id === updated.id ? updated : i));
+    } else {
+      fresh_updateTransferred(updated);
+    }
+    setPage('list');
+    setEditItem(null);
+  };
+
+  // ── Render sub-pages ───────────────────────────────────────────────────────
+  if (page === 'view' && selectedItem) {
+    return <ViewPage item={selectedItem} onBack={() => { setPage('list'); setSelectedItem(null); }} />;
+  }
+  if (page === 'edit' && editItem) {
+    return <EditForm item={editItem}
+      onSave={handleSaveEdit}
+      onCancel={() => { setPage('list'); setEditItem(null); }} />;
+  }
+
+  // ── Tab labels ─────────────────────────────────────────────────────────────
+  const tabs =
+    role === 'assistant'
+      ? [
+          { key: 'active',      label: `New Requests (${freshActive.length})` },
+          { key: 'transferred', label: `Transferred (${freshTransferred.length})` },
+          { key: 'completed',   label: `Completed (${freshCompleted.length})` },
+        ]
+      : role === 'superintendent'
+      ? [
+          { key: 'active',      label: `In My Queue (${myTransferred.length})` },
+          { key: 'transferred', label: `All Transferred (${freshTransferred.length})` },
+          { key: 'completed',   label: `Completed (${freshCompleted.length})` },
+        ]
+      : [
+          { key: 'active',      label: `Awaiting Approval (${myTransferred.length})` },
+          { key: 'completed',   label: `Completed (${freshCompleted.length})` },
+        ];
+
   return (
-    <div className="project-dashboard">
-      <div className="tab-switcher">
-        <button className={activeTab === 'pending' ? 'active' : ''} onClick={() => setActiveTab('pending')}>Pending Requests</button>
-        <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>History</button>
+    <div className={`project-dashboard ${mounted ? 'fs-loaded' : ''}`}>
+      {/* Top Nav */}
+      <div className="fs-top-nav">
+        <button className="fs-btn-back" onClick={() => navigate('/projects/dashboard')}>
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Back to Dashboard
+        </button>
+        <div className="fs-nav-right">
+          <span className={`fs-role-chip fs-role-${role}`}>
+            {role === 'assistant' ? '🟢' : role === 'superintendent' ? '🔵' : '🔴'} {role}
+          </span>
+        </div>
       </div>
 
+      {/* Header */}
+      <div className="fs-header">
+        <h1 className="fs-header-title">Fresh Sanctions</h1>
+        <p className="fs-header-sub">First installment sanction requests — review, assign account, and transfer</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="tab-switcher">
+        {tabs.map(t => (
+          <button
+            key={t.key}
+            className={activeTab === t.key ? 'active' : ''}
+            onClick={() => setActiveTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="fs-search-bar">
+        <div className="fs-search-inner">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by title, ref no, agency, PI name..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && <button className="fs-search-clear" onClick={() => setSearch('')}>✕</button>}
+        </div>
+      </div>
+
+      {/* Table */}
       <table className="sanctioned-table">
         <thead>
           <tr>
             <th>Sl.No</th>
             <th>Ref No</th>
             <th>Project Title</th>
-            <th>Total Cost (₹)</th>
-            <th>Assignment</th>
-            <th>Action</th>
+            <th>PI</th>
+            <th>Agency</th>
+            <th>Cost (₹)</th>
+            {/* Assistant-only: account assignment */}
+            {role === 'assistant' && activeTab === 'active' && <th>Account</th>}
+            {/* Transferred tab: show stage */}
+            {(activeTab === 'transferred' || (role !== 'assistant' && activeTab === 'active')) && <th>Stage</th>}
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {(activeTab === 'pending' ? requests : history).map((item, idx) => (
+          {filtered.length === 0 && (
+            <tr>
+              <td colSpan={10} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+                {search ? `No results for "${search}"` : 'No items to display'}
+              </td>
+            </tr>
+          )}
+          {filtered.map((item, idx) => (
             <tr key={item.id}>
               <td>{idx + 1}</td>
               <td>{item.refNo}</td>
-              <td>{item.title}</td>
-              <td>{item.cost}</td>
               <td>
-                {activeTab === 'pending' ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-  <select
-    onChange={(e) =>
-      setAssignments({
-        ...assignments,
-        [item.id]: e.target.value
-      })
-    }
-    value={assignments[item.id] || ""}
-  >
-    <option value="">Select</option>
-    <option value="ZBA">ZBA</option>
-    <option value="TSA(H)">TSA(H)</option>
-    <option value="CMRG">CMRG</option>
-  </select>
-
-  {(assignments[item.id] === "ZBA" ||
-    assignments[item.id] === "TSA(H)" ||
-    assignments[item.id] === "CMRG") && (
-    <input
-      type="text"
-      placeholder={`Enter ${assignments[item.id]} Code`}
-      value={assignmentCodes[item.id] || ""}
-      onChange={(e) =>
-        setAssignmentCodes({
-          ...assignmentCodes,
-          [item.id]: e.target.value
-        })
-      }
-      className="edit-input"
-    />
-  )}
-</div>
-                ) : (
-                  <div>
-  <strong>{item.assignedTo}</strong>
-  {item.assignmentCode && (
-    <div style={{ fontSize: "12px", color: "#666" }}>
-      Code: {item.assignmentCode}
-    </div>
-  )}
-</div>
-                )}
+                <div style={{ fontWeight: 600 }}>{item.title}</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>{item.pi?.campus}</div>
               </td>
               <td>
-                {activeTab === 'pending' ? (
-                  <>
-                    <button
-  className="btn-view"
-  onClick={() => {
-    setSelectedProject(item);
-    setPage('view');
-  }}
->
-  View
-</button>
-                    <button
-  className="btn-edit"
-  onClick={() => handleEdit(item)}
->
-  Edit
-</button>
-                    <button className="btn-approve" onClick={() => handleApprove(item.id)}>Approve</button>
-                  </>
-                ) : (
-                  <span>Approved on {item.approvedDate}</span>
-                )}
+                <div>{item.pi?.name}</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>{item.pi?.department}</div>
+              </td>
+              <td>{item.fundingAgency}</td>
+              <td>₹ {item.cost}</td>
+
+              {/* Account assignment — assistant only, active tab */}
+              {role === 'assistant' && activeTab === 'active' && (
+                <td>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <select
+                      className="edit-input"
+                      value={assignments[item.id] || item.assignedAccount || ''}
+                      onChange={e => setAssignments({ ...assignments, [item.id]: e.target.value })}
+                    >
+                      <option value="">Select</option>
+                      <option value="ZBA">ZBA</option>
+                      <option value="TSA(H)">TSA(H)</option>
+                      <option value="CMRG">CMRG</option>
+                    </select>
+                    {(assignments[item.id] || item.assignedAccount) && (
+                      <input
+                        type="text"
+                        className="edit-input"
+                        placeholder={`Enter ${assignments[item.id] || item.assignedAccount} Code`}
+                        value={assignmentCodes[item.id] || item.accountCode || ''}
+                        onChange={e => setAssignmentCodes({ ...assignmentCodes, [item.id]: e.target.value })}
+                      />
+                    )}
+                  </div>
+                </td>
+              )}
+
+              {/* Stage column */}
+              {(activeTab === 'transferred' || (role !== 'assistant' && activeTab === 'active')) && (
+                <td><StageBadge role={item.currentHolder?.role} /></td>
+              )}
+
+              {/* Actions */}
+              <td>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {/* View */}
+                  <button className="btn-view"
+                    onClick={() => { setSelectedItem(item); setPage('view'); }}>
+                    View
+                  </button>
+
+                  {/* Edit — assistant on active, superintendent/director on their queue */}
+                  {(
+                    (role === 'assistant' && activeTab === 'active') ||
+                    (role === 'superintendent' && activeTab === 'active') ||
+                    (role === 'director' && activeTab === 'active')
+                  ) && (
+                    <button className="btn-edit"
+                      onClick={() => { setEditItem(item); setPage('edit'); }}>
+                      Edit
+                    </button>
+                  )}
+
+                  {/* Transfer — assistant → superintendent */}
+                  {role === 'assistant' && activeTab === 'active' && (
+                    <TransferCell item={item} onTransfer={handleTransfer} />
+                  )}
+
+                  {/* Forward — superintendent → director */}
+                  {role === 'superintendent' && activeTab === 'active' && (
+                    <TransferCell item={item} onTransfer={handleForwardToDirector} />
+                  )}
+
+                  {/* Complete — director */}
+                  {role === 'director' && activeTab === 'active' && (
+                    <button className="btn-approve"
+                      onClick={() => handleComplete(item)}>
+                      ✓ Approve
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

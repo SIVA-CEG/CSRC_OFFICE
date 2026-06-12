@@ -68,6 +68,8 @@ import SearchProjects      from '../pages/projects/Search';
 import Reports             from '../pages/projects/Reports';
 
 
+import { ProjectProvider } from '../pages/projects/ProjectContext';
+
 
 /* =======================
    ACCOUNTS IMPORTS
@@ -188,7 +190,14 @@ export default function AppRouter() {
         </Route>
 
         {/* ── PROJECTS ── */}
-        <Route path="/projects" element={<MasterLayout />}>
+        <Route
+  path="/projects"
+  element={
+    <ProjectProvider>
+      <MasterLayout />
+    </ProjectProvider>
+  }
+>
           <Route index                         element={<ProjectDashboard />} />
           <Route path="fresh-sanction"         element={<FreshSanction />} />
           <Route path="renewal-sanction"       element={<RenewalSanction />} />

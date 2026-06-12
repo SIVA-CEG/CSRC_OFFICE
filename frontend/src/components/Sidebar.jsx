@@ -33,7 +33,7 @@ const endorsementItems = [
 const projectItems = [
   { label: 'Dashboard', path: '/projects', icon: '📊' },
   { label: 'Fresh Sanction', path: '/projects/fresh-sanction', icon: '✨' },
-  { label: 'Renewal Sanction', path: '/projects/renewal-sanction', icon: '🔄' },
+  { label: 'Other Sanction', path: '/projects/renewal-sanction', icon: '🔄' },
 
   {
     label: 'Project Requests',

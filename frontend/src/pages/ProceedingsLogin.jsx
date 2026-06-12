@@ -2,13 +2,43 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ProceedingsLogin.css';
 
-export default function ProceedingsLogin() {
+// ── Mock DB ───────────────────────────────────────────────────────────────────
+// Same credentials work for both Endorsements and Projects portals.
+// The portal the user came from is tracked via `portalType` state.
+const MOCK_DB = [
+  { userId: 'ast1', password: '123', role: 'assistant',     name: 'Mr. R. Senthilkumar' },
+  { userId: 'sup1', password: '123', role: 'superintendent', name: 'Mr. T. Anbarasan' },
+  { userId: 'dir1', password: '123', role: 'director',      name: 'Dr. S. Balasivanandha Prabu' },
+];
+
+// Portal config — easily extendable
+const PORTAL_CONFIG = {
+  endorsements: {
+    icon: '📋',
+    title: 'CSRC Proceedings',
+    subtitle: 'Sign in to CSRC Proceedings Portal',
+    description: 'Unified portal for research proceedings, grant management, and institutional coordination.',
+    features: ['Proceedings Management', 'Grant Tracking', 'Faculty & Staff Records'],
+    dashboardPath: '/endorsements/dashboard',
+  },
+  projects: {
+    icon: '🏗️',
+    title: 'CSRC Projects',
+    subtitle: 'Sign in to CSRC Projects Portal',
+    description: 'Manage fresh sanctions, renewal sanctions, project requests, and claims end-to-end.',
+    features: ['Fresh & Renewal Sanctions', 'Project Requests', 'ZBA / TSA(H) / CMRG Claims'],
+    dashboardPath: '/projects/dashboard',
+  },
+};
+
+export default function ProceedingsLogin({ portalType = 'endorsements' }) {
   const navigate = useNavigate();
-  // Added "role" to the form state
-  const [form, setForm] = useState({ userId: '', password: '', role: 'assistant' });
-  const [loading, setLoading] = useState(false);
+  const config   = PORTAL_CONFIG[portalType] || PORTAL_CONFIG.endorsements;
+
+  const [form,     setForm]     = useState({ userId: '', password: '' });
+  const [loading,  setLoading]  = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState('');
+  const [error,    setError]    = useState('');
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,12 +52,18 @@ export default function ProceedingsLogin() {
       return;
     }
     setLoading(true);
-    
     setTimeout(() => {
-      setLoading(false);
-      // Save the selected role to localStorage so other pages can adapt their logic
-      localStorage.setItem('userRole', form.role);
-      navigate('/endorsements/dashboard'); // Redirecting straight to the dashboard
+      const user = MOCK_DB.find(
+        u => u.userId === form.userId && u.password === form.password
+      );
+      if (user) {
+        localStorage.setItem('userRole', user.role);
+        localStorage.setItem('userName', user.name);
+        navigate(config.dashboardPath);
+      } else {
+        setLoading(false);
+        setError('Invalid User ID or Password.');
+      }
     }, 1400);
   };
 
@@ -36,7 +72,6 @@ export default function ProceedingsLogin() {
       <div className="pl-bg-left" />
       <div className="pl-bg-dots" />
 
-      {/* Back button */}
       <button className="pl-back" onClick={() => navigate('/')}>
         ← Back to Portal
       </button>
@@ -44,49 +79,24 @@ export default function ProceedingsLogin() {
       <div className="pl-card">
         {/* Left panel */}
         <div className="pl-panel-left">
-          <div className="pl-panel-icon">📋</div>
-          <h2 className="pl-panel-title">CSRC Proceedings</h2>
-          <p className="pl-panel-desc">
-            Unified portal for research proceedings, grant management, and institutional coordination.
-          </p>
+          <div className="pl-panel-icon">{config.icon}</div>
+          <h2 className="pl-panel-title">{config.title}</h2>
+          <p className="pl-panel-desc">{config.description}</p>
           <div className="pl-features">
-            <div className="pl-feature-item">✓ Proceedings Management</div>
-            <div className="pl-feature-item">✓ Grant Tracking</div>
-            <div className="pl-feature-item">✓ Faculty & Staff Records</div>
-            <div className="pl-feature-item">✓ DST INSPIRE Integration</div>
+            {config.features.map(f => (
+              <div key={f} className="pl-feature-item">✓ {f}</div>
+            ))}
           </div>
-          <div className="pl-panel-footer">CSRC Office — Secure Access</div>
         </div>
 
-        {/* Right panel */}
+        {/* Right panel — form */}
         <div className="pl-panel-right">
           <div className="pl-form-header">
-            <div className="pl-form-logo">🎓</div>
             <h1 className="pl-form-title">Welcome Back</h1>
-            <p className="pl-form-sub">Sign in to CSRC Proceedings Portal</p>
+            <p className="pl-form-sub">{config.subtitle}</p>
           </div>
 
           <form className="pl-form" onSubmit={handleSubmit} noValidate>
-            
-            {/* NEW: Role Selection */}
-            <div className="pl-field">
-              <label htmlFor="role">Login As</label>
-              <div className="pl-input-wrap">
-                <span className="pl-input-icon">🏢</span>
-                <select
-                  id="role"
-                  name="role"
-                  value={form.role}
-                  onChange={handleChange}
-                  className="pl-select"
-                >
-                  <option value="assistant">Assistant</option>
-                  <option value="superintendent">Superintendent</option>
-                  <option value="director">Director</option>
-                </select>
-              </div>
-            </div>
-
             <div className="pl-field">
               <label htmlFor="userId">User ID</label>
               <div className="pl-input-wrap">
@@ -98,7 +108,6 @@ export default function ProceedingsLogin() {
                   placeholder="Enter your User ID"
                   value={form.userId}
                   onChange={handleChange}
-                  autoComplete="username"
                 />
               </div>
             </div>
@@ -114,7 +123,6 @@ export default function ProceedingsLogin() {
                   placeholder="Enter your Password"
                   value={form.password}
                   onChange={handleChange}
-                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -129,20 +137,23 @@ export default function ProceedingsLogin() {
 
             {error && <div className="pl-error">{error}</div>}
 
-            <div className="pl-forgot">
-              <a href="#">Forgot Password?</a>
-            </div>
-
-            <button type="submit" className={`pl-btn ${loading ? 'pl-btn--loading' : ''}`} disabled={loading}>
-              {loading ? (
-                <span className="pl-spinner" />
-              ) : (
-                'Sign In →'
-              )}
+            <button
+              type="submit"
+              className={`pl-btn ${loading ? 'pl-btn--loading' : ''}`}
+              disabled={loading}
+            >
+              {loading ? <span className="pl-spinner" /> : 'Sign In →'}
             </button>
           </form>
 
-          <p className="pl-secure-note">🔐 This is a secure government portal. Unauthorized access is prohibited.</p>
+          {/* Quick-login hint for dev */}
+          <div style={{
+            marginTop: '18px', fontSize: '11px', color: '#aaa',
+            textAlign: 'center', lineHeight: 1.6,
+          }}>
+            <strong>Dev credentials:</strong><br />
+            ast1 / 123 &nbsp;|&nbsp; sup1 / 123 &nbsp;|&nbsp; dir1 / 123
+          </div>
         </div>
       </div>
     </div>

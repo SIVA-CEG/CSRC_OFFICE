@@ -1,823 +1,888 @@
 import React, { useState, useMemo } from "react";
-import "./ZBAOfficePage.css";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Mock data — in production this would come from a shared store / API
-// ─────────────────────────────────────────────────────────────────────────────
-const PROJECTS = [
-  { id: "ZBA001", title: "AI Based Research Project",   pi: "Dr. Kumar", department: "IT",  sanctionedAmount: 500000 },
-  { id: "ZBA002", title: "IoT Smart Monitoring System", pi: "Dr. Priya",  department: "CSE", sanctionedAmount: 350000 },
-];
+/* ═══════════════════════════════════════════════════════════════════
+   STYLES
+═══════════════════════════════════════════════════════════════════ */
+const officeCss = `
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
 
-const INITIAL_CLAIMS = [
-  { ref:"ZBA001-CLM001", projectId:"ZBA001", date:"01 Jun 2025", section:"A", title:"Non-Recurring Heads", head:"Equipment 1", amount:45000,  fileName:"invoice_eq1.pdf",  fileURL:null, status:"pending",  note:"" },
-  { ref:"ZBA001-CLM002", projectId:"ZBA001", date:"03 Jun 2025", section:"B", title:"Recurring Heads",     head:"Manpower",    amount:28000,  fileName:"manpower_may.pdf", fileURL:null, status:"pending",  note:"" },
-  { ref:"ZBA001-CLM003", projectId:"ZBA001", date:"10 Jun 2025", section:"B", title:"Recurring Heads",     head:"Travel",      amount:12500,  fileName:null,               fileURL:null, status:"approved", note:"Verified against travel receipts." },
-  { ref:"ZBA002-CLM001", projectId:"ZBA002", date:"05 Jun 2025", section:"A", title:"Non-Recurring Heads", head:"Equipment 2", amount:95000,  fileName:"sensor_quote.pdf", fileURL:null, status:"pending",  note:"" },
-  { ref:"ZBA002-CLM002", projectId:"ZBA002", date:"12 Jun 2025", section:"B", title:"Recurring Heads",     head:"Consumables & Accessories", amount:7800, fileName:null, fileURL:null, status:"rejected", note:"Missing supporting bills." },
-];
+.office-page { animation: officeFade 0.4s ease both; }
+@keyframes officeFade { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes officeSlide { from{opacity:0;transform:translateX(18px)} to{opacity:1;transform:translateX(0)} }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-const fmt  = n  => "₹" + Number(n).toLocaleString("en-IN");
-const today = () => new Date().toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" });
+.office-card {
+  background: rgba(255,255,255,0.028);
+  border: 1px solid rgba(255,255,255,0.075);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+}
+.office-card h2 {
+  font-family: 'Syne', sans-serif;
+  color: rgba(255,255,255,0.9);
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+.office-card .office-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: rgba(255,255,255,0.45); margin: 0 0 18px;
+}
 
-const STATUS_META = {
-  pending:  { label:"Pending Review", color:"#f59e0b", bg:"rgba(245,158,11,0.12)",  border:"rgba(245,158,11,0.3)",  icon:"⏳" },
-  approved: { label:"Approved",       color:"#22c55e", bg:"rgba(34,197,94,0.12)",   border:"rgba(34,197,94,0.3)",   icon:"✓"  },
-  rejected: { label:"Rejected",       color:"#ef4444", bg:"rgba(239,68,68,0.12)",   border:"rgba(239,68,68,0.3)",   icon:"✕"  },
+/* breadcrumb */
+.office-breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: rgba(255,255,255,0.45); margin-bottom: 18px; flex-wrap: wrap;
+}
+.office-breadcrumb .bc-link { color: #38bdf8; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.office-breadcrumb .bc-sep { color: rgba(255,255,255,0.2); }
+.office-breadcrumb .bc-cur { color: rgba(255,255,255,0.7); font-weight: 600; }
+
+/* back button */
+.office-back-btn {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.55); border-radius: 10px;
+  padding: 8px 16px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 18px;
+}
+.office-back-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+
+/* top-level category grid (Non-Recurring / Recurring / History) */
+.office-cat-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 8px;
+}
+@media (max-width: 900px) { .office-cat-grid { grid-template-columns: 1fr; } }
+
+.office-cat-card {
+  border-radius: 18px; padding: 28px 24px;
+  cursor: pointer; transition: all 0.25s;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  text-align: center; position: relative; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+.office-cat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.25); }
+.office-cat-card.nr { background: linear-gradient(135deg, rgba(56,189,248,0.12), rgba(56,189,248,0.04)); border-color: rgba(56,189,248,0.25); }
+.office-cat-card.nr:hover { border-color: rgba(56,189,248,0.55); }
+.office-cat-card.rec { background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(167,139,250,0.04)); border-color: rgba(167,139,250,0.25); }
+.office-cat-card.rec:hover { border-color: rgba(167,139,250,0.55); }
+.office-cat-card.hist { background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.04)); border-color: rgba(34,197,94,0.25); }
+.office-cat-card.hist:hover { border-color: rgba(34,197,94,0.55); }
+.office-cat-card .oc-icon { font-size: 40px; }
+.office-cat-card .oc-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.92); }
+.office-cat-card .oc-sub { font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+.office-cat-card .oc-count {
+  margin-top: 4px; font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff;
+}
+.office-cat-card .oc-arr { font-size: 20px; margin-top: 2px; color: rgba(255,255,255,0.3); }
+
+/* recurring sub-head grid */
+.office-sub-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px; margin-top: 8px;
+}
+.office-sub-card {
+  border-radius: 16px; padding: 20px 16px;
+  cursor: pointer; transition: all 0.22s;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; text-align: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  position: relative;
+}
+.office-sub-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(167,139,250,0.4);
+  background: rgba(167,139,250,0.08);
+  box-shadow: 0 10px 28px rgba(167,139,250,0.12);
+}
+.office-sub-card .osc-icon { font-size: 32px; }
+.office-sub-card .osc-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.85); line-height: 1.3; }
+.office-sub-card .osc-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(251,191,36,0.15); color: #fbbf24;
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 700;
+  font-family: 'Syne', sans-serif;
+}
+.office-sub-card .osc-badge.zero { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.08); }
+
+/* status tabs */
+.office-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.office-tab {
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.5);
+  border-radius: 10px; padding: 8px 16px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; transition: 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.office-tab.active-all { border-color: rgba(56,189,248,0.4); background: rgba(56,189,248,0.08); color: #38bdf8; }
+.office-tab.active-pending { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); color: #fbbf24; }
+.office-tab.active-approved { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); color: #22c55e; }
+.office-tab.active-rejected { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); color: #ef4444; }
+.office-tab-count {
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px; padding: 1px 7px;
+  font-size: 11px; font-weight: 700;
+}
+
+/* search bar */
+.office-search-row {
+  display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center;
+}
+.office-search-wrap {
+  position: relative; flex: 1; min-width: 220px;
+}
+.office-search-wrap input {
+  width: 100%; background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px; padding: 11px 14px 11px 38px;
+  color: rgba(255,255,255,0.86);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: 0.2s; box-sizing: border-box;
+}
+.office-search-wrap input:focus {
+  border-color: rgba(56,189,248,0.65);
+  background: rgba(56,189,248,0.06);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.11);
+}
+.office-search-wrap .search-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  color: rgba(255,255,255,0.35); font-size: 14px; pointer-events: none;
+}
+.office-filter-select {
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px; padding: 11px 14px;
+  color: rgba(255,255,255,0.86);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  outline: none; cursor: pointer;
+}
+.office-filter-select option { background: #111827; color: #fff; }
+
+/* claims table */
+.office-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,0.07); }
+.office-table { width: 100%; border-collapse: collapse; min-width: 880px; }
+.office-table th {
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.38);
+  font-family: 'Syne', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 12px 14px; text-align: left; white-space: nowrap;
+}
+.office-table td {
+  padding: 13px 14px; color: rgba(255,255,255,0.7);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  white-space: nowrap;
+}
+.office-table tr:last-child td { border-bottom: none; }
+.office-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.office-amount { color: #22c55e; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; }
+.office-type-badge {
+  background: rgba(56,189,248,0.1); color: #38bdf8;
+  border: 1px solid rgba(56,189,248,0.2);
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-family: 'Syne', sans-serif; font-weight: 700;
+}
+.office-head-badge {
+  background: rgba(167,139,250,0.1); color: #a78bfa;
+  border: 1px solid rgba(167,139,250,0.2);
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-family: 'DM Sans', sans-serif;
+}
+.office-proj-badge {
+  background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-family: 'DM Sans', sans-serif;
+}
+
+.office-status-pending {
+  background: rgba(251,191,36,0.12); color: #fbbf24;
+  border: 1px solid rgba(251,191,36,0.3);
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif;
+}
+.office-status-approved {
+  background: rgba(34,197,94,0.12); color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.3);
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif;
+}
+.office-status-rejected {
+  background: rgba(239,68,68,0.12); color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.3);
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif;
+}
+
+.office-action-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.office-preview-btn {
+  border: 1px solid rgba(56,189,248,0.3); background: rgba(56,189,248,0.08);
+  color: #38bdf8; border-radius: 8px; padding: 6px 11px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; transition: 0.2s;
+}
+.office-preview-btn:hover { background: rgba(56,189,248,0.18); }
+.office-download-btn {
+  border: 1px solid rgba(34,197,94,0.3); background: rgba(34,197,94,0.08);
+  color: #22c55e; border-radius: 8px; padding: 6px 11px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; transition: 0.2s;
+}
+.office-download-btn:hover { background: rgba(34,197,94,0.18); }
+.office-approve-btn {
+  border: 1px solid rgba(34,197,94,0.35); background: rgba(34,197,94,0.1);
+  color: #22c55e; border-radius: 8px; padding: 6px 11px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; transition: 0.2s;
+}
+.office-approve-btn:hover { background: rgba(34,197,94,0.2); }
+.office-reject-btn {
+  border: 1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.1);
+  color: #ef4444; border-radius: 8px; padding: 6px 11px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; transition: 0.2s;
+}
+.office-reject-btn:hover { background: rgba(239,68,68,0.2); }
+.office-undo-btn {
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.6); border-radius: 8px; padding: 6px 11px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; transition: 0.2s;
+}
+.office-undo-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* empty state */
+.office-empty {
+  text-align: center; padding: 50px 24px;
+  color: rgba(255,255,255,0.3); font-family: 'DM Sans', sans-serif; font-size: 14px;
+}
+.office-empty .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+/* summary stats row */
+.office-stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;
+}
+@media (max-width: 800px) { .office-stats-row { grid-template-columns: repeat(2, 1fr); } }
+.office-stat-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; padding: 14px 16px;
+}
+.office-stat-card p {
+  margin: 0 0 4px; font-family: 'DM Sans', sans-serif;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.9px; color: rgba(255,255,255,0.35);
+}
+.office-stat-card h4 { margin: 0; font-family: 'Syne', sans-serif; font-size: 20px; color: #fff; }
+.office-stat-card h4.yellow { color: #fbbf24; }
+.office-stat-card h4.green { color: #22c55e; }
+.office-stat-card h4.red { color: #ef4444; }
+.office-stat-card h4.blue { color: #38bdf8; }
+
+/* History filters row */
+.history-filter-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 18px;
+}
+@media (max-width: 800px) { .history-filter-grid { grid-template-columns: 1fr; } }
+.history-filter-grid label {
+  display: block; font-family: 'Syne', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.38); margin-bottom: 6px;
+}
+
+/* PDF/HTML Preview Modal */
+.office-pdf-overlay {
+  position: fixed; inset: 0; z-index: 1000000;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 16px 24px;
+}
+.office-pdf-box {
+  width: min(900px,96vw); height: calc(100vh - 32px);
+  background: #111827; border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+}
+.office-pdf-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 18px; background: #0f172a;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0; gap: 10px; flex-wrap: wrap;
+}
+.office-pdf-head span { color: rgba(255,255,255,0.7); font-family: 'DM Sans', sans-serif; font-size: 13px; }
+.office-pdf-head div { display: flex; gap: 8px; }
+.office-pdf-head button {
+  border-radius: 9px; padding: 7px 13px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+  border: none;
+}
+.office-pdf-head .btn-cl { background: #ef4444; color: #fff; }
+.office-pdf-frame { flex: 1; width: 100%; border: none; background: #fff; }
+`;
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════════ */
+function fmt(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
+
+const RECURRING_HEAD_LABELS = {
+  "Manpower": { icon: "👥" },
+  "Travel": { icon: "✈️" },
+  "Consumables & Accessories": { icon: "🧪" },
+  "Contingency": { icon: "📦" },
+  "Other Expenses": { icon: "💰" },
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Sub-components
-// ─────────────────────────────────────────────────────────────────────────────
+const RECURRING_SUB_HEADS = [
+  { key: "Manpower", label: "Manpower", icon: "👥", sub: "Salary claims for JRF/SRF/RA" },
+  { key: "Travel", label: "Travel", icon: "✈️", sub: "Conference, field work, official visits" },
+  { key: "Consumables & Accessories", label: "Consumables & Accessories", icon: "🧪", sub: "Lab materials, chemicals, supplies" },
+  { key: "Contingency", label: "Contingency", icon: "📦", sub: "Postage, printing, stationery, misc" },
+  { key: "Other Expenses", label: "Other Expenses", icon: "💰", sub: "Publications, patents, other misc." },
+];
 
-function StatCard({ icon, label, value, accent }) {
-  return (
-    <div className="zba-stat-card" style={{ "--accent": accent }}>
-      <div className="zba-stat-icon">{icon}</div>
-      <div>
-        <p className="zba-stat-label">{label}</p>
-        <h3 className="zba-stat-value">{value}</h3>
+/** Normalize a claim's status. Claims in faculty store use "review"|"approved".
+ * Office page adds "rejected" support via the same status field. */
+function statusOf(c) {
+  if (c.status === "approved") return "approved";
+  if (c.status === "rejected") return "rejected";
+  return "pending"; // covers "review" and undefined
+}
+
+function statusBadge(status) {
+  if (status === "approved") return <span className="office-status-approved">✓ Approved</span>;
+  if (status === "rejected") return <span className="office-status-rejected">✕ Rejected</span>;
+  return <span className="office-status-pending">⏳ Pending</span>;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS TABLE (shared by all sections)
+═══════════════════════════════════════════════════════════════════ */
+function ClaimsTable({ claims, onPreview, onDownload, onApprove, onReject, onRevert, showProject }) {
+  if (claims.length === 0) {
+    return (
+      <div className="office-empty">
+        <div className="empty-icon">📭</div>
+        No claims found.
       </div>
+    );
+  }
+  return (
+    <div className="office-table-wrap">
+      <table className="office-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            {showProject && <th>Project</th>}
+            <th>Date</th><th>Type</th><th>Head</th>
+            <th>Amount</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {claims.map((c, i) => {
+            const st = statusOf(c);
+            return (
+              <tr key={c.id}>
+                <td style={{ color: "rgba(255,255,255,0.35)", fontWeight: 700 }}>{i + 1}</td>
+                {showProject && (
+                  <td><span className="office-proj-badge">{c._projectId} — {c._projectTitle}</span></td>
+                )}
+                <td>{c.date}</td>
+                <td><span className="office-type-badge">{c.type}</span></td>
+                <td><span className="office-head-badge">{c.head}</span></td>
+                <td className="office-amount">{fmt(c.amount)}</td>
+                <td>{statusBadge(st)}</td>
+                <td>
+                  <div className="office-action-group">
+                    <button className="office-preview-btn" onClick={() => onPreview(c)}>👁 Preview</button>
+                    <button className="office-download-btn" onClick={() => onDownload(c)}>⬇ Download</button>
+                    {st === "pending" && (
+                      <>
+                        <button className="office-approve-btn" onClick={() => onApprove(c)}>✓ Approve</button>
+                        <button className="office-reject-btn" onClick={() => onReject(c)}>✕ Reject</button>
+                      </>
+                    )}
+                    {st !== "pending" && onRevert && (
+                      <button className="office-undo-btn" onClick={() => onRevert(c)}>↺ Revert</button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function StatusBadge({ status }) {
-  const m = STATUS_META[status];
+/* ═══════════════════════════════════════════════════════════════════
+   GENERIC "CLAIMS LIST" SCREEN — tabs + search + table
+   Used for: Non-Recurring, and each Recurring sub-head
+═══════════════════════════════════════════════════════════════════ */
+function ClaimsListScreen({ title, icon, sub, claims, onBack, onPreview, onDownload, onApprove, onReject, onRevert, showProject }) {
+  const [tab, setTab] = useState("all");
+  const [search, setSearch] = useState("");
+
+  const counts = useMemo(() => ({
+    all: claims.length,
+    pending: claims.filter(c => statusOf(c) === "pending").length,
+    approved: claims.filter(c => statusOf(c) === "approved").length,
+    rejected: claims.filter(c => statusOf(c) === "rejected").length,
+  }), [claims]);
+
+  const filtered = useMemo(() => {
+    let list = claims;
+    if (tab !== "all") list = list.filter(c => statusOf(c) === tab);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(c =>
+        (c.head || "").toLowerCase().includes(q) ||
+        (c.type || "").toLowerCase().includes(q) ||
+        (c.date || "").toLowerCase().includes(q) ||
+        String(c.amount || "").includes(q) ||
+        (c._projectTitle || "").toLowerCase().includes(q) ||
+        (c._projectId || "").toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [claims, tab, search]);
+
   return (
-    <span className="zba-status-badge"
-      style={{ color: m.color, background: m.bg, borderColor: m.border }}>
-      {m.icon} {m.label}
-    </span>
+    <div className="office-card" style={{ animation: "officeSlide 0.3s ease" }}>
+      <button className="office-back-btn" onClick={onBack}>← Back</button>
+      <h2>{icon} {title}</h2>
+      <p className="office-sub">{sub}</p>
+
+      <div className="office-stats-row">
+        <div className="office-stat-card"><p>Total Claims</p><h4 className="blue">{counts.all}</h4></div>
+        <div className="office-stat-card"><p>Pending</p><h4 className="yellow">{counts.pending}</h4></div>
+        <div className="office-stat-card"><p>Approved</p><h4 className="green">{counts.approved}</h4></div>
+        <div className="office-stat-card"><p>Rejected</p><h4 className="red">{counts.rejected}</h4></div>
+      </div>
+
+      <div className="office-tabs">
+        <button className={`office-tab ${tab === "all" ? "active-all" : ""}`} onClick={() => setTab("all")}>
+          📋 All <span className="office-tab-count">{counts.all}</span>
+        </button>
+        <button className={`office-tab ${tab === "pending" ? "active-pending" : ""}`} onClick={() => setTab("pending")}>
+          ⏳ Pending <span className="office-tab-count">{counts.pending}</span>
+        </button>
+        <button className={`office-tab ${tab === "approved" ? "active-approved" : ""}`} onClick={() => setTab("approved")}>
+          ✅ Approved <span className="office-tab-count">{counts.approved}</span>
+        </button>
+        <button className={`office-tab ${tab === "rejected" ? "active-rejected" : ""}`} onClick={() => setTab("rejected")}>
+          ❌ Rejected <span className="office-tab-count">{counts.rejected}</span>
+        </button>
+      </div>
+
+      <div className="office-search-row">
+        <div className="office-search-wrap">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search by head, type, project, date, amount..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <ClaimsTable
+        claims={filtered}
+        onPreview={onPreview}
+        onDownload={onDownload}
+        onApprove={onApprove}
+        onReject={onReject}
+        onRevert={onRevert}
+        showProject={showProject}
+      />
+    </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Review Drawer
-// ─────────────────────────────────────────────────────────────────────────────
-function ReviewDrawer({ claim, project, onClose, onDecide }) {
-  const [note, setNote] = useState(claim.note || "");
-  const [deciding, setDeciding] = useState(null);
+/* ═══════════════════════════════════════════════════════════════════
+   HISTORY SCREEN
+═══════════════════════════════════════════════════════════════════ */
+function HistoryScreen({ allClaims, onBack, onPreview, onDownload, onApprove, onReject, onRevert }) {
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all"); // "all" | "Non-Recurring" | "Recurring"
+  const [headFilter, setHeadFilter] = useState("all"); // specific head name or "all"
+  const [search, setSearch] = useState("");
 
-  const handle = (action) => {
-    setDeciding(action);
-    setTimeout(() => {
-      onDecide(claim.ref, action, note);
-      setDeciding(null);
-    }, 600);
-  };
+  const counts = useMemo(() => ({
+    all: allClaims.length,
+    pending: allClaims.filter(c => statusOf(c) === "pending").length,
+    approved: allClaims.filter(c => statusOf(c) === "approved").length,
+    rejected: allClaims.filter(c => statusOf(c) === "rejected").length,
+  }), [allClaims]);
 
-  if (!claim) return null;
+  const headOptions = useMemo(() => {
+    const heads = new Set();
+    allClaims.forEach(c => {
+      if (typeFilter === "all" || c.type === typeFilter) heads.add(c.head);
+    });
+    return Array.from(heads).sort();
+  }, [allClaims, typeFilter]);
+
+  const filtered = useMemo(() => {
+    let list = allClaims;
+    if (statusFilter !== "all") list = list.filter(c => statusOf(c) === statusFilter);
+    if (typeFilter !== "all") list = list.filter(c => c.type === typeFilter);
+    if (headFilter !== "all") list = list.filter(c => c.head === headFilter);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(c =>
+        (c.head || "").toLowerCase().includes(q) ||
+        (c.type || "").toLowerCase().includes(q) ||
+        (c.date || "").toLowerCase().includes(q) ||
+        String(c.amount || "").includes(q) ||
+        (c._projectTitle || "").toLowerCase().includes(q) ||
+        (c._projectId || "").toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [allClaims, statusFilter, typeFilter, headFilter, search]);
 
   return (
-    <div className="zba-drawer-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="zba-drawer">
-        {/* Header */}
-        <div className="zba-drawer-head">
-          <div>
-            <span className="zba-drawer-eyebrow">Claim Review</span>
-            <h2 className="zba-drawer-title">{claim.ref}</h2>
+    <div className="office-card" style={{ animation: "officeSlide 0.3s ease" }}>
+      <button className="office-back-btn" onClick={onBack}>← Back</button>
+      <h2>🗂️ Claims History</h2>
+      <p className="office-sub">Complete record of all claims across every project, category and head</p>
+
+      <div className="office-stats-row">
+        <div className="office-stat-card"><p>Total Claims</p><h4 className="blue">{counts.all}</h4></div>
+        <div className="office-stat-card"><p>Pending</p><h4 className="yellow">{counts.pending}</h4></div>
+        <div className="office-stat-card"><p>Approved</p><h4 className="green">{counts.approved}</h4></div>
+        <div className="office-stat-card"><p>Rejected</p><h4 className="red">{counts.rejected}</h4></div>
+      </div>
+
+      <div className="office-tabs">
+        <button className={`office-tab ${statusFilter === "all" ? "active-all" : ""}`} onClick={() => setStatusFilter("all")}>
+          📋 All <span className="office-tab-count">{counts.all}</span>
+        </button>
+        <button className={`office-tab ${statusFilter === "pending" ? "active-pending" : ""}`} onClick={() => setStatusFilter("pending")}>
+          ⏳ Pending <span className="office-tab-count">{counts.pending}</span>
+        </button>
+        <button className={`office-tab ${statusFilter === "approved" ? "active-approved" : ""}`} onClick={() => setStatusFilter("approved")}>
+          ✅ Approved <span className="office-tab-count">{counts.approved}</span>
+        </button>
+        <button className={`office-tab ${statusFilter === "rejected" ? "active-rejected" : ""}`} onClick={() => setStatusFilter("rejected")}>
+          ❌ Rejected <span className="office-tab-count">{counts.rejected}</span>
+        </button>
+      </div>
+
+      <div className="history-filter-grid">
+        <div>
+          <label>Category</label>
+          <select className="office-filter-select" style={{ width: "100%" }}
+            value={typeFilter}
+            onChange={e => { setTypeFilter(e.target.value); setHeadFilter("all"); }}>
+            <option value="all">All Categories</option>
+            <option value="Non-Recurring">Non-Recurring</option>
+            <option value="Recurring">Recurring</option>
+          </select>
+        </div>
+        <div>
+          <label>Head / Sub-type</label>
+          <select className="office-filter-select" style={{ width: "100%" }}
+            value={headFilter}
+            onChange={e => setHeadFilter(e.target.value)}>
+            <option value="all">All Heads</option>
+            {headOptions.map(h => <option key={h} value={h}>{h}</option>)}
+          </select>
+        </div>
+        <div>
+          <label>Search</label>
+          <div className="office-search-wrap">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search project, date, amount..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
-          <button className="zba-drawer-close" onClick={onClose}>✕</button>
         </div>
+      </div>
 
-        {/* Project strip */}
-        <div className="zba-drawer-project-strip">
-          <div className="zba-dps-item"><span>Project</span><b>{project?.id}</b></div>
-          <div className="zba-dps-item"><span>PI</span><b>{project?.pi}</b></div>
-          <div className="zba-dps-item"><span>Dept</span><b>{project?.department}</b></div>
-          <div className="zba-dps-item"><span>Sanctioned</span><b>{fmt(project?.sanctionedAmount)}</b></div>
-        </div>
+      <ClaimsTable
+        claims={filtered}
+        onPreview={onPreview}
+        onDownload={onDownload}
+        onApprove={onApprove}
+        onReject={onReject}
+        onRevert={onRevert}
+        showProject
+      />
+    </div>
+  );
+}
 
-        {/* Claim detail grid */}
-        <div className="zba-drawer-section">
-          <h4 className="zba-drawer-section-title">📄 Claim Details</h4>
-          <div className="zba-detail-grid">
-            <div className="zba-detail-item"><label>Date Filed</label><span>{claim.date}</span></div>
-            <div className="zba-detail-item"><label>Section</label>
-              <span className="zba-section-pill">{claim.section}</span></div>
-            <div className="zba-detail-item"><label>Head Category</label><span>{claim.title}</span></div>
-            <div className="zba-detail-item"><label>Item / Equipment</label><span>{claim.head}</span></div>
-            <div className="zba-detail-item zba-detail-full">
-              <label>Claimed Amount</label>
-              <span className="zba-amount-large">{fmt(claim.amount)}</span>
-            </div>
-          </div>
-        </div>
+/* ═══════════════════════════════════════════════════════════════════
+   MAIN OFFICE PAGE
+═══════════════════════════════════════════════════════════════════ */
+/**
+ * Props:
+ *  - claimsStore: { [projectId]: [claim, ...] }   — same shape as faculty side
+ *  - projects: [{ id, title, ... }]               — PROJECTS array
+ *  - onApprove(projectId, claimId)
+ *  - onReject(projectId, claimId)
+ *  - onRevert(projectId, claimId)                 — sets status back to "review"
+ *  - generateReportPDF(claim, mode)               — same fn used on faculty side
+ */
+export default function ZBAOfficePage({
+  claimsStore = {},
+  projects = [],
+  onApprove,
+  onReject,
+  onRevert,
+  generateReportPDF,
+}) {
+  // screen: "home" | "nonRecurring" | "recurringHeads" | "recurringHead" | "history"
+  const [screen, setScreen] = useState("home");
+  const [activeHead, setActiveHead] = useState(null);
 
-        {/* Bill file */}
-        <div className="zba-drawer-section">
-          <h4 className="zba-drawer-section-title">🗂️ Supporting Document</h4>
-          {claim.fileURL ? (
-            <div className="zba-bill-file-card">
-              <div className="zba-bill-file-icon">📎</div>
-              <div className="zba-bill-file-info">
-                <strong>{claim.fileName}</strong>
-                <span>Uploaded bill / invoice</span>
-              </div>
-              <div className="zba-bill-file-actions">
-                <button className="zba-file-btn preview"
-                  onClick={() => window.open(claim.fileURL, "_blank")}>👁 Preview</button>
-                <a className="zba-file-btn download"
-                  href={claim.fileURL} download={claim.fileName}>⬇ Download</a>
-              </div>
-            </div>
-          ) : (
-            <div className="zba-no-file">
-              <span>⚠️</span> No bill document uploaded by claimant.
+  const [pdfPreview, setPdfPreview] = useState(null);
+
+  /* Flatten claims with project context attached */
+  const allClaims = useMemo(() => {
+    const list = [];
+    Object.entries(claimsStore).forEach(([pid, claims]) => {
+      const proj = projects.find(p => p.id === pid);
+      (claims || []).forEach(c => {
+        list.push({
+          ...c,
+          _projectId: pid,
+          _projectTitle: proj ? proj.title : pid,
+        });
+      });
+    });
+    // sort newest first
+    return list.sort((a, b) => (b.id || 0) - (a.id || 0));
+  }, [claimsStore, projects]);
+
+  const nonRecurringClaims = useMemo(
+    () => allClaims.filter(c => c.type === "Non-Recurring"),
+    [allClaims]
+  );
+
+  const recurringClaims = useMemo(
+    () => allClaims.filter(c => c.type === "Recurring"),
+    [allClaims]
+  );
+
+  const recurringByHead = useMemo(() => {
+    const map = {};
+    RECURRING_SUB_HEADS.forEach(h => { map[h.key] = []; });
+    recurringClaims.forEach(c => {
+      if (!map[c.head]) map[c.head] = [];
+      map[c.head].push(c);
+    });
+    return map;
+  }, [recurringClaims]);
+
+  const pendingCount = (list) => list.filter(c => statusOf(c) === "pending").length;
+
+  /* ─── action handlers ─── */
+  const handlePreview = (c) => setPdfPreview({ name: `${c.head}_report.html`, html: c.reportHTML });
+  const handleDownload = (c) => {
+    if (generateReportPDF) generateReportPDF(c, "download");
+  };
+  const handleApprove = (c) => onApprove && onApprove(c._projectId, c.id);
+  const handleReject = (c) => onReject && onReject(c._projectId, c.id);
+  const handleRevert = (c) => onRevert && onRevert(c._projectId, c.id);
+
+  /* ─── HOME SCREEN ─── */
+  const renderHome = () => (
+    <div className="office-card">
+      <h2>🏢 ZBA Office — Claims Management</h2>
+      <p className="office-sub">Review, approve, and track all project claims across categories</p>
+
+      <div className="office-stats-row">
+        <div className="office-stat-card"><p>Total Claims</p><h4 className="blue">{allClaims.length}</h4></div>
+        <div className="office-stat-card"><p>Pending</p><h4 className="yellow">{pendingCount(allClaims)}</h4></div>
+        <div className="office-stat-card"><p>Approved</p><h4 className="green">{allClaims.filter(c => statusOf(c) === "approved").length}</h4></div>
+        <div className="office-stat-card"><p>Rejected</p><h4 className="red">{allClaims.filter(c => statusOf(c) === "rejected").length}</h4></div>
+      </div>
+
+      <div className="office-cat-grid">
+        <div className="office-cat-card nr" onClick={() => setScreen("nonRecurring")}>
+          <div className="oc-icon">🔧</div>
+          <div className="oc-title">Non-Recurring Requests</div>
+          <div className="oc-sub">Equipment & one-time capital expenditure claims</div>
+          <div className="oc-count">{nonRecurringClaims.length}</div>
+          {pendingCount(nonRecurringClaims) > 0 && (
+            <div className="office-tab-count" style={{ background: "rgba(251,191,36,0.18)", color: "#fbbf24" }}>
+              {pendingCount(nonRecurringClaims)} pending
             </div>
           )}
+          <div className="oc-arr">→</div>
         </div>
 
-        {/* Office note */}
-        <div className="zba-drawer-section">
-          <h4 className="zba-drawer-section-title">📝 Office Note / Remarks</h4>
-          <textarea className="zba-note-input"
-            placeholder="Add verification remarks, queries, or approval conditions…"
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            disabled={claim.status !== "pending"}
-            rows={4}/>
+        <div className="office-cat-card rec" onClick={() => setScreen("recurringHeads")}>
+          <div className="oc-icon">🔄</div>
+          <div className="oc-title">Recurring Requests</div>
+          <div className="oc-sub">Manpower, travel, consumables, contingency & other expenses</div>
+          <div className="oc-count">{recurringClaims.length}</div>
+          {pendingCount(recurringClaims) > 0 && (
+            <div className="office-tab-count" style={{ background: "rgba(251,191,36,0.18)", color: "#fbbf24" }}>
+              {pendingCount(recurringClaims)} pending
+            </div>
+          )}
+          <div className="oc-arr">→</div>
         </div>
 
-        {/* Action buttons */}
-        {claim.status === "pending" ? (
-          <div className="zba-drawer-actions">
-            <button
-              className={`zba-action-btn reject ${deciding==="rejected" ? "deciding" : ""}`}
-              onClick={() => handle("rejected")}
-              disabled={!!deciding}>
-              {deciding === "rejected" ? "⏳ Rejecting…" : "✕ Reject Claim"}
-            </button>
-            <button
-              className={`zba-action-btn approve ${deciding==="approved" ? "deciding" : ""}`}
-              onClick={() => handle("approved")}
-              disabled={!!deciding}>
-              {deciding === "approved" ? "⏳ Approving…" : "✓ Approve Claim"}
-            </button>
-          </div>
-        ) : (
-          <div className="zba-drawer-verdict">
-            <StatusBadge status={claim.status} />
-            {claim.note && <p className="zba-verdict-note">"{claim.note}"</p>}
+        <div className="office-cat-card hist" onClick={() => setScreen("history")}>
+          <div className="oc-icon">🗂️</div>
+          <div className="oc-title">History</div>
+          <div className="oc-sub">Full searchable record across all projects & categories</div>
+          <div className="oc-count">{allClaims.length}</div>
+          <div className="oc-arr">→</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ─── NON-RECURRING SCREEN ─── */
+  const renderNonRecurring = () => (
+    <>
+      <div className="office-breadcrumb">
+        <span className="bc-link" onClick={() => setScreen("home")}>Office</span>
+        <span className="bc-sep">›</span>
+        <span className="bc-cur">Non-Recurring Requests</span>
+      </div>
+      <ClaimsListScreen
+        title="Non-Recurring Requests"
+        icon="🔧"
+        sub="Equipment purchase proceedings submitted by faculty"
+        claims={nonRecurringClaims}
+        onBack={() => setScreen("home")}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onRevert={handleRevert}
+        showProject
+      />
+    </>
+  );
+
+  /* ─── RECURRING HEADS SELECTION SCREEN ─── */
+  const renderRecurringHeads = () => (
+    <div className="office-card" style={{ animation: "officeSlide 0.3s ease" }}>
+      <div className="office-breadcrumb">
+        <span className="bc-link" onClick={() => setScreen("home")}>Office</span>
+        <span className="bc-sep">›</span>
+        <span className="bc-cur">Recurring Requests</span>
+      </div>
+      <button className="office-back-btn" onClick={() => setScreen("home")}>← Back</button>
+      <h2>🔄 Recurring Requests</h2>
+      <p className="office-sub">Select a head to review its claims</p>
+
+      <div className="office-stats-row">
+        <div className="office-stat-card"><p>Total Claims</p><h4 className="blue">{recurringClaims.length}</h4></div>
+        <div className="office-stat-card"><p>Pending</p><h4 className="yellow">{pendingCount(recurringClaims)}</h4></div>
+        <div className="office-stat-card"><p>Approved</p><h4 className="green">{recurringClaims.filter(c => statusOf(c) === "approved").length}</h4></div>
+        <div className="office-stat-card"><p>Rejected</p><h4 className="red">{recurringClaims.filter(c => statusOf(c) === "rejected").length}</h4></div>
+      </div>
+
+      <div className="office-sub-grid">
+        {RECURRING_SUB_HEADS.map(h => {
+          const list = recurringByHead[h.key] || [];
+          const pend = pendingCount(list);
+          return (
+            <div key={h.key} className="office-sub-card" onClick={() => { setActiveHead(h.key); setScreen("recurringHead"); }}>
+              {pend > 0
+                ? <div className="osc-badge">{pend} pending</div>
+                : <div className="osc-badge zero">{list.length}</div>}
+              <div className="osc-icon">{h.icon}</div>
+              <div className="osc-title">{h.label}</div>
+              <div className="oc-sub" style={{ fontSize: 11 }}>{h.sub}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  /* ─── RECURRING HEAD DETAIL SCREEN ─── */
+  const renderRecurringHead = () => {
+    const cfg = RECURRING_SUB_HEADS.find(h => h.key === activeHead);
+    const list = recurringByHead[activeHead] || [];
+    return (
+      <>
+        <div className="office-breadcrumb">
+          <span className="bc-link" onClick={() => setScreen("home")}>Office</span>
+          <span className="bc-sep">›</span>
+          <span className="bc-link" onClick={() => setScreen("recurringHeads")}>Recurring Requests</span>
+          <span className="bc-sep">›</span>
+          <span className="bc-cur">{cfg?.label}</span>
+        </div>
+        <ClaimsListScreen
+          title={cfg?.label}
+          icon={cfg?.icon}
+          sub={`${cfg?.label} claims submitted by faculty across all projects`}
+          claims={list}
+          onBack={() => setScreen("recurringHeads")}
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onRevert={handleRevert}
+          showProject
+        />
+      </>
+    );
+  };
+
+  /* ─── HISTORY SCREEN ─── */
+  const renderHistory = () => (
+    <>
+      <div className="office-breadcrumb">
+        <span className="bc-link" onClick={() => setScreen("home")}>Office</span>
+        <span className="bc-sep">›</span>
+        <span className="bc-cur">History</span>
+      </div>
+      <HistoryScreen
+        allClaims={allClaims}
+        onBack={() => setScreen("home")}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onRevert={handleRevert}
+      />
+    </>
+  );
+
+  return (
+    <>
+      <style>{officeCss}</style>
+      <div className="office-page">
+        {screen === "home" && renderHome()}
+        {screen === "nonRecurring" && renderNonRecurring()}
+        {screen === "recurringHeads" && renderRecurringHeads()}
+        {screen === "recurringHead" && renderRecurringHead()}
+        {screen === "history" && renderHistory()}
+
+        {/* Preview Modal */}
+        {pdfPreview && (
+          <div className="office-pdf-overlay" onClick={e => { if (e.target === e.currentTarget) setPdfPreview(null); }}>
+            <div className="office-pdf-box">
+              <div className="office-pdf-head">
+                <span>{pdfPreview.name}</span>
+                <div>
+                  <button className="btn-cl" onClick={() => setPdfPreview(null)}>✕ Close</button>
+                </div>
+              </div>
+              <iframe className="office-pdf-frame" srcDoc={pdfPreview.html} title={pdfPreview.name} />
+            </div>
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// History Modal
-// ─────────────────────────────────────────────────────────────────────────────
-function HistoryModal({ claims, projects, onClose, onPreview }) {
-  const [filterProject, setFilterProject] = useState("ALL");
-  const [filterStatus,  setFilterStatus]  = useState("ALL");
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(() => claims.filter(c => {
-    const matchProj   = filterProject === "ALL" || c.projectId === filterProject;
-    const matchStatus = filterStatus  === "ALL" || c.status    === filterStatus;
-    const q = search.toLowerCase();
-    const matchSearch = !q || c.ref.toLowerCase().includes(q) ||
-      c.head.toLowerCase().includes(q) || c.title.toLowerCase().includes(q);
-    return matchProj && matchStatus && matchSearch;
-  }), [claims, filterProject, filterStatus, search]);
-
-  const totals = {
-    approved: filtered.filter(c=>c.status==="approved").reduce((s,c)=>s+c.amount,0),
-    rejected: filtered.filter(c=>c.status==="rejected").reduce((s,c)=>s+c.amount,0),
-    pending:  filtered.filter(c=>c.status==="pending").length,
-  };
-
-  return (
-    <div className="zba-modal-overlay" onClick={e => { if (e.target===e.currentTarget) onClose(); }}>
-      <div className="zba-modal">
-        {/* Modal header */}
-        <div className="zba-modal-head">
-          <div>
-            <h2 className="zba-modal-title">📚 Full Claims History</h2>
-            <p className="zba-modal-sub">{filtered.length} records · all projects</p>
-          </div>
-          <button className="zba-drawer-close" onClick={onClose}>✕</button>
-        </div>
-
-        {/* Filters */}
-        <div className="zba-modal-filters">
-          <input className="zba-filter-input" placeholder="🔍 Search ref, head, item…"
-            value={search} onChange={e => setSearch(e.target.value)}/>
-          <select className="zba-filter-select"
-            value={filterProject} onChange={e => setFilterProject(e.target.value)}>
-            <option value="ALL">All Projects</option>
-            {projects.map(p => <option key={p.id} value={p.id}>{p.id} — {p.title}</option>)}
-          </select>
-          <select className="zba-filter-select"
-            value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-            <option value="ALL">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
-
-        {/* Mini summary */}
-        <div className="zba-modal-summary">
-          <div className="zba-ms-card green"><p>Approved Value</p><h4>{fmt(totals.approved)}</h4></div>
-          <div className="zba-ms-card red"><p>Rejected Value</p><h4>{fmt(totals.rejected)}</h4></div>
-          <div className="zba-ms-card yellow"><p>Pending Count</p><h4>{totals.pending}</h4></div>
-        </div>
-
-        {/* Table */}
-        <div className="zba-modal-table-wrap">
-          {filtered.length === 0 ? (
-            <div className="zba-empty"><div className="zba-empty-icon">🗂️</div>No matching records found.</div>
-          ) : (
-            <table className="zba-hist-table">
-              <thead>
-                <tr>
-                  <th>#</th><th>Reference</th><th>Project</th><th>Date</th>
-                  <th>Section</th><th>Head / Item</th><th>Amount</th>
-                  <th>Status</th><th>Note</th><th>Bill</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((c, i) => {
-                  const proj = projects.find(p => p.id === c.projectId);
-                  return (
-                    <tr key={c.ref}>
-                      <td className="zba-row-num">{i+1}</td>
-                      <td><span className="zba-ref-badge">{c.ref}</span></td>
-                      <td>
-                        <div className="zba-proj-cell">
-                          <strong>{c.projectId}</strong>
-                          <span>{proj?.pi}</span>
-                        </div>
-                      </td>
-                      <td className="zba-muted">{c.date}</td>
-                      <td><span className="zba-sec-badge">{c.section}</span></td>
-                      <td>
-                        <div className="zba-head-cell">
-                          <span>{c.head}</span>
-                          <small>{c.title}</small>
-                        </div>
-                      </td>
-                      <td className="zba-amount-cell">{fmt(c.amount)}</td>
-                      <td><StatusBadge status={c.status}/></td>
-                      <td className="zba-note-cell">{c.note || <span className="zba-muted">—</span>}</td>
-                      <td>
-                        {c.fileURL
-                          ? <button className="zba-file-btn preview" onClick={() => onPreview(c)}>👁</button>
-                          : <span className="zba-muted">—</span>}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Main Office Page
-// ─────────────────────────────────────────────────────────────────────────────
-export default function ZBAOfficePage() {
-  const [claims,       setClaims]       = useState(INITIAL_CLAIMS);
-  const [activeProject, setActiveProject] = useState("ALL");
-  const [projectDirectory, setProjectDirectory] = useState(true);
-const [projectSearch, setProjectSearch] = useState("");
-  const [filterStatus, setFilterStatus]  = useState("pending");
-  const [reviewClaim,  setReviewClaim]   = useState(null);
-  const [showHistory,  setShowHistory]   = useState(false);
-  const [pdfPreview,   setPdfPreview]    = useState(null);
-  const [toast,        setToast]         = useState(null);
-
-  // ── Stats ────────────────────────────────────────────────────────────────
-  const currentClaims = useMemo(() => {
-
-  if (activeProject === "ALL") {
-    return claims;
-  }
-
-  return claims.filter(
-    c => c.projectId === activeProject
-  );
-
-}, [claims, activeProject]);
-
-
-const stats = useMemo(() => ({
-
-  total:
-    currentClaims.length,
-
-  pending:
-    currentClaims.filter(
-      c => c.status === "pending"
-    ).length,
-
-  approved:
-    currentClaims.filter(
-      c => c.status === "approved"
-    ).length,
-
-  rejected:
-    currentClaims.filter(
-      c => c.status === "rejected"
-    ).length,
-
-  totalAmt:
-    currentClaims
-      .filter(c => c.status === "approved")
-      .reduce((s,c)=>s+c.amount,0)
-
-}), [currentClaims]);
-
-  // ── Filtered claims list ──────────────────────────────────────────────────
-  const visible = useMemo(() => claims.filter(c => {
-    const matchProj = activeProject==="ALL" || c.projectId===activeProject;
-    const matchStatus = filterStatus==="ALL" || c.status===filterStatus;
-    return matchProj && matchStatus;
-  }), [claims, activeProject, filterStatus]);
-
-  // ── Decision handler ─────────────────────────────────────────────────────
-  const handleDecide = (ref, action, note) => {
-    setClaims(prev => prev.map(c =>
-      c.ref === ref ? { ...c, status: action, note } : c
-    ));
-    setReviewClaim(null);
-    const label = action === "approved" ? "✓ Claim Approved" : "✕ Claim Rejected";
-    const color = action === "approved" ? "#22c55e" : "#ef4444";
-    setToast({ label, color });
-    setTimeout(() => setToast(null), 2500);
-  };
-
-  const reviewProject = reviewClaim
-    ? PROJECTS.find(p => p.id === reviewClaim.projectId)
-    : null;
-
-  // ── Project utilization ───────────────────────────────────────────────────
-  const projectStats = useMemo(() => PROJECTS.map(p => {
-    const pClaims = claims.filter(c => c.projectId===p.id);
-    const approved = pClaims.filter(c=>c.status==="approved").reduce((s,c)=>s+c.amount,0);
-    const pending  = pClaims.filter(c=>c.status==="pending").reduce((s,c)=>s+c.amount,0);
-    const pct      = Math.min(100, Math.round((approved/p.sanctionedAmount)*100));
-    return { ...p, approved, pending, pct, totalClaims: pClaims.length };
-  }), [claims, PROJECTS]);
-
-  return (
-    <div className="zba-root">
-      {/* ── Ambient background ─────────────────────────────────────── */}
-      <div className="zba-bg-orbs" aria-hidden="true">
-        <div className="zba-orb zba-orb-1"/>
-        <div className="zba-orb zba-orb-2"/>
-        <div className="zba-orb zba-orb-3"/>
-      </div>
-
-
-  <header className="zba-nav">
-
-    <div className="zba-nav-brand">
-      <div className="zba-brand-mark">ZBA</div>
-
-      <div className="zba-brand-name">
-        Office <span>Claims Portal</span>
-      </div>
-    </div>
-
-    <div className="zba-nav-tabs">
-
-      {[
-        { key:"ALL", label:"All Claims", count:stats.total },
-        { key:"pending", label:"Pending", count:stats.pending },
-        { key:"approved", label:"Approved", count:stats.approved },
-        { key:"rejected", label:"Rejected", count:stats.rejected }
-      ].map(item => (
-        <button
-          key={item.key}
-          className={`zba-nav-tab ${
-            filterStatus===item.key ? "active" : ""
-          }`}
-          onClick={() => setFilterStatus(item.key)}
-        >
-          {item.label}
-          <span className="zba-tab-count">
-            {item.count}
-          </span>
-        </button>
-      ))}
-
-    </div>
-
-    <div className="zba-nav-right">
-
-      <button
-        className="zba-history-btn"
-        onClick={() => setShowHistory(true)}
-      >
-        📚 History
-      </button>
-
-      <div className="zba-officer-chip">
-        <div className="zba-officer-avatar">
-          OF
-        </div>
-
-        <div>
-          <strong>Finance Officer</strong>
-          <span>Grants Division</span>
-        </div>
-      </div>
-
-    </div>
-
-  </header>
-
-  <main className="zba-page">
-
-          <div className="zba-header">
-
-  <div>
-
-    <div className="zba-header-eyebrow">
-      Research Grants Office
-    </div>
-
-    <h1 className="zba-page-title">
-
-  {projectDirectory
-    ? "Research Projects"
-    : `${activeProject} Dashboard`}
-
-</h1>
-
-    <p className="zba-page-sub">
-      Office of Research Grants · {today()}
-    </p>
-    {!projectDirectory && (
-  <button
-    className="zba-back-btn"
-    onClick={() => {
-      setProjectDirectory(true);
-      setActiveProject("ALL");
-    }}
-  >
-    ← Back to All Projects
-  </button>
-)}
-
-  </div>
-
-  <div className="zba-project-toolbar">
-
-  {projectDirectory && (
-    <input
-      type="text"
-      placeholder="🔍 Search Project / PI / Department"
-      className="zba-search-project"
-      value={projectSearch}
-      onChange={(e)=>setProjectSearch(e.target.value)}
-    />
-  )}
-
-</div>
-
-</div>
-
-          {/* Stat cards */}
-          <div className="zba-stats-grid">
-            <StatCard icon="📋" label="Total Claims"    value={stats.total}            accent="#38bdf8"/>
-            <StatCard icon="⏳" label="Pending Review"  value={stats.pending}          accent="#f59e0b"/>
-            <StatCard icon="✓"  label="Approved"        value={stats.approved}         accent="#22c55e"/>
-            <StatCard icon="₹"  label="Approved Amount" value={fmt(stats.totalAmt)}    accent="#a78bfa"/>
-          </div>
-
-
-          {projectDirectory && activeProject==="ALL" && (
-
-<>
-
-<div className="zba-directory-heading">
-  <h2>Research Projects</h2>
-  <span>{PROJECTS.length} Projects Available</span>
-</div>
-
-<div className="zba-project-directory">
-
-  {PROJECTS
-    .filter(project => {
-
-      const q = projectSearch.toLowerCase();
-
-      return (
-        project.id.toLowerCase().includes(q) ||
-        project.title.toLowerCase().includes(q) ||
-        project.pi.toLowerCase().includes(q) ||
-        project.department.toLowerCase().includes(q)
-      );
-
-    })
-    .map(project => {
-
-      const projectClaims =
-        claims.filter(
-          c => c.projectId === project.id
-        );
-
-      const approved =
-        projectClaims
-          .filter(c => c.status==="approved")
-          .reduce((s,c)=>s+c.amount,0);
-
-      const pending =
-        projectClaims
-          .filter(c => c.status==="pending")
-          .length;
-
-      return (
-
-      <div
-        key={project.id}
-        className="zba-project-card"
-      >
-
-        <div className="zba-project-top">
-
-          <div>
-
-            <h3>{project.id}</h3>
-
-            <p>{project.title}</p>
-
-          </div>
-
-          <div className="zba-card-right">
-
-  <span className="zba-dept-badge">
-    {project.department}
-  </span>
-
-  {pending > 0 && (
-
-    <div className="zba-pending-badge">
-
-      <div className="zba-notification-icon">
-
-  🔔
-
-  <span>
-    {pending}
-  </span>
-
-</div>
-
-    </div>
-
-  )}
-
-</div>
-
-        </div>
-
-        <div className="zba-project-info">
-
-  <span>
-    <strong>PI:</strong> {project.pi}
-  </span>
-
-  <span>
-    <strong>Department:</strong> {project.department}
-  </span>
-
-  <span>
-    <strong>Total Claims:</strong> {projectClaims.length}
-  </span>
-
-  <span>
-    <strong>Pending Claims:</strong> {pending}
-  </span>
-
-  <span>
-    <strong>Sanctioned Amount:</strong>
-    {fmt(project.sanctionedAmount)}
-  </span>
-
-</div>
-
-<div className="zba-project-progress">
-
-  <div className="zba-progress-head">
-
-    <span>Utilization</span>
-
-    <span>
-      {Math.min(
-        100,
-        Math.round(
-          (approved / project.sanctionedAmount) * 100
-        )
-      )}%
-    </span>
-
-  </div>
-
-  <div className="zba-progress-track">
-
-    <div
-      className="zba-progress-fill"
-      style={{
-        width: `${Math.min(
-          100,
-          Math.round(
-            (approved / project.sanctionedAmount) * 100
-          )
-        )}%`
-      }}
-    />
-
-  </div>
-
-</div>
-
-        <div className="zba-project-footer">
-
-          <span>
-            Approved: {fmt(approved)}
-          </span>
-
-          <button
-            className="zba-open-project"
-            onClick={()=>{
-              setActiveProject(project.id);
-              setProjectDirectory(false);
-            }}
-          >
-            Open Project →
-          </button>
-
-        </div>
-
-      </div>
-
-      );
-
-    })}
-
-</div>
-</>
-)}
-
-
-          {/* Claims table */}
-{!projectDirectory && (
-
-<div className="zba-table-card">
-            <div className="zba-table-head">
-              <h3>
-                {filterStatus === "ALL" ? "All Claims" :
-                 filterStatus === "pending" ? "⏳ Pending Review" :
-                 filterStatus === "approved" ? "✓ Approved Claims" : "✕ Rejected Claims"}
-                <span className="zba-table-count">{visible.length}</span>
-              </h3>
-            </div>
-
-            {visible.length === 0 ? (
-              <div className="zba-empty">
-                <div className="zba-empty-icon">🗂️</div>
-                No claims matching the current filter.
-              </div>
-            ) : (
-              <div className="zba-table-wrap">
-                <table className="zba-claims-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Reference</th>
-                      <th>Project</th>
-                      <th>Date</th>
-                      <th>Section</th>
-                      <th>Head / Item</th>
-                      <th>Amount</th>
-                      <th>Bill</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visible.map((claim, i) => {
-                      const proj = PROJECTS.find(p => p.id === claim.projectId);
-                      return (
-                        <tr key={claim.ref} className={`zba-tr-${claim.status}`}>
-                          <td className="zba-row-num">{i+1}</td>
-                          <td><span className="zba-ref-badge">{claim.ref}</span></td>
-                          <td>
-                            <div className="zba-proj-cell">
-                              <strong>{claim.projectId}</strong>
-                              <span>{proj?.pi}</span>
-                            </div>
-                          </td>
-                          <td className="zba-muted">{claim.date}</td>
-                          <td><span className="zba-sec-badge">{claim.section}</span></td>
-                          <td>
-                            <div className="zba-head-cell">
-                              <span>{claim.head}</span>
-                              <small>{claim.title}</small>
-                            </div>
-                          </td>
-                          <td className="zba-amount-cell">{fmt(claim.amount)}</td>
-                          <td>
-                            {claim.fileURL
-                              ? <button className="zba-file-btn preview"
-                                  onClick={() => setPdfPreview(claim)}>👁</button>
-                              : <span className="zba-muted">—</span>}
-                          </td>
-                          <td><StatusBadge status={claim.status}/></td>
-                          <td>
-                            <button
-                              className={`zba-review-btn ${claim.status !== "pending" ? "viewed" : ""}`}
-                              onClick={() => setReviewClaim(claim)}>
-                              {claim.status === "pending" ? "Review →" : "View →"}
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-)}
-        </main>
-      
-
-      {/* ── Review Drawer ───────────────────────────────────────────── */}
-      {reviewClaim && (
-        <ReviewDrawer
-          claim={reviewClaim}
-          project={reviewProject}
-          onClose={() => setReviewClaim(null)}
-          onDecide={handleDecide}/>
-      )}
-
-      {/* ── History Modal ───────────────────────────────────────────── */}
-      {showHistory && (
-        <HistoryModal
-          claims={claims}
-          projects={PROJECTS}
-          onClose={() => setShowHistory(false)}
-          onPreview={c => setPdfPreview(c)}/>
-      )}
-
-      {/* ── File Preview ────────────────────────────────────────────── */}
-      {pdfPreview && (
-        <div className="zba-pdf-overlay"
-          onClick={e => { if(e.target===e.currentTarget) setPdfPreview(null); }}>
-          <div className="zba-pdf-box">
-            <div className="zba-pdf-head">
-              <span>{pdfPreview.fileName || "Document Preview"}</span>
-              <div style={{display:"flex",gap:8}}>
-                {pdfPreview.fileURL &&
-                  <a href={pdfPreview.fileURL} download={pdfPreview.fileName}
-                    style={{background:"#38bdf8",color:"#001018",borderRadius:8,padding:"7px 13px",
-                    fontFamily:"inherit",fontSize:12,fontWeight:700,textDecoration:"none"}}>
-                    ⬇ Download
-                  </a>}
-                <button onClick={() => setPdfPreview(null)}
-                  style={{background:"#ef4444",color:"#fff",border:"none",borderRadius:8,
-                  padding:"7px 13px",cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:700}}>
-                  ✕ Close
-                </button>
-              </div>
-            </div>
-            {pdfPreview.fileURL ? (
-              pdfPreview.fileName?.toLowerCase().match(/\.(png|jpg|jpeg|webp)$/)
-                ? <img src={pdfPreview.fileURL} alt={pdfPreview.fileName}
-                    style={{width:"100%",height:"100%",objectFit:"contain",background:"#fff"}}/>
-                : <iframe src={pdfPreview.fileURL} title={pdfPreview.fileName}
-                    style={{flex:1,width:"100%",border:"none",background:"#fff"}}/>
-            ) : (
-              <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",
-                color:"rgba(255,255,255,0.4)",fontFamily:"DM Sans, sans-serif"}}>
-                No file available for preview.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Toast ───────────────────────────────────────────────────── */}
-      {toast && (
-        <div className="zba-toast" style={{ "--toast-color": toast.color }}>
-          {toast.label}
-        </div>
-      )}
-    </div>
+    </>
   );
 }
