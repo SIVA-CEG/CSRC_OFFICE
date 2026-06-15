@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./OfficeReappropriationPage.css";
 import { useProjectContext, PROJECT_STAFF } from "./ProjectContext";
+import ProjectApprovalTransferCell, { getProfileSignature } from "./ProjectApprovalTransferCell";
 
 /* ─── Helpers ──────────────────────────────────────────────── */
 const toINR = (n) =>
@@ -112,7 +113,7 @@ function StageBadge({ role }) {
 }
 
 /* ─── Detail Drawer ──────────────────────────────────────── */
-function DetailDrawer({ req, onClose, onDecide, onTransfer, onForward, userRole }) {
+function DetailDrawer({ req, onClose, onDecide, onApproveTransfer, onPlainTransfer, onApproveForward, onPlainForward, userRole }) {
   const [remarksInput, setRemarksInput] = useState(req.remarks || "");
   const [deciding, setDeciding] = useState(false);
   const isPending = req.status === "PENDING" || req.status === "TRANSFERRED";
@@ -230,24 +231,28 @@ function DetailDrawer({ req, onClose, onDecide, onTransfer, onForward, userRole 
               <div className="orq-section-title">Actions</div>
 
               {/* Transfer — assistant → superintendent */}
-              {userRole === "assistant" && (
-                <div style={{ marginBottom: "16px" }}>
-                  <TransferCell item={req} onTransfer={(item, staff) => {
-                    onTransfer(item, staff);
-                    onClose();
-                  }} />
-                </div>
-              )}
+{userRole === "assistant" && (
+  <div style={{ marginBottom: "16px" }}>
+    <ProjectApprovalTransferCell
+      item={req}
+      userRole={userRole}
+      onApproveTransfer={(item, staff) => { onApproveTransfer(item, staff); onClose(); }}
+      onPlainTransfer={(item, staff) => { onPlainTransfer(item, staff); onClose(); }}
+    />
+  </div>
+)}
 
-              {/* Forward — superintendent → director */}
-              {userRole === "superintendent" && (
-                <div style={{ marginBottom: "16px" }}>
-                  <TransferCell item={req} onTransfer={(item, staff) => {
-                    onForward(item, staff);
-                    onClose();
-                  }} />
-                </div>
-              )}
+{/* Forward — superintendent → director */}
+{userRole === "superintendent" && (
+  <div style={{ marginBottom: "16px" }}>
+    <ProjectApprovalTransferCell
+      item={req}
+      userRole={userRole}
+      onApproveTransfer={(item, staff) => { onApproveForward(item, staff); onClose(); }}
+      onPlainTransfer={(item, staff) => { onPlainForward(item, staff); onClose(); }}
+    />
+  </div>
+)}
 
               {/* Approve/Decline — director only */}
               {userRole === "director" && (
@@ -362,15 +367,60 @@ export default function OfficeReappropriationPage() {
       decision === "approved" ? "success" : "error");
   };
 
-  const handleTransfer = (item, staff) => {
-    reap_transfer(item, staff);
-    showToast(`Transferred to ${staff.name}`);
-  };
+const today = () => new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
 
-  const handleForward = (item, staff) => {
-    reap_forwardToDirector(item, staff);
-    showToast(`Forwarded to ${staff.name}`);
+const handleApproveTransfer = (item, staff) => {
+  const mySig = getProfileSignature(userRole);
+  const stamped = {
+    ...item,
+    signatures: { ...(item.signatures || {}), [userRole]: mySig || true },
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: true },
+    ],
   };
+  reap_transfer(stamped, staff);
+  showToast(`Approved & transferred to ${staff.name}`);
+};
+
+const handlePlainTransfer = (item, staff) => {
+  const updated = {
+    ...item,
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: false },
+    ],
+  };
+  reap_transfer(updated, staff);
+  showToast(`Transferred to ${staff.name} (no approval)`);
+};
+
+const handleApproveForward = (item, staff) => {
+  const mySig = getProfileSignature(userRole);
+  const stamped = {
+    ...item,
+    signatures: { ...(item.signatures || {}), [userRole]: mySig || true },
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: true },
+    ],
+  };
+  reap_forwardToDirector(stamped, staff);
+  showToast(`Approved & forwarded to ${staff.name}`);
+};
+
+const handlePlainForward = (item, staff) => {
+  const updated = {
+    ...item,
+    currentHolder: staff,
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: false },
+    ],
+  };
+  reap_updateTransferred(updated);
+  showToast(`Transferred to ${staff.name} (no approval)`);
+};
 
   const selectedReq = selected
     ? [...reapActive, ...reapTransferred, ...reapCompleted].find(r => r.id === selected)
@@ -501,13 +551,15 @@ export default function OfficeReappropriationPage() {
 
       {selectedReq && (
         <DetailDrawer
-          req={selectedReq}
-          onClose={() => setSelected(null)}
-          onDecide={handleDecide}
-          onTransfer={handleTransfer}
-          onForward={handleForward}
-          userRole={userRole}
-        />
+  req={selectedReq}
+  onClose={() => setSelected(null)}
+  onDecide={handleDecide}
+  onApproveTransfer={handleApproveTransfer}
+  onPlainTransfer={handlePlainTransfer}
+  onApproveForward={handleApproveForward}
+  onPlainForward={handlePlainForward}
+  userRole={userRole}
+/>
       )}
     </div>
   );

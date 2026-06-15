@@ -1,0 +1,237 @@
+.pf-page {
+  padding: 32px 40px;
+  font-family: 'DM Sans', sans-serif;
+  background: #f7f5f0;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  opacity: 0;
+  transform: translateY(8px);
+  animation: pf-fade-in 0.4s ease forwards;
+}
+
+@keyframes pf-fade-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pf-top-nav,.pf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+    width: 100%;
+  max-width: 900px;
+}
+
+.pf-btn-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e3ddd2;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b3b2a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.pf-btn-back:hover {
+  border-color: #8a6d4a;
+  color: #8a6d4a;
+}
+
+.pf-role-chip {
+  background: #2c2a4a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+.pf-header-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  color: #2c2a4a;
+  margin: 0 0 4px;
+}
+
+.pf-header-sub {
+  color: #7a7268;
+  font-size: 14px;
+  margin: 0 0 28px;
+}
+
+.pf-card {
+  background: #ffffff;
+  border: 1px solid #ece6da;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(80, 60, 30, 0.05);
+  max-width: 760px;
+    width: 100%;
+  max-width: 760px;
+}
+
+.pf-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px 24px;
+}
+
+.pf-field-full {
+  grid-column: 1 / -1;
+}
+
+.pf-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8a6d4a;
+  margin-bottom: 6px;
+}
+
+.pf-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  border: 1px solid #e3ddd2;
+  border-radius: 8px;
+  background: #fbf9f5;
+  color: #2c2a4a;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.pf-input:focus {
+  border-color: #2c2a4a;
+  background: #ffffff;
+}
+
+.pf-sig-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px dashed #d8cfc0;
+  border-radius: 10px;
+  background: #fbf9f5;
+  min-height: 70px;
+}
+
+.pf-sig-preview {
+  max-height: 60px;
+  max-width: 200px;
+  object-fit: contain;
+  background: #ffffff;
+  border: 1px solid #ece6da;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.pf-sig-upload-btn,
+.pf-sig-change-btn {
+  background: #2c2a4a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.pf-sig-upload-btn:hover,
+.pf-sig-change-btn:hover {
+  background: #463f73;
+}
+
+.pf-sig-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #9a9286;
+}
+
+.pf-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #ece6da;
+}
+
+.pf-save-btn {
+  background: #1e7a52;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.pf-save-btn:hover {
+  background: #166040;
+}
+
+.pf-saved-msg {
+  color: #1e7a52;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .pf-grid { grid-template-columns: 1fr; }
+}
+
+.pf-input:read-only {
+  background: #f4f1eb;
+  color: #666;
+  cursor: default;
+}
+
+.pf-input:disabled {
+  background: #f4f1eb;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.pf-edit-btn {
+  background: #2c2a4a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pf-edit-btn:hover {
+  background: #463f73;
+}
+
+.pf-cancel-btn {
+  background: #f3f3f3;
+  color: #444;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pf-cancel-btn:hover {
+  background: #e8e8e8;
+}

@@ -11,6 +11,11 @@ export default function Navbar() {
     navigate('/');
   };
 
+const goToProfile = () => {
+  setDropOpen(false);
+  navigate('/profile');
+};
+
   return (
     <nav className="navbar">
       <div className="navbar-left">
@@ -42,8 +47,7 @@ export default function Navbar() {
           <span className="navbar-chevron">{dropOpen ? '▲' : '▼'}</span>
           {dropOpen && (
             <div className="navbar-dropdown">
-              <div className="drop-item">👤 My Profile</div>
-              <div className="drop-item">⚙️ Settings</div>
+              <div className="drop-item" onClick={goToProfile}>👤 My Profile</div>
               <div className="drop-divider" />
               <div className="drop-item drop-logout" onClick={handleLogout}>🚪 Logout</div>
             </div>

@@ -237,3 +237,57 @@
 .nr-page-btn:hover:not(:disabled) { background: #f1f5f9; }
 .nr-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .nr-page-indicator { font-size: 13px; font-weight: 700; color: #166534; padding: 0 8px; }
+
+.nr-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nr-approve-btn,
+.nr-plain-transfer-btn,
+.nr-approve-final-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nr-approve-btn,
+.nr-approve-final-btn {
+  background: #e7f5ee;
+  color: #1e7a52;
+  border: 1px solid #b9e4cf;
+}
+.nr-approve-btn:hover,
+.nr-approve-final-btn:hover {
+  background: #1e7a52;
+  color: #ffffff;
+}
+
+.nr-plain-transfer-btn {
+  background: #eef0fb;
+  color: #2c2a4a;
+  border: 1px solid #ccd2f0;
+}
+.nr-plain-transfer-btn:hover {
+  background: #2c2a4a;
+  color: #ffffff;
+}
+
+.nr-transfer-popup-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a7268;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}

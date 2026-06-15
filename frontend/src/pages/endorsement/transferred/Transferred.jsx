@@ -98,7 +98,7 @@ function EndorsementReport({ form, onSignatureUpload }) {
     director:       userRole === "director"       && !dirSig,
   };
 
-  return (
+return (
   <div className="tr-report-wrap">
 
     <input
@@ -181,7 +181,11 @@ function EndorsementReport({ form, onSignatureUpload }) {
           <div className="tr-er-sig-block">
             <div className="tr-er-sig-item">
               {asstSig ? (
-                <img src={asstSig} alt="Asst Sig" className="tr-er-sig-img" />
+                typeof asstSig === "string" && asstSig.startsWith("data:") ? (
+                  <img src={asstSig} alt="Asst Sig" className="tr-er-sig-img" />
+                ) : (
+                  <div className="tr-er-sig-approved">✔ Approved</div>
+                )
               ) : canSign.assistant ? (
                 <button className="tr-sig-upload-btn" onClick={() => handleUpload("assistant")}>📤 Upload Sign</button>
               ) : (
@@ -192,7 +196,11 @@ function EndorsementReport({ form, onSignatureUpload }) {
             </div>
             <div className="tr-er-sig-item">
               {supdtSig ? (
-                <img src={supdtSig} alt="Supdt Sig" className="tr-er-sig-img" />
+                typeof supdtSig === "string" && supdtSig.startsWith("data:") ? (
+                  <img src={supdtSig} alt="Supdt Sig" className="tr-er-sig-img" />
+                ) : (
+                  <div className="tr-er-sig-approved">✔ Approved</div>
+                )
               ) : canSign.superintendent ? (
                 <button className="tr-sig-upload-btn" onClick={() => handleUpload("superintendent")}>📤 Upload Sign</button>
               ) : (
@@ -203,7 +211,11 @@ function EndorsementReport({ form, onSignatureUpload }) {
             </div>
             <div className="tr-er-sig-item">
               {dirSig ? (
-                <img src={dirSig} alt="Dir Sig" className="tr-er-sig-img" />
+                typeof dirSig === "string" && dirSig.startsWith("data:") ? (
+                  <img src={dirSig} alt="Dir Sig" className="tr-er-sig-img" />
+                ) : (
+                  <div className="tr-er-sig-approved">✔ Approved</div>
+                )
               ) : (
                 <div className="tr-er-sig-blank tr-sig-pending" style={{ opacity: 0.4 }}>Pending</div>
               )}
@@ -217,19 +229,8 @@ function EndorsementReport({ form, onSignatureUpload }) {
   );
 }
 
-// ── Transfer History Timeline ─────────────────────────────────────────────────
 function TransferTimeline({ item }) {
   const history = item.transferHistory || [];
-  const sigs    = item.signatures || {};
-
-  const signerForRole = (role) => {
-    const entry = history.find(h => (typeof h.to === "object" ? h.to.role : null) === role);
-    if (!entry) return null;
-    return typeof entry.to === "object" ? entry.to.name : entry.to;
-  };
-
-  const asstSigner  = signerForRole("assistant");
-  const supdtSigner = signerForRole("superintendent");
 
   return (
     <div className="tr-timeline">
@@ -238,20 +239,11 @@ function TransferTimeline({ item }) {
         const toRole   = typeof entry.to === "object" ? entry.to.role : null;
         const fromName = typeof entry.from === "object" ? entry.from.name : entry.from;
 
-        const signed =
-          (toRole === "assistant"      && sigs.assistant) ||
-          (toRole === "superintendent" && sigs.superintendent) ||
-          (toRole === "director"       && sigs.director);
-
-        const signerName =
-          toRole === "assistant"      ? asstSigner :
-          toRole === "superintendent" ? supdtSigner : null;
-
         return (
           <div key={i} className="tr-timeline-entry">
             <div className="tr-tl-dot-wrap">
-              <div className={`tr-tl-dot ${signed ? "tr-tl-signed" : "tr-tl-pending"}`}>
-                {signed ? "✔" : "⏳"}
+              <div className={`tr-tl-dot ${entry.approved ? "tr-tl-approved" : "tr-tl-forwarded"}`}>
+                {entry.approved ? "✔" : "↪"}
               </div>
               {i < history.length - 1 && <div className="tr-tl-line" />}
             </div>
@@ -263,23 +255,35 @@ function TransferTimeline({ item }) {
                 <span className="tr-tl-to">{toName}</span>
                 {toRole && <span className={`tr-tl-role-badge tr-role-${toRole}`}>{toRole}</span>}
               </div>
-              {signed && signerName && (
-                <div className="tr-tl-signed-badge">✔ Signed by {signerName}</div>
-              )}
+              <div className={`tr-tl-status-badge ${entry.approved ? "tr-tl-approved-badge" : "tr-tl-forward-badge"}`}>
+                {entry.approved ? "✔ Approved & Forwarded" : "↪ Forwarded (Pending Approval)"}
+              </div>
             </div>
           </div>
         );
       })}
-      <div className="tr-timeline-entry tr-tl-pending-entry">
-        <div className="tr-tl-dot-wrap">
-          <div className="tr-tl-dot tr-tl-pending">⏳</div>
-        </div>
-        <div className="tr-tl-content">
-          <div className="tr-tl-pending-label">
-            Waiting for action from {item.currentHolder?.name || "Next Approver"}
+
+      {item.status === "APPROVED" ? (
+        <div className="tr-timeline-entry tr-tl-pending-entry">
+          <div className="tr-tl-dot-wrap">
+            <div className="tr-tl-dot tr-tl-approved">✔</div>
+          </div>
+          <div className="tr-tl-content">
+            <div className="tr-tl-pending-label">Process Completed — Fully Approved</div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="tr-timeline-entry tr-tl-pending-entry">
+          <div className="tr-tl-dot-wrap">
+            <div className="tr-tl-dot tr-tl-pending">⏳</div>
+          </div>
+          <div className="tr-tl-content">
+            <div className="tr-tl-pending-label">
+              Waiting for action from {item.currentHolder?.name || "Next Approver"}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -302,12 +306,14 @@ function TransferredModal({ item, onClose, onUpdate }) {
   };
 
   const currentHolder   = localItem.currentHolder;
-  const stageBadgeClass =
-    currentHolder?.role === "superintendent" ? "tr-stage-supdt" :
-    currentHolder?.role === "director"       ? "tr-stage-dir"   : "tr-stage-asst";
-  const stageLabel =
-    currentHolder?.role === "superintendent" ? "With Superintendent" :
-    currentHolder?.role === "director"       ? "With Director"       : "With Assistant";
+// in TransferredModal, replace the stageBadgeClass/stageLabel computation:
+const isCompleted = localItem.status === "APPROVED";
+const stageBadgeClass = isCompleted ? "tr-stage-completed" :
+  currentHolder?.role === "superintendent" ? "tr-stage-supdt" :
+  currentHolder?.role === "director"       ? "tr-stage-dir"   : "tr-stage-asst";
+const stageLabel = isCompleted ? "Completed" :
+  currentHolder?.role === "superintendent" ? "With Superintendent" :
+  currentHolder?.role === "director"       ? "With Director"       : "With Assistant";
 
   return (
     <div className="tr-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -392,8 +398,8 @@ function TransferredModal({ item, onClose, onUpdate }) {
   );
 }
 
-// ── Stage Badge ───────────────────────────────────────────────────────────────
-function StageBadge({ role }) {
+function StageBadge({ role, status }) {
+  if (status === "APPROVED") return <span className="tr-stage-badge tr-stage-completed">Completed</span>;
   if (role === "superintendent") return <span className="tr-stage-badge tr-stage-supdt">With Superintendent</span>;
   if (role === "director")       return <span className="tr-stage-badge tr-stage-dir">With Director</span>;
   return <span className="tr-stage-badge tr-stage-asst">With Assistant</span>;
@@ -545,7 +551,7 @@ export default function Transferred() {
                   <td className="tr-agency">{row.fundingAgency}</td>
                   <td><span className="tr-fmt-badge">{row.endorsementFormat}</span></td>
                   <td className="tr-cost">{Number(row.calculatedTotal || 0).toLocaleString("en-IN")}</td>
-                  <td><StageBadge role={row.currentHolder?.role} /></td>
+<td><StageBadge role={row.currentHolder?.role} status={row.status} /></td>
                   <td>
                     <div className="tr-sig-indicators">
                       <span className={`tr-sig-dot ${sigs.assistant      ? "tr-sig-done" : "tr-sig-none"}`} title="Assistant">A</span>

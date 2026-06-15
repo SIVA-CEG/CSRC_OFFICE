@@ -1,73 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjectContext, PROJECT_STAFF } from './ProjectContext';
+import ProjectApprovalTransferCell, { getProfileSignature } from './ProjectApprovalTransferCell';
+import SchemeSelectModal from './SchemeSelectModal';
 import './FreshSanction.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const userRole = () => localStorage.getItem('userRole') || 'assistant';
 const userName = () => localStorage.getItem('userName') || 'Office';
-
-// ── Transfer Cell (mirrors endorsement pattern) ───────────────────────────────
-function TransferCell({ item, onTransfer }) {
-  const role = userRole();
-  const [open, setOpen]         = useState(false);
-  const [selectedId, setSelectedId] = useState('');
-  const [confirming, setConfirming] = useState(false);
-
-  const eligible = role === 'superintendent'
-    ? PROJECT_STAFF.filter(s => s.role === 'director')
-    : PROJECT_STAFF.filter(s => s.role === 'superintendent');
-
-  const handleOk = () => {
-    const staff = PROJECT_STAFF.find(s => s.id === parseInt(selectedId));
-    if (!staff) return;
-    onTransfer(item, staff);
-    setOpen(false);
-    setSelectedId('');
-    setConfirming(false);
-  };
-
-  return (
-    <div className="fs-transfer-cell">
-      {!open ? (
-        <button className="fs-transfer-btn" onClick={() => setOpen(true)}>
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-          </svg>
-          Transfer
-        </button>
-      ) : (
-        <div className="fs-transfer-popup">
-          <select
-            className="fs-transfer-select"
-            value={selectedId}
-            onChange={e => setSelectedId(e.target.value)}
-          >
-            <option value="">-- Select Staff --</option>
-            {eligible.map(s => (
-              <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
-            ))}
-          </select>
-          <div className="fs-transfer-actions">
-            <button className="fs-transfer-ok"
-              onClick={() => { if (selectedId) setConfirming(true); }}
-              disabled={!selectedId}>OK</button>
-            <button className="fs-transfer-cancel"
-              onClick={() => { setOpen(false); setSelectedId(''); }}>✕</button>
-          </div>
-          {confirming && (
-            <div className="fs-transfer-confirm">
-              <span>Transfer to <b>{PROJECT_STAFF.find(s => s.id === parseInt(selectedId))?.name}</b>?</span>
-              <button className="fs-transfer-ok" onClick={handleOk}>Confirm</button>
-              <button className="fs-transfer-cancel" onClick={() => setConfirming(false)}>Back</button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ── Edit Form ─────────────────────────────────────────────────────────────────
 function EditForm({ item, onSave, onCancel }) {
@@ -158,6 +98,9 @@ function ViewPage({ item, onBack }) {
           <div className="fs-account-badge">
             Account: <strong>{item.assignedAccount}</strong>
             {item.accountCode && <> &nbsp;| Code: <strong>{item.accountCode}</strong></>}
+            {item.assignedScheme?.schemeName && (
+              <> &nbsp;| Scheme: <strong>{item.assignedScheme.schemeName}</strong></>
+            )}
           </div>
         )}
         <div className="sanctioned-inst-card">
@@ -184,6 +127,7 @@ function ViewPage({ item, onBack }) {
                 <span className="fs-history-arrow">→</span>
                 <span className="fs-history-to">{h.to?.name || h.to}</span>
                 <span className={`fs-role-badge fs-role-${h.to?.role}`}>{h.to?.role}</span>
+                {h.approved === false && <span className="fs-role-badge" style={{ background:'#eef0fb', color:'#2c2a4a' }}>not approved</span>}
               </div>
             ))}
           </div>
@@ -225,8 +169,7 @@ export default function FreshSanction() {
   const [editItem, setEditItem]           = useState(null);
   const [search, setSearch]               = useState('');
   const [activeTab, setActiveTab]         = useState('active'); // active | transferred | completed
-  const [assignments, setAssignments]     = useState({});
-  const [assignmentCodes, setAssignmentCodes] = useState({});
+  const [schemeModalItem, setSchemeModalItem] = useState(null);
 
   useEffect(() => { setTimeout(() => setMounted(true), 50); }, []);
 
@@ -255,18 +198,73 @@ export default function FreshSanction() {
     );
   }, [activeSource, search]);
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
-  const handleTransfer = (item, toStaff) => {
-    const withAccount = {
-      ...item,
-      assignedAccount: assignments[item.id] || item.assignedAccount || '',
-      accountCode:     assignmentCodes[item.id] || item.accountCode || '',
+  // ── Scheme / Account assignment (assistant, active tab) ─────────────────────
+  const handleAssignScheme = (scheme) => {
+    if (!schemeModalItem) return;
+    const updated = {
+      ...schemeModalItem,
+      assignedScheme: scheme,
+      assignedAccount: scheme.accountType,
+      accountCode: scheme.schemeCode,
     };
-    fresh_transfer(withAccount, toStaff);
+    setFreshActive(prev => prev.map(i => i.id === updated.id ? updated : i));
+    setSchemeModalItem(null);
   };
 
-  const handleForwardToDirector = (item, toStaff) => {
-    fresh_forwardToDirector(item, toStaff);
+  // ── Transfer handlers ────────────────────────────────────────────────────────
+  const today = () => new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+
+  // Assistant: Approve & Transfer → superintendent (stamps signature)
+  const handleApproveTransfer = (item, staff) => {
+    const mySig = getProfileSignature(role);
+    const stamped = {
+      ...item,
+      signatures: { ...(item.signatures || {}), [role]: mySig || true },
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: true },
+      ],
+    };
+    fresh_transfer(stamped, staff);
+  };
+
+  // Assistant: Transfer (No Approval) → another assistant, same level
+  const handlePlainTransferAssistant = (item, staff) => {
+    const updated = {
+      ...item,
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: false },
+      ],
+    };
+    fresh_transfer(updated, staff);
+  };
+
+  // Superintendent: Approve & Transfer → director (stamps signature)
+  const handleApproveForward = (item, staff) => {
+    const mySig = getProfileSignature(role);
+    const stamped = {
+      ...item,
+      signatures: { ...(item.signatures || {}), [role]: mySig || true },
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: true },
+      ],
+    };
+    fresh_forwardToDirector(stamped, staff);
+  };
+
+  // Superintendent: Transfer (No Approval) → another superintendent, same level
+  const handlePlainTransferSuperintendent = (item, staff) => {
+    const updated = {
+      ...item,
+      currentHolder: staff,
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: false },
+      ],
+    };
+    fresh_updateTransferred(updated);
   };
 
   const handleComplete = (item) => {
@@ -375,8 +373,8 @@ export default function FreshSanction() {
             <th>PI</th>
             <th>Agency</th>
             <th>Cost (₹)</th>
-            {/* Assistant-only: account assignment */}
-            {role === 'assistant' && activeTab === 'active' && <th>Account</th>}
+            {/* Assistant-only: scheme/account assignment */}
+            {role === 'assistant' && activeTab === 'active' && <th>Account / Scheme</th>}
             {/* Transferred tab: show stage */}
             {(activeTab === 'transferred' || (role !== 'assistant' && activeTab === 'active')) && <th>Stage</th>}
             <th>Actions</th>
@@ -405,29 +403,22 @@ export default function FreshSanction() {
               <td>{item.fundingAgency}</td>
               <td>₹ {item.cost}</td>
 
-              {/* Account assignment — assistant only, active tab */}
+              {/* Account / Scheme assignment — assistant only, active tab */}
               {role === 'assistant' && activeTab === 'active' && (
                 <td>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <select
-                      className="edit-input"
-                      value={assignments[item.id] || item.assignedAccount || ''}
-                      onChange={e => setAssignments({ ...assignments, [item.id]: e.target.value })}
-                    >
-                      <option value="">Select</option>
-                      <option value="ZBA">ZBA</option>
-                      <option value="TSA(H)">TSA(H)</option>
-                      <option value="CMRG">CMRG</option>
-                    </select>
-                    {(assignments[item.id] || item.assignedAccount) && (
-                      <input
-                        type="text"
-                        className="edit-input"
-                        placeholder={`Enter ${assignments[item.id] || item.assignedAccount} Code`}
-                        value={assignmentCodes[item.id] || item.accountCode || ''}
-                        onChange={e => setAssignmentCodes({ ...assignmentCodes, [item.id]: e.target.value })}
-                      />
+                  <div className="fs-scheme-cell">
+                    {item.assignedScheme ? (
+                      <div className="fs-scheme-chip">
+                        <div className="fs-scheme-code">{item.assignedScheme.schemeCode}</div>
+                        <div className="fs-scheme-name">{item.assignedScheme.schemeName}</div>
+                        <div className="fs-scheme-type">{item.assignedScheme.accountType}</div>
+                      </div>
+                    ) : (
+                      <span className="fs-scheme-empty">Not assigned</span>
                     )}
+                    <button className="fs-scheme-action-btn" onClick={() => setSchemeModalItem(item)}>
+                      {item.assignedScheme ? '✏️ Change' : '➕ Action'}
+                    </button>
                   </div>
                 </td>
               )}
@@ -439,7 +430,7 @@ export default function FreshSanction() {
 
               {/* Actions */}
               <td>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div className="fs-actions">
                   {/* View */}
                   <button className="btn-view"
                     onClick={() => { setSelectedItem(item); setPage('view'); }}>
@@ -458,14 +449,24 @@ export default function FreshSanction() {
                     </button>
                   )}
 
-                  {/* Transfer — assistant → superintendent */}
+                  {/* Assistant: Approve & Transfer / Transfer (No Approval) */}
                   {role === 'assistant' && activeTab === 'active' && (
-                    <TransferCell item={item} onTransfer={handleTransfer} />
+                    <ProjectApprovalTransferCell
+                      item={item}
+                      userRole={role}
+                      onApproveTransfer={handleApproveTransfer}
+                      onPlainTransfer={handlePlainTransferAssistant}
+                    />
                   )}
 
-                  {/* Forward — superintendent → director */}
+                  {/* Superintendent: Approve & Forward / Transfer (No Approval) */}
                   {role === 'superintendent' && activeTab === 'active' && (
-                    <TransferCell item={item} onTransfer={handleForwardToDirector} />
+                    <ProjectApprovalTransferCell
+                      item={item}
+                      userRole={role}
+                      onApproveTransfer={handleApproveForward}
+                      onPlainTransfer={handlePlainTransferSuperintendent}
+                    />
                   )}
 
                   {/* Complete — director */}
@@ -481,6 +482,14 @@ export default function FreshSanction() {
           ))}
         </tbody>
       </table>
+
+      {/* Scheme selection modal */}
+      <SchemeSelectModal
+        open={!!schemeModalItem}
+        onClose={() => setSchemeModalItem(null)}
+        onSelect={handleAssignScheme}
+        currentScheme={schemeModalItem?.assignedScheme}
+      />
     </div>
   );
 }

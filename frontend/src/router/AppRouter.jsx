@@ -129,6 +129,9 @@ import AccountsPIRoles         from '../../src_accounts/pages/master/PIRoles';
 import AccountsSchemes         from '../../src_accounts/pages/master/Schemes';
 
 
+import ProfilePage from '../components/ProfilePage';
+
+
 
 export default function AppRouter() {
   return (
@@ -139,6 +142,7 @@ export default function AppRouter() {
         <Route path="/tapal-login"       element={<TapalLogin />} />
         <Route path="/proceedings-login" element={<ProceedingsLogin />} />
         <Route path="/dashboard"         element={<Dashboard />} />
+        <Route path="/profile" element={<ProfilePage />} />
 
         {/* ── TAPAL MODULE (own layout, no backend for now) ── */}
         <Route path="/tapal" element={<TapalLayout counts={{ new: 0, assigned: 0, completed: 0 }} />}>

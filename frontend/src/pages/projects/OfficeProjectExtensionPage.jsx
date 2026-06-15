@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./OfficeProjectExtensionPage.css";
 import { useProjectContext, PROJECT_STAFF } from "./ProjectContext";
+import ProjectApprovalTransferCell, { getProfileSignature } from "./ProjectApprovalTransferCell";
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 function TransferCell({ item, onTransfer }) {
@@ -118,7 +119,7 @@ function TimelineVisual({ sanctionedDate, originalEndDate, duration, revisedEndD
 }
 
 /* ─── Detail Drawer ───────────────────────────────────────── */
-function DetailDrawer({ req, onClose, onDecide, onTransfer, onForward, userRole }) {
+function DetailDrawer({ req, onClose, onDecide, onApproveTransfer, onPlainTransfer, onApproveForward, onPlainForward, userRole }) {
   const [remarksInput, setRemarksInput] = useState(req.remarks || "");
   const [deciding, setDeciding] = useState(false);
   const isPending = req.status === "PENDING" || req.status === "TRANSFERRED";
@@ -236,27 +237,33 @@ function DetailDrawer({ req, onClose, onDecide, onTransfer, onForward, userRole 
             <section className="oex-section oex-action-section">
               <div className="oex-section-title">Actions</div>
 
-              {userRole === "assistant" && (
-                <div style={{ marginBottom: "16px" }}>
-                  <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px" }}>
-                    Transfer to Superintendent for review:
-                  </div>
-                  <TransferCell item={req} onTransfer={(item, staff) => {
-                    onTransfer(item, staff); onClose();
-                  }} />
-                </div>
-              )}
+{userRole === "assistant" && (
+  <div style={{ marginBottom: "16px" }}>
+    <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px" }}>
+      Transfer to Superintendent for review:
+    </div>
+    <ProjectApprovalTransferCell
+      item={req}
+      userRole={userRole}
+      onApproveTransfer={(item, staff) => { onApproveTransfer(item, staff); onClose(); }}
+      onPlainTransfer={(item, staff) => { onPlainTransfer(item, staff); onClose(); }}
+    />
+  </div>
+)}
 
-              {userRole === "superintendent" && (
-                <div style={{ marginBottom: "16px" }}>
-                  <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px" }}>
-                    Forward to Director for final approval:
-                  </div>
-                  <TransferCell item={req} onTransfer={(item, staff) => {
-                    onForward(item, staff); onClose();
-                  }} />
-                </div>
-              )}
+{userRole === "superintendent" && (
+  <div style={{ marginBottom: "16px" }}>
+    <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px" }}>
+      Forward to Director for final approval:
+    </div>
+    <ProjectApprovalTransferCell
+      item={req}
+      userRole={userRole}
+      onApproveTransfer={(item, staff) => { onApproveForward(item, staff); onClose(); }}
+      onPlainTransfer={(item, staff) => { onPlainForward(item, staff); onClose(); }}
+    />
+  </div>
+)}
 
               {userRole === "director" && (
                 <>
@@ -368,16 +375,60 @@ export default function OfficeProjectExtensionPage() {
     showToast(`Request ${id} ${decision === "approved" ? "approved ✓" : "declined ✗"}`,
       decision === "approved" ? "success" : "error");
   };
+const today = () => new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
 
-  const handleTransfer = (item, staff) => {
-    ext_transfer(item, staff);
-    showToast(`Transferred to ${staff.name}`);
+const handleApproveTransfer = (item, staff) => {
+  const mySig = getProfileSignature(userRole);
+  const stamped = {
+    ...item,
+    signatures: { ...(item.signatures || {}), [userRole]: mySig || true },
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: true },
+    ],
   };
+  ext_transfer(stamped, staff);
+  showToast(`Approved & transferred to ${staff.name}`);
+};
 
-  const handleForward = (item, staff) => {
-    ext_forwardToDirector(item, staff);
-    showToast(`Forwarded to ${staff.name}`);
+const handlePlainTransfer = (item, staff) => {
+  const updated = {
+    ...item,
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: false },
+    ],
   };
+  ext_transfer(updated, staff);
+  showToast(`Transferred to ${staff.name} (no approval)`);
+};
+
+const handleApproveForward = (item, staff) => {
+  const mySig = getProfileSignature(userRole);
+  const stamped = {
+    ...item,
+    signatures: { ...(item.signatures || {}), [userRole]: mySig || true },
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: true },
+    ],
+  };
+  ext_forwardToDirector(stamped, staff);
+  showToast(`Approved & forwarded to ${staff.name}`);
+};
+
+const handlePlainForward = (item, staff) => {
+  const updated = {
+    ...item,
+    currentHolder: staff,
+    transferHistory: [
+      ...(item.transferHistory || []),
+      { from: "Office", fromRole: userRole, to: staff, date: today(), approved: false },
+    ],
+  };
+  ext_updateTransferred(updated);
+  showToast(`Transferred to ${staff.name} (no approval)`);
+};
 
   const selectedReq = selected
     ? [...extActive, ...extTransferred, ...extCompleted].find(r => r.id === selected)
@@ -515,14 +566,16 @@ export default function OfficeProjectExtensionPage() {
       </div>
 
       {selectedReq && (
-        <DetailDrawer
-          req={selectedReq}
-          onClose={() => setSelected(null)}
-          onDecide={handleDecide}
-          onTransfer={handleTransfer}
-          onForward={handleForward}
-          userRole={userRole}
-        />
+<DetailDrawer
+  req={selectedReq}
+  onClose={() => setSelected(null)}
+  onDecide={handleDecide}
+  onApproveTransfer={handleApproveTransfer}
+  onPlainTransfer={handlePlainTransfer}
+  onApproveForward={handleApproveForward}
+  onPlainForward={handlePlainForward}
+  userRole={userRole}
+/>
       )}
     </div>
   );

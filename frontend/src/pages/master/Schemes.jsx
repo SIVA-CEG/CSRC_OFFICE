@@ -177,6 +177,8 @@ const initialSchemes = [
   },
 ];
 
+export const SCHEMES_LIST = initialSchemes;
+
 export default function Schemes() {
   const [schemes, setSchemes] = useState(initialSchemes);
   const [search, setSearch] = useState("");

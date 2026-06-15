@@ -1,0 +1,150 @@
+.ssm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 36, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: ssm-fade-in 0.18s ease;
+}
+
+@keyframes ssm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ssm-modal {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.ssm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ece6da;
+}
+
+.ssm-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c2a4a;
+}
+
+.ssm-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #7a7268;
+  padding: 4px;
+}
+.ssm-close:hover { color: #2c2a4a; }
+
+.ssm-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ece6da;
+  color: #9a9286;
+}
+
+.ssm-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding: 6px 0;
+  color: #2c2a4a;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.ssm-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9a9286;
+  font-size: 13px;
+}
+
+.ssm-list {
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.ssm-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: #9a9286;
+  font-size: 13px;
+}
+
+.ssm-item {
+  position: relative;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: 1px solid transparent;
+}
+.ssm-item:hover {
+  background: #f7f5f0;
+}
+.ssm-item-active {
+  background: #e7f5ee;
+  border-color: #b9e4cf;
+}
+
+.ssm-item-main {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.ssm-item-code {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a6d4a;
+  background: #fbf3e6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ssm-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c2a4a;
+}
+
+.ssm-item-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #9a9286;
+}
+
+.ssm-item-type {
+  font-weight: 700;
+  color: #6b6f9e;
+}
+
+.ssm-item-check {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e7a52;
+}

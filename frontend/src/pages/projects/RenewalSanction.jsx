@@ -1,66 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjectContext, PROJECT_STAFF } from './ProjectContext';
+import ProjectApprovalTransferCell, { getProfileSignature } from './ProjectApprovalTransferCell';
 import './FreshSanction.css'; // reuse same base styles
 
 const userRole = () => localStorage.getItem('userRole') || 'assistant';
-
-// ── Transfer Cell ─────────────────────────────────────────────────────────────
-function TransferCell({ item, onTransfer }) {
-  const role = userRole();
-  const [open, setOpen]         = useState(false);
-  const [selectedId, setSelectedId] = useState('');
-  const [confirming, setConfirming] = useState(false);
-
-  const eligible = role === 'superintendent'
-    ? PROJECT_STAFF.filter(s => s.role === 'director')
-    : PROJECT_STAFF.filter(s => s.role === 'superintendent');
-
-  const handleOk = () => {
-    const staff = PROJECT_STAFF.find(s => s.id === parseInt(selectedId));
-    if (!staff) return;
-    onTransfer(item, staff);
-    setOpen(false); setSelectedId(''); setConfirming(false);
-  };
-
-  return (
-    <div className="fs-transfer-cell">
-      {!open ? (
-        <button className="fs-transfer-btn" onClick={() => setOpen(true)}>
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-          </svg>
-          Transfer
-        </button>
-      ) : (
-        <div className="fs-transfer-popup">
-          <select className="fs-transfer-select" value={selectedId}
-            onChange={e => setSelectedId(e.target.value)}>
-            <option value="">-- Select Staff --</option>
-            {eligible.map(s => (
-              <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
-            ))}
-          </select>
-          <div className="fs-transfer-actions">
-            <button className="fs-transfer-ok"
-              onClick={() => { if (selectedId) setConfirming(true); }}
-              disabled={!selectedId}>OK</button>
-            <button className="fs-transfer-cancel"
-              onClick={() => { setOpen(false); setSelectedId(''); }}>✕</button>
-          </div>
-          {confirming && (
-            <div className="fs-transfer-confirm">
-              <span>Transfer to <b>{PROJECT_STAFF.find(s => s.id === parseInt(selectedId))?.name}</b>?</span>
-              <button className="fs-transfer-ok" onClick={handleOk}>Confirm</button>
-              <button className="fs-transfer-cancel" onClick={() => setConfirming(false)}>Back</button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+const userName = () => localStorage.getItem('userName') || 'Office';
 
 // ── Stage Badge ───────────────────────────────────────────────────────────────
 function StageBadge({ role }) {
@@ -70,6 +15,27 @@ function StageBadge({ role }) {
   };
   const { label, cls } = map[role] || { label: 'Pending', cls: 'fs-stage-asst' };
   return <span className={`fs-stage-badge ${cls}`}>{label}</span>;
+}
+
+// ── Scheme reflection (read-only, mirrors Fresh Sanction assignment) ───────────
+function SchemeReflect({ item }) {
+  if (item.assignedScheme) {
+    return (
+      <div className="rn-scheme-reflect">
+        <span className="rn-scheme-code">{item.assignedScheme.schemeCode}</span>
+        <span className="rn-scheme-name">{item.assignedScheme.schemeName}</span>
+      </div>
+    );
+  }
+  if (item.assignedAccount) {
+    return (
+      <div className="rn-scheme-reflect">
+        <span className="rn-scheme-code">{item.assignedAccount}</span>
+        {item.accountCode && <span className="rn-scheme-name">Code: {item.accountCode}</span>}
+      </div>
+    );
+  }
+  return <span className="rn-scheme-empty">Not assigned</span>;
 }
 
 // ── View Page ─────────────────────────────────────────────────────────────────
@@ -89,6 +55,16 @@ function ViewPage({ item, onBack }) {
           <div><span>Department</span><strong>{item.pi.department}</strong></div>
           <div><span>Campus</span><strong>{item.pi.campus}</strong></div>
         </div>
+
+        {(item.assignedScheme || item.assignedAccount) && (
+          <div className="fs-account-badge">
+            Account: <strong>{item.assignedAccount || item.assignedScheme?.accountType}</strong>
+            {item.accountCode && <> &nbsp;| Code: <strong>{item.accountCode}</strong></>}
+            {item.assignedScheme?.schemeName && (
+              <> &nbsp;| Scheme: <strong>{item.assignedScheme.schemeName}</strong></>
+            )}
+          </div>
+        )}
 
         {/* Previous installments */}
         {item.installments.filter((_, i) => i < item.currentInstallment - 1).length > 0 && (
@@ -136,6 +112,7 @@ function ViewPage({ item, onBack }) {
                 <span className="fs-history-arrow">→</span>
                 <span className="fs-history-to">{h.to?.name || h.to}</span>
                 <span className={`fs-role-badge fs-role-${h.to?.role}`}>{h.to?.role}</span>
+                {h.approved === false && <span className="fs-role-badge" style={{ background:'#eef0fb', color:'#2c2a4a' }}>not approved</span>}
               </div>
             ))}
           </div>
@@ -239,9 +216,59 @@ export default function RenewalSanction() {
     );
   }, [activeSource, search]);
 
-  const handleTransfer          = (item, staff) => renewal_transfer(item, staff);
-  const handleForwardToDirector = (item, staff) => renewal_forwardToDirector(item, staff);
-  const handleComplete          = (item)         => renewal_complete(item);
+  // ── Transfer handlers (mirrors Fresh Sanction) ───────────────────────────────
+  const today = () => new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+
+  const handleApproveTransfer = (item, staff) => {
+    const mySig = getProfileSignature(role);
+    const stamped = {
+      ...item,
+      signatures: { ...(item.signatures || {}), [role]: mySig || true },
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: true },
+      ],
+    };
+    renewal_transfer(stamped, staff);
+  };
+
+  const handlePlainTransferAssistant = (item, staff) => {
+    const updated = {
+      ...item,
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: false },
+      ],
+    };
+    renewal_transfer(updated, staff);
+  };
+
+  const handleApproveForward = (item, staff) => {
+    const mySig = getProfileSignature(role);
+    const stamped = {
+      ...item,
+      signatures: { ...(item.signatures || {}), [role]: mySig || true },
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: true },
+      ],
+    };
+    renewal_forwardToDirector(stamped, staff);
+  };
+
+  const handlePlainTransferSuperintendent = (item, staff) => {
+    const updated = {
+      ...item,
+      currentHolder: staff,
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: userName(), fromRole: role, to: staff, date: today(), approved: false },
+      ],
+    };
+    renewal_updateTransferred(updated);
+  };
+
+  const handleComplete = (item) => renewal_complete(item);
 
   const handleSaveEdit = (updated) => {
     if (role === 'assistant') {
@@ -331,6 +358,7 @@ export default function RenewalSanction() {
             <th>Agency</th>
             <th>Installment</th>
             <th>Amount (₹)</th>
+            <th>Account / Scheme</th>
             {(activeTab === 'transferred' || (role !== 'assistant' && activeTab === 'active')) && <th>Stage</th>}
             <th>Actions</th>
           </tr>
@@ -357,6 +385,7 @@ export default function RenewalSanction() {
                 <td>{item.fundingAgency}</td>
                 <td>{current?.installmentNo}</td>
                 <td>{current?.amount}</td>
+                <td><SchemeReflect item={item} /></td>
                 {(activeTab === 'transferred' || (role !== 'assistant' && activeTab === 'active')) && (
                   <td><StageBadge role={item.currentHolder?.role} /></td>
                 )}
@@ -377,10 +406,20 @@ export default function RenewalSanction() {
                       </button>
                     )}
                     {role === 'assistant' && activeTab === 'active' && (
-                      <TransferCell item={item} onTransfer={handleTransfer} />
+                      <ProjectApprovalTransferCell
+                        item={item}
+                        userRole={role}
+                        onApproveTransfer={handleApproveTransfer}
+                        onPlainTransfer={handlePlainTransferAssistant}
+                      />
                     )}
                     {role === 'superintendent' && activeTab === 'active' && (
-                      <TransferCell item={item} onTransfer={handleForwardToDirector} />
+                      <ProjectApprovalTransferCell
+                        item={item}
+                        userRole={role}
+                        onApproveTransfer={handleApproveForward}
+                        onPlainTransfer={handlePlainTransferSuperintendent}
+                      />
                     )}
                     {role === 'director' && activeTab === 'active' && (
                       <button className="btn-approve" onClick={() => handleComplete(item)}>

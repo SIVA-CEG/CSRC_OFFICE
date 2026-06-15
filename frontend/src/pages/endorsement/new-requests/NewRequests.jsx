@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import "./NewRequests.css";
 import EndorsementDetailModal from "./EndorsementDetailModal";
 import { useNavigate } from "react-router-dom";
-import { useEndorsementContext } from "../EndorsementContext"; 
-// Or if the folder structure changed:
-// import { useEndorsementContext } from "../../EndorsementContext";
+import { useEndorsementContext } from "../EndorsementContext";
 
 // ── Shared Staff List ─────────────────────────────────────────────────────────
 export const STAFF_LIST = [
@@ -129,100 +127,98 @@ export const DUMMY_ENDORSEMENTS = [
     signatures: {},
   },
 ];
-
 function formatCurrency(val) {
   const n = parseFloat(val) || 0;
   return n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
 
-// ── Inline Signature Upload Cell ──────────────────────────────────────────────
-function SignatureCell({ row, onSignatureChange }) {
-  const fileRef = useRef(null);
-  const sig = row.signatures?.assistant || null;
-
-  const handleFile = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onSignatureChange(row.id, ev.target.result);
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-
-  return (
-    <div className="nr-sig-cell">
-      <input
-        type="file"
-        ref={fileRef}
-        accept="image/*"
-        style={{ display: "none" }}
-        onChange={handleFile}
-      />
-      {sig ? (
-        <div className="nr-sig-preview-wrap" title="Click to change">
-          <img src={sig} alt="Signature" className="nr-sig-preview-img" />
-          <button className="nr-sig-change-btn" onClick={() => fileRef.current?.click()}>✏️</button>
-        </div>
-      ) : (
-        <button className="nr-sig-upload-btn" onClick={() => fileRef.current?.click()}>
-          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-          </svg>
-          Upload Sign
-        </button>
-      )}
-    </div>
-  );
+// ── Read the signature saved on the profile page ──────────────────────────────
+function getProfileSignature(role) {
+  try {
+    const p = JSON.parse(localStorage.getItem(`csrc_profile_${role}`) || "null");
+    return p?.signature || null;
+  } catch {
+    return null;
+  }
 }
 
-// ── Transfer Cell ─────────────────────────────────────────────────────────────
-function TransferCell({ row, onTransfer, userRole }) {
-  const [open, setOpen]         = useState(false);
+// ── Approve & Transfer / Same-Level Transfer Cell ─────────────────────────────
+function ApprovalTransferCell({ row, onApproveTransfer, onPlainTransfer, userRole }) {
+  const [activeType, setActiveType] = useState(null); // "approve" | "plain" | null
   const [selectedId, setSelectedId] = useState("");
   const [confirming, setConfirming] = useState(false);
 
-  const eligible = userRole === "superintendent"
-    ? STAFF_LIST.filter(s => s.role === "director")
-    : STAFF_LIST.filter(s => s.role === "assistant" || s.role === "superintendent");
+  // Who you can Approve & Transfer to (next level up)
+  const approveEligible =
+    userRole === "assistant"      ? STAFF_LIST.filter(s => s.role === "superintendent") :
+    userRole === "superintendent" ? STAFF_LIST.filter(s => s.role === "director") :
+    [];
+
+  // Who you can transfer to at the same level, without approving
+  const plainEligible =
+    userRole === "assistant"      ? STAFF_LIST.filter(s => s.role === "assistant") :
+    userRole === "superintendent" ? STAFF_LIST.filter(s => s.role === "superintendent") :
+    [];
+
+  const isDirector = userRole === "director";
+
+  const reset = () => { setActiveType(null); setSelectedId(""); setConfirming(false); };
 
   const handleOk = () => {
     if (!selectedId) return;
     const staff = STAFF_LIST.find(s => s.id === parseInt(selectedId));
-    onTransfer(row.id, staff);
-    setOpen(false);
-    setSelectedId("");
-    setConfirming(false);
+    if (activeType === "approve") onApproveTransfer(row.id, staff);
+    if (activeType === "plain")   onPlainTransfer(row.id, staff);
+    reset();
   };
+
+  // Director is the final approver — no one to transfer to
+  if (isDirector) {
+    return (
+      <div className="nr-transfer-cell">
+        <button className="nr-approve-final-btn" onClick={() => onApproveTransfer(row.id, null)}>
+          ✅ Final Approve
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="nr-transfer-cell">
-      {!open ? (
-        <button className="nr-transfer-btn" onClick={() => setOpen(true)}>
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-          </svg>
-          Transfer
-        </button>
+      {!activeType ? (
+        <div className="nr-action-buttons">
+          <button className="nr-approve-btn" onClick={() => setActiveType("approve")}>
+            ✅ Approve &amp; Transfer
+          </button>
+          <button className="nr-plain-transfer-btn" onClick={() => setActiveType("plain")}>
+            ↪ Transfer (No Approval)
+          </button>
+        </div>
       ) : (
         <div className="nr-transfer-popup">
+          <div className="nr-transfer-popup-title">
+            {activeType === "approve" ? "Approve & Transfer to:" : "Transfer (same level) to:"}
+          </div>
           <select
             className="nr-transfer-select"
             value={selectedId}
             onChange={e => setSelectedId(e.target.value)}
           >
             <option value="">-- Select Staff --</option>
-            {eligible.map(s => (
+            {(activeType === "approve" ? approveEligible : plainEligible).map(s => (
               <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
             ))}
           </select>
           <div className="nr-transfer-actions">
             <button className="nr-transfer-ok" onClick={() => { if (selectedId) setConfirming(true); }} disabled={!selectedId}>OK</button>
-            <button className="nr-transfer-cancel" onClick={() => { setOpen(false); setSelectedId(""); }}>✕</button>
+            <button className="nr-transfer-cancel" onClick={reset}>✕</button>
           </div>
           {confirming && (
             <div className="nr-transfer-confirm">
-              <span>Transfer to <b>{STAFF_LIST.find(s => s.id === parseInt(selectedId))?.name}</b>?</span>
+              <span>
+                {activeType === "approve" ? "Approve and transfer to " : "Transfer to "}
+                <b>{STAFF_LIST.find(s => s.id === parseInt(selectedId))?.name}</b>?
+              </span>
               <button className="nr-transfer-ok" onClick={handleOk}>Confirm</button>
               <button className="nr-transfer-cancel" onClick={() => setConfirming(false)}>Back</button>
             </div>
@@ -237,12 +233,12 @@ function TransferCell({ row, onTransfer, userRole }) {
 export default function NewRequests() {
   const navigate = useNavigate();
 
-const {
-  activeRequests,
-  addTransferred,
-} = useEndorsementContext();
+  const {
+    activeRequests,
+    addTransferred,
+  } = useEndorsementContext();
 
-const [endorsements, setEndorsements] = useState(activeRequests);
+  const [endorsements, setEndorsements] = useState(activeRequests);
   const [selected, setSelected]         = useState(null);
   const [mounted, setMounted]           = useState(false);
   const [userRole, setUserRole]         = useState("assistant");
@@ -255,49 +251,57 @@ const [endorsements, setEndorsements] = useState(activeRequests);
     const role = localStorage.getItem("userRole") || "assistant";
     setUserRole(role);
   }, []);
+
   useEffect(() => {
-  setEndorsements(activeRequests);
-}, [activeRequests]);
+    setEndorsements(activeRequests);
+  }, [activeRequests]);
 
-  // Handle inline signature upload in table row
-  const handleSignatureChange = (id, dataUrl) => {
-    setEndorsements(prev =>
-      prev.map(e =>
-        e.id === id
-          ? { ...e, signatures: { ...(e.signatures || {}), assistant: dataUrl } }
-          : e
-      )
-    );
-  };
+  // Approve & Transfer → stamps the current user's profile signature
+  const handleApproveAndTransfer = (id, staff) => {
+    const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
+    const item = endorsements.find(e => e.id === id);
+    if (!item) return;
 
-  // Transfer out → send to Transferred page
-  const handleTransfer = (id, staff) => {
-  const today = new Date()
-    .toLocaleDateString("en-GB")
-    .replace(/\//g, "-");
+    const mySig  = getProfileSignature(userRole);
+    const toEntry = staff || { name: "Completed", role: userRole };
 
-  const item = endorsements.find(e => e.id === id);
-
-  if (!item) return;
-
-  const updated = {
-    ...item,
-    status: "TRANSFERRED",
-    transferredTo: staff,
-    transferHistory: [
-      ...(item.transferHistory || []),
-      {
-        from: "Office",
-        fromRole: userRole,
-        to: staff,
-        date: today,
+    const updated = {
+      ...item,
+      status: staff ? "TRANSFERRED" : "APPROVED",
+      transferredTo: staff,
+      signatures: {
+        ...(item.signatures || {}),
+        [userRole]: mySig || item.signatures?.[userRole] || true,
       },
-    ],
-    currentHolder: staff,
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: "Office", fromRole: userRole, to: toEntry, date: today, approved: true },
+      ],
+      currentHolder: toEntry,
+    };
+
+    addTransferred(updated);
   };
 
-  addTransferred(updated);
-};
+  // Transfer without approval → same-level handoff, no signature applied
+  const handlePlainTransfer = (id, staff) => {
+    const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
+    const item = endorsements.find(e => e.id === id);
+    if (!item) return;
+
+    const updated = {
+      ...item,
+      status: "TRANSFERRED",
+      transferredTo: staff,
+      transferHistory: [
+        ...(item.transferHistory || []),
+        { from: "Office", fromRole: userRole, to: staff, date: today, approved: false },
+      ],
+      currentHolder: staff,
+    };
+
+    addTransferred(updated);
+  };
 
   // Search filter
   const filtered = useMemo(() => {
@@ -370,14 +374,13 @@ const [endorsements, setEndorsements] = useState(activeRequests);
               <th>Agency</th>
               <th>Cost (₹)</th>
               <th>View</th>
-              <th>Signature</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {currentRows.length === 0 && (
               <tr>
-                <td colSpan={11} className="nr-empty-row">
+                <td colSpan={10} className="nr-empty-row">
                   {search ? `No results for "${search}"` : "No pending requests"}
                 </td>
               </tr>
@@ -410,10 +413,12 @@ const [endorsements, setEndorsements] = useState(activeRequests);
                   </button>
                 </td>
                 <td>
-                  <SignatureCell row={row} onSignatureChange={handleSignatureChange} />
-                </td>
-                <td>
-                  <TransferCell row={row} onTransfer={handleTransfer} userRole={userRole} />
+                  <ApprovalTransferCell
+                    row={row}
+                    onApproveTransfer={handleApproveAndTransfer}
+                    onPlainTransfer={handlePlainTransfer}
+                    userRole={userRole}
+                  />
                 </td>
               </tr>
             ))}
@@ -449,3 +454,11 @@ const [endorsements, setEndorsements] = useState(activeRequests);
     </div>
   );
 }
+
+
+
+
+
+
+
+

@@ -99,10 +99,8 @@
 .sanctioned-table tbody tr {
   transition: all 0.3s ease;
 }
-
 .sanctioned-table tbody tr:hover {
   background: rgba(37,99,235,0.05);
-  transform: scale(1.002);
 }
 
 .sanctioned-table tbody tr:last-child td {
@@ -598,7 +596,7 @@
 
 .fs-transfer-cell {
   position: relative;
-  overflow: visible;
+  min-width: 180px;
 }
 .fs-transfer-btn {
   border: none;
@@ -619,18 +617,22 @@
   transform: translateY(-2px);
 }
 
-/* Transfer Popup */
 .fs-transfer-popup {
   position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  width: 280px;
+  top: calc(100% + 8px);
+  left: 0;
+
+  width: 300px;
   background: white;
   border-radius: 14px;
   padding: 16px;
-  z-index: 9999;
+  z-index: 99999;
+
   box-shadow: 0 12px 30px rgba(0,0,0,.15);
+}
+.sanctioned-table td {
+  vertical-align: top;
+  overflow: visible !important;
 }
 
 .fs-transfer-confirm {
@@ -709,4 +711,136 @@
 .fs-status-completed {
   color: #10b981;
   font-weight: 700;
+}
+
+.fs-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fs-approve-btn,
+.fs-plain-transfer-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.fs-approve-btn {
+  background: #e7f5ee;
+  color: #1e7a52;
+  border: 1px solid #b9e4cf;
+}
+.fs-approve-btn:hover {
+  background: #1e7a52;
+  color: #ffffff;
+}
+
+.fs-plain-transfer-btn {
+  background: #eef0fb;
+  color: #2c2a4a;
+  border: 1px solid #ccd2f0;
+}
+.fs-plain-transfer-btn:hover {
+  background: #2c2a4a;
+  color: #ffffff;
+}
+
+.fs-transfer-popup-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a7268;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+/* Scheme assignment cell (Fresh Sanction) */
+.fs-scheme-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.fs-scheme-chip {
+  background: #fbf9f5;
+  border: 1px solid #ece6da;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.fs-scheme-code {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a6d4a;
+}
+
+.fs-scheme-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c2a4a;
+  margin: 2px 0;
+}
+
+.fs-scheme-type {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b6f9e;
+}
+
+.fs-scheme-empty {
+  font-size: 12px;
+  color: #9a9286;
+  font-style: italic;
+}
+
+.fs-scheme-action-btn {
+  background: #2c2a4a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.fs-scheme-action-btn:hover {
+  background: #463f73;
+}
+
+/* Reflected scheme display (Other Sanctions / Renewal) */
+.rn-scheme-reflect {
+  font-size: 12px;
+}
+.rn-scheme-reflect .rn-scheme-code {
+  font-weight: 700;
+  color: #8a6d4a;
+}
+.rn-scheme-reflect .rn-scheme-name {
+  color: #2c2a4a;
+  display: block;
+  margin-top: 2px;
+}
+.rn-scheme-empty {
+  font-size: 12px;
+  color: #9a9286;
+  font-style: italic;
+}
+.fs-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  min-width: 170px;
 }

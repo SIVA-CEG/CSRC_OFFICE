@@ -397,3 +397,41 @@
   justify-content: center;
   min-width: 90px;
 }
+
+.tr-tl-approved {
+  background: #1e7a52;
+  color: #ffffff;
+}
+.tr-tl-forwarded {
+  background: #6b6f9e;
+  color: #ffffff;
+}
+
+.tr-tl-status-badge {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.tr-tl-approved-badge {
+  background: #e7f5ee;
+  color: #1e7a52;
+}
+.tr-tl-forward-badge {
+  background: #eef0fb;
+  color: #2c2a4a;
+}
+
+.tr-er-sig-approved {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e7a52;
+}
+
+.tr-stage-completed {
+  background: #e7f5ee;
+  color: #1e7a52;
+  border: 1px solid #b9e4cf;
+}
