@@ -93,11 +93,11 @@ import ConsultancyAccount from '../../src_accounts/pages/banking/fundtransfer/Co
 import TECAccount from '../../src_accounts/pages/banking/fundtransfer/TECAccount';
 import TAXAccount from '../../src_accounts/pages/banking/fundtransfer/TAXAccount';
 import Receipts from '../../src_accounts/pages/receipts/Receipts';
-import ProjectAcR from '../../src_accounts/pages/receipts/ProjectAc';
-import MoPRAc from '../../src_accounts/pages/receipts/MoPRAc';
-import TTDFAcR from '../../src_accounts/pages/receipts/TTDFAc';
-import RevenueAcR from '../../src_accounts/pages/receipts/RevenueAc';
-import TaxAcR from '../../src_accounts/pages/receipts/TaxAc';
+import ProjectAc from '../../src_accounts/pages/receipts/ProjectAc';
+import MOPRAc from '../../src_accounts/pages/receipts/MOPRAc';
+import TTDFAc from '../../src_accounts/pages/receipts/TTDFAc';
+import RevenueAc from '../../src_accounts/pages/receipts/RevenueAc';
+import TaxAc from '../../src_accounts/pages/receipts/TaxAc';
 import ReceiptLock from '../../src_accounts/pages/receipts/ReceiptLock';
 import Payments from '../../src_accounts/pages/payments/Payments';
 import RevenueAcP from '../../src_accounts/pages/payments/RevenueAc';
@@ -112,6 +112,7 @@ import VoucherClearance from '../../src_accounts/pages/payments/VoucherClearance
 import PaymentTypes from '../../src_accounts/pages/payments/PaymentTypes';
 import SubheadTypes from '../../src_accounts/pages/payments/SubheadTypes';
 import PaymentLock from '../../src_accounts/pages/payments/PaymentLock';
+
 
 
 
@@ -130,6 +131,10 @@ import AccountsSchemes         from '../../src_accounts/pages/master/Schemes';
 
 
 import ProfilePage from '../components/ProfilePage';
+
+
+import MonthWiseReceiptReport from "../../src_accounts/pages/receipts/MonthWiseReceiptReport";
+import ReceiptReportView from "../../src_accounts/pages/receipts/ReceiptReportView";
 
 
 
@@ -260,12 +265,41 @@ export default function AppRouter() {
 
 {/* Receipts */}
 <Route path="/accounts/receipts" element={<Receipts />} />
-<Route path="/accounts/receipts/project-account" element={<ProjectAcR />} />
-<Route path="/accounts/receipts/mopr-account" element={<MoPRAc />} />
-<Route path="/accounts/receipts/ttdf-account" element={<TTDFAcR />} />
-<Route path="/accounts/receipts/revenue-account" element={<RevenueAcR />} />
-<Route path="/accounts/receipts/tax-account" element={<TaxAcR />} />
-<Route path="/accounts/receipts/receipt-lock" element={<ReceiptLock />} />
+<Route
+  path="/accounts/receipts/project-account"
+  element={<ProjectAc />}
+/>
+
+<Route
+  path="/accounts/receipts/mopr-account"
+  element={<MOPRAc />}
+/>
+
+<Route
+  path="/accounts/receipts/ttdf-account"
+  element={<TTDFAc />}
+/>
+
+<Route
+  path="/accounts/receipts/revenue-account"
+  element={<RevenueAc />}
+/>
+
+<Route
+  path="/accounts/receipts/tax-account"
+  element={<TaxAc />}
+/>
+
+<Route
+  path="/accounts/receipts/month-wise-report"
+  element={<MonthWiseReceiptReport />}
+/>
+
+<Route
+  path="/accounts/receipts/report/:id"
+  element={<ReceiptReportView />}
+/>
+
 
 {/* Payments */}
 <Route path="/accounts/payments" element={<Payments />} />

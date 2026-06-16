@@ -1,66 +1,108 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import csrcLogo from "../assets/csrc-logo.png";
+
 
 const NAV = [
-  { label: 'Dashboard', icon: '⊞', path: '/accounts' },
   {
-    label: 'Master', icon: '◈', path: '/master',
-    children: [
-      { label: 'Campus', path: '/accounts/master/campus' },
-      { label: 'Departments', path: '/accounts/master/departments' },
-      { label: 'Designation', path: '/accounts/master/designation' },
-      { label: 'Faculties', path: '/accounts/master/faculties' },
-      { label: 'Beneficiaries', path: '/accounts/master/beneficiaries' },
-      { label: 'Schemes', path: '/accounts/master/schemes' },
-      { label: 'PI Roles', path: '/accounts/master/pi-roles' },
-      { label: 'User Activation', path: '/accounts/master/user-activation' },
-    ]
-  },
-  { label: 'Budget', icon: '◉', path: '/accounts/budget' },
+  label: 'Dashboard',
+  icon: '📊',
+  path: '/accounts'
+},
+{
+  label: 'Master',
+  icon: '🗂️',
+  path: '/master',
+  children: [
+    { label: 'Campus', path: '/accounts/master/campus' },
+    { label: 'Departments', path: '/accounts/master/departments' },
+    { label: 'Designation', path: '/accounts/master/designation' },
+    { label: 'Faculties', path: '/accounts/master/faculties' },
+    { label: 'Beneficiaries', path: '/accounts/master/beneficiaries' },
+    { label: 'Schemes', path: '/accounts/master/schemes' },
+    { label: 'PI Roles', path: '/accounts/master/pi-roles' },
+    { label: 'User Activation', path: '/accounts/master/user-activation' },
+  ]
+},
+{
+  label: 'Budget',
+  icon: '💰',
+  path: '/accounts/budget'
+},
+{
+  label: 'Banking',
+  icon: '🏦',
+  path: '/accounts/banking',
+  children: [
+    {
+      label: 'Bank',
+      icon: '💳',
+      path: '/accounts/banking/bank',
+      children: [
+        { label: 'New Entry', path: '/accounts/banking/bank/new-entry' },
+        { label: 'Original Statements', path: '/accounts/banking/bank/original-statements' },
+        { label: 'Current Statements', path: '/accounts/banking/bank/current-statements' },
+      ]
+    },
+    {
+      label: 'Fund Transfer',
+      icon: '🔄',
+      path: '/accounts/banking/fund-transfer',
+      children: [
+        { label: 'Revenue Account', path: '/accounts/banking/fund-transfer/revenue-account' },
+        { label: 'Project Account', path: '/accounts/banking/fund-transfer/project-account' },
+        { label: 'MOPR Account', path: '/accounts/banking/fund-transfer/mopr-account' },
+        { label: 'TTDF Account', path: '/accounts/banking/fund-transfer/ttdf-account' },
+        { label: 'Consultancy Account', path: '/accounts/banking/fund-transfer/consultancy-account' },
+        { label: 'TEC Account', path: '/accounts/banking/fund-transfer/tec-account' },
+        { label: 'TAX Account', path: '/accounts/banking/fund-transfer/tax-account' },
+      ]
+    },
+  ]
+},
   {
-    label: 'Banking', icon: '⬡', path: '/accounts/banking',
-    children: [
-      {
-        label: 'Bank', icon: '○', path: '/accounts/banking/bank',
-        children: [
-          { label: 'New Entry', path: '/accounts/banking/bank/new-entry' },
-          { label: 'Original Statements', path: '/accounts/banking/bank/original-statements' },
-          { label: 'Current Statements', path: '/accounts/banking/bank/current-statements' },
-        ]
-      },
-      {
-        label: 'Fund Transfer', icon: '○', path: '/accounts/banking/fund-transfer',
-        children: [
-          { label: 'Revenue Account', path: '/accounts/banking/fund-transfer/revenue-account' },
-          { label: 'Project Account', path: '/accounts/banking/fund-transfer/project-account' },
-          { label: 'MOPR Account', path: '/accounts/banking/fund-transfer/mopr-account' },
-          { label: 'TTDF Account', path: '/accounts/banking/fund-transfer/ttdf-account' },
-          { label: 'Consultancy Account', path: '/accounts/banking/fund-transfer/consultancy-account' },
-          { label: 'TEC Account', path: '/accounts/banking/fund-transfer/tec-account' },
-          { label: 'TAX Account', path: '/accounts/banking/fund-transfer/tax-account' },
-        ]
-      },
-    ]
-  },
+  label: 'Receipts',
+  icon: '🧾',
+  path: '/accounts/receipts',
+  children: [
+    {
+      label: 'Project A/c',
+      path: '/accounts/receipts/project-account'
+    },
+    {
+      label: 'MoPR A/c',
+      path: '/accounts/receipts/mopr-account'
+    },
+    {
+      label: 'TTDF A/c',
+      path: '/accounts/receipts/ttdf-account'
+    },
+    {
+      label: 'Revenue A/c',
+      path: '/accounts/receipts/revenue-account'
+    },
+    {
+      label: 'Tax A/c',
+      path: '/accounts/receipts/tax-account'
+    },
+    {
+  label: 'Receipt Lock',
+  path: '/accounts/receipts/receipt-lock'
+},
+{
+  label: 'Month Wise Report',
+  path: '/accounts/receipts/month-wise-report'
+}
+  ]
+},
   {
-    label: 'Receipts', icon: '◎', path: '/accounts/receipts',
+    label: 'Payments', icon: '💳', path: '/accounts/payments',
     children: [
-      { label: 'Project A/c', path: '/accounts/receipts/project-ac' },
-      { label: 'MoPR A/c', path: '/accounts/receipts/mopr-ac' },
-      { label: 'TTDF A/c', path: '/accounts/receipts/ttdf-ac' },
-      { label: 'Revenue A/c', path: '/accounts/receipts/revenue-ac' },
-      { label: 'Tax A/c', path: '/accounts/receipts/tax-ac' },
-      { label: 'Receipt Lock', path: '/accounts/receipts/receipt-lock' },
-    ]
-  },
-  {
-    label: 'Payments', icon: '◐', path: '/accounts/payments',
-    children: [
-      { label: 'Revenue A/c', path: '/accounts/payments/revenue-ac' },
-      { label: 'Project A/c', path: '/accounts/payments/project-ac' },
-      { label: 'MOPR A/c', path: '/accounts/payments/mopr-ac' },
-      { label: 'TTDF A/c', path: '/accounts/payments/ttdf-ac' },
-      { label: 'Tax A/c', path: '/accounts/payments/tax-ac' },
+      { label: 'Revenue A/c', path: '/accounts/payments/revenue-account' },
+      { label: 'Project A/c', path: '/accounts/payments/project-account' },
+      { label: 'MOPR A/c', path: '/accounts/payments/mopr-account' },
+      { label: 'TTDF A/c', path: '/accounts/payments/ttdf-account' },
+      { label: 'Tax A/c', path: '/accounts/payments/tax-account' },
       { label: 'Unspent Amount', path: '/accounts/payments/unspent-amount' },
       { label: 'Adv Settlement', path: '/accounts/payments/adv-settlement' },
       { label: 'Bank Clearance', path: '/accounts/payments/bank-clearance' },
@@ -75,16 +117,18 @@ const NAV = [
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [openGroups, setOpenGroups] = useState(() => {
+const [openGroups, setOpenGroups] = useState(() => {
   const initial = {};
 
   NAV.forEach(item => {
-    if (
-      item.children &&
-      item.children.some(child =>
-        location.pathname.startsWith(child.path)
+    const hasMatch = item.children?.some(child =>
+      location.pathname.startsWith(child.path) ||
+      child.children?.some(gc =>
+        location.pathname.startsWith(gc.path)
       )
-    ) {
+    );
+
+    if (hasMatch) {
       initial[item.label] = true;
     }
   });
@@ -103,7 +147,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={sideStyles.logoArea}>
         <div style={sideStyles.logoIcon}>
-          <img src="src/assets/csrc-logo.png" alt="Logo"
+          <img src={csrcLogo} alt="Logo"
             style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 10 }}
             onError={e => { e.target.style.display = 'none'; }}
           />
@@ -183,17 +227,31 @@ export default function Sidebar() {
   child.children.some(gc => location.pathname === gc.path)) && (
                       <div style={sideStyles.grandchildGroup}>
                         {child.children.map(gc => (
-                          <div
-                            key={gc.label}
-                            style={{
-                              ...sideStyles.grandchildItem,
-                              ...(location.pathname === gc.path ? sideStyles.grandchildActive : {}),
-                            }}
-                            onClick={() => navigate(gc.path)}
-                          >
-                            — {gc.label}
-                          </div>
-                        ))}
+  <div
+    key={gc.label}
+    style={{
+      ...sideStyles.grandchildItem,
+      ...(location.pathname === gc.path
+        ? sideStyles.grandchildActive
+        : {}),
+    }}
+    onMouseEnter={(e) => {
+      if (location.pathname !== gc.path) {
+        e.currentTarget.style.background =
+          'rgba(255,255,255,0.12)';
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (location.pathname !== gc.path) {
+        e.currentTarget.style.background =
+          'transparent';
+      }
+    }}
+    onClick={() => navigate(gc.path)}
+  >
+    — {gc.label}
+  </div>
+))}
                       </div>
                     )}
                   </div>
@@ -372,12 +430,32 @@ navIcon: {
 },
   dot: { fontSize: 9, color: 'var(--text-muted)' },
   chevronSm: { fontSize: 9, marginLeft: 'auto', color: 'var(--text-muted)' },
-  grandchildGroup: { paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 1, marginBottom: 2 },
+  grandchildGroup: {
+  marginLeft: '20px',
+  paddingLeft: '16px',
+  borderLeft: '1px solid rgba(255,255,255,0.18)',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+  marginBottom: '8px',
+},
   grandchildItem: {
-    padding: '6px 8px', fontSize: 11.5, color: 'var(--text-muted)',
-    cursor: 'pointer', borderRadius: 6, transition: 'all 0.15s', userSelect: 'none',
-  },
-  grandchildActive: { color: 'var(--accent-glow)', color: 'var(--accent)' },
+  padding: '10px 14px',
+  fontSize: '14px',
+  fontWeight: '500',
+  color: 'rgba(255,255,255,0.85)',
+  cursor: 'pointer',
+  borderRadius: '10px',
+  transition: 'all 0.25s ease',
+  userSelect: 'none',
+},
+  grandchildActive: {
+  background:
+    'linear-gradient(135deg, rgba(255,255,255,0.20), rgba(255,255,255,0.08))',
+  color: '#fff',
+  fontWeight: '600',
+  border: '1px solid rgba(255,255,255,0.2)',
+},
   userChip: {
   margin: '18px',
   padding: '16px',

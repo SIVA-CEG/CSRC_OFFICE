@@ -3,12 +3,53 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 
 const CARDS = [
-  { label: 'Project A/c', icon: '📁', desc: 'Project account receipt entries and records', path: '/receipts/project-ac', color: '#06b6d4' },
-  { label: 'MoPR A/c', icon: '🏛️', desc: 'Ministry of Panchayati Raj receipt management', path: '/receipts/mopr-ac', color: '#8b5cf6' },
-  { label: 'TTDF A/c', icon: '🔬', desc: 'TTDF account receipts and transactions', path: '/receipts/ttdf-ac', color: '#f59e0b' },
-  { label: 'Revenue A/c', icon: '💰', desc: 'Revenue account receipt tracking', path: '/receipts/revenue-ac', color: '#10b981' },
-  { label: 'Tax A/c', icon: '🧾', desc: 'Tax account receipts and deductions', path: '/receipts/tax-ac', color: '#f43f5e' },
-  { label: 'Receipt Lock', icon: '🔒', desc: 'Lock and finalise receipt period entries', path: '/receipts/receipt-lock', color: '#a78bfa' },
+  {
+    label: 'Project A/c',
+    icon: '📁',
+    desc: 'Project account receipt entries and records',
+    path: '/accounts/receipts/project-account',
+    color: '#06b6d4'
+  },
+
+  {
+    label: 'MoPR A/c',
+    icon: '🏛️',
+    desc: 'Ministry of Panchayati Raj receipt management',
+    path: '/accounts/receipts/mopr-account',
+    color: '#8b5cf6'
+  },
+
+  {
+    label: 'TTDF A/c',
+    icon: '🔬',
+    desc: 'TTDF account receipts and transactions',
+    path: '/accounts/receipts/ttdf-account',
+    color: '#f59e0b'
+  },
+
+  {
+    label: 'Revenue A/c',
+    icon: '💰',
+    desc: 'Revenue account receipt tracking',
+    path: '/accounts/receipts/revenue-account',
+    color: '#10b981'
+  },
+
+  {
+    label: 'Tax A/c',
+    icon: '🧾',
+    desc: 'Tax account receipts and deductions',
+    path: '/accounts/receipts/tax-account',
+    color: '#f43f5e'
+  },
+
+  {
+    label: 'Receipt Lock',
+    icon: '🔒',
+    desc: 'Lock and finalise receipt period entries',
+    path: '/accounts/receipts/receipt-lock',
+    color: '#a78bfa'
+  }
 ];
 
 export default function Receipts() {
@@ -18,10 +59,43 @@ export default function Receipts() {
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
         Dashboard / Receipts
       </div>
-      <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>Receipts</h2>
-      <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 30 }}>
-        Manage receipts for project, revenue, tax and other CSRC accounts.
-      </p>
+      <div style={{
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 30,
+  flexWrap: 'wrap',
+  gap: 16
+}}>
+  <div>
+    <h2 style={{
+      fontSize: 28,
+      fontWeight: 800,
+      color: 'var(--text-primary)',
+      marginBottom: 8
+    }}>
+      Receipt Management
+    </h2>
+
+    <p style={{
+      fontSize: 14,
+      color: 'var(--text-secondary)'
+    }}>
+      Process bank statement entries into account receipts
+    </p>
+  </div>
+
+  <div style={{
+    padding: '10px 16px',
+    borderRadius: 12,
+    background: 'rgba(16,185,129,.12)',
+    border: '1px solid rgba(16,185,129,.2)',
+    color: '#10b981',
+    fontWeight: 700
+  }}>
+    5 Account Types
+  </div>
+</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 20 }}>
         {CARDS.map(c => <ReceiptCard key={c.label} card={c} onClick={() => navigate(c.path)} />)}
       </div>
@@ -37,7 +111,7 @@ function ReceiptCard({ card, onClick }) {
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
       style={{
-        background: 'rgba(30,41,59,0.75)', borderRadius: 18, padding: '24px 20px',
+        background: 'rgba(255, 255, 255, 0.75)', borderRadius: 18, padding: '24px 20px',
         cursor: 'pointer', position: 'relative', overflow: 'hidden',
         transition: 'all 0.22s cubic-bezier(.4,0,.2,1)',
         transform: h ? 'translateY(-3px)' : 'none',

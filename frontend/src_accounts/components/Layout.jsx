@@ -1,4 +1,5 @@
 import Sidebar from './Sidebar';
+import annaLogo from "../assets/anna-university-logo.png";
 
 export default function Layout({ children, title, subtitle }) {
   return (
@@ -28,7 +29,7 @@ export default function Layout({ children, title, subtitle }) {
     <div style={navStyles.badge}>Anna University</div>
     <div style={navStyles.logoBox}>
   <img
-    src="src/assets/anna-university-logo.png"
+    src={annaLogo}
     alt="Anna University Logo"
     style={{
       width: "100%",

@@ -18,7 +18,6 @@ const CARDS = [
     path: '/accounts/budget',
     color: '#8b5cf6',
     glow: 'rgba(139,92,246,0.20)',
-    tag: 'Under Construction',
   },
   {
     label: 'Banking',

@@ -21,7 +21,14 @@ export default function NewEntry() {
     const e = {};
     if (!form.transactionDate) e.transactionDate = 'Date is required';
     if (!form.bankDescription.trim()) e.bankDescription = 'Description is required';
-    if (!form.debitAmount && !form.creditAmount) e.debitAmount = 'Enter debit or credit amount';
+    if (!form.debitAmount && !form.creditAmount) {
+  e.debitAmount = 'Enter either debit or credit amount';
+}
+
+if (form.debitAmount && form.creditAmount) {
+  e.debitAmount = 'Only one amount can be entered';
+  e.creditAmount = 'Only one amount can be entered';
+}
     return e;
   };
 
@@ -41,10 +48,25 @@ export default function NewEntry() {
       timestamp: new Date().toISOString(),
     };
 
-    // Save to localStorage (original + current both get the same entry)
-    const existing = JSON.parse(localStorage.getItem('bank_entries') || '[]');
-    existing.unshift(entry);
-    localStorage.setItem('bank_entries', JSON.stringify(existing));
+// Save to Original Statements
+const originalEntries = JSON.parse(
+  localStorage.getItem('original_bank_entries') || '[]'
+);
+originalEntries.unshift(entry);
+localStorage.setItem(
+  'original_bank_entries',
+  JSON.stringify(originalEntries)
+);
+
+// Save to Current Statements (editable copy)
+const currentEntries = JSON.parse(
+  localStorage.getItem('current_bank_entries') || '[]'
+);
+currentEntries.unshift({ ...entry });
+localStorage.setItem(
+  'current_bank_entries',
+  JSON.stringify(currentEntries)
+);
 
     setTimeout(() => {
       setSubmitting(false);
@@ -143,7 +165,18 @@ export default function NewEntry() {
                 placeholder="0.00"
                 style={{ ...s.input, ...s.amountInput, ...(errors.debitAmount ? s.inputError : {}) }}
                 value={form.debitAmount}
-                onChange={e => set('debitAmount', e.target.value)}
+                disabled={!!form.creditAmount}
+                onChange={e => {
+  set('debitAmount', e.target.value);
+
+  if (e.target.value) {
+    setForm(p => ({
+      ...p,
+      debitAmount: e.target.value,
+      creditAmount: '',
+    }));
+  }
+}}
                 onFocus={e => e.target.style.borderColor = '#f43f5e'}
                 onBlur={e => e.target.style.borderColor = errors.debitAmount ? '#f43f5e' : 'rgba(255,255,255,0.1)'}
               />
@@ -161,7 +194,18 @@ export default function NewEntry() {
                 placeholder="0.00"
                 style={{ ...s.input, ...s.amountInput }}
                 value={form.creditAmount}
-                onChange={e => set('creditAmount', e.target.value)}
+                disabled={!!form.debitAmount}
+                onChange={e => {
+  set('creditAmount', e.target.value);
+
+  if (e.target.value) {
+    setForm(p => ({
+      ...p,
+      creditAmount: e.target.value,
+      debitAmount: '',
+    }));
+  }
+}}
                 onFocus={e => e.target.style.borderColor = '#10b981'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
@@ -252,13 +296,19 @@ const s = {
     background: 'linear-gradient(135deg, #06b6d4, #0ea5e9)',
     color: '#fff', boxShadow: '0 3px 12px rgba(6,182,212,0.35)',
   },
-  card: {
-    background: 'rgba(30,41,59,0.75)', backdropFilter: 'blur(16px)',
-    borderRadius: 20, padding: '32px 32px 28px',
-    border: '1px solid var(--border)', position: 'relative', overflow: 'hidden',
-    boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
-    maxWidth: 780,
-  },
+card: {
+  background: 'rgba(255, 255, 255, 0.75)',
+  backdropFilter: 'blur(16px)',
+  borderRadius: 20,
+  padding: '32px 32px 28px',
+  border: '1px solid var(--border)',
+  position: 'relative',
+  overflow: 'hidden',
+  boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
+  maxWidth: 780,
+  width: '100%',
+  margin: '0 auto',
+},
   cardAccent: {
     position: 'absolute', top: 0, left: 0, right: 0, height: 3,
     background: 'linear-gradient(90deg, #06b6d4, #0ea5e9, transparent)',
@@ -286,7 +336,7 @@ const s = {
     textTransform: 'uppercase', letterSpacing: '0.7px',
   },
   input: {
-    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+    background: 'rgba(255,255,255,0.05)', border: '1px solid rgb(0, 0, 0)',
     borderRadius: 10, padding: '11px 14px', color: 'var(--text-primary)',
     fontSize: 14, fontFamily: 'Sora, sans-serif', outline: 'none',
     transition: 'border-color 0.2s', width: '100%',

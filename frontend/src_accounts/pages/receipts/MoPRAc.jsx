@@ -1,10 +1,9 @@
-import Layout from '../../components/Layout';
-import ComingSoon from '../../components/ComingSoon';
+import ReceiptAccountPage from "./ReceiptAccountPage";
 
-export default function MoPRAc() {
+export default function MOPRAc() {
   return (
-    <Layout title="MoPR A/c" subtitle="Receipts / MoPR A/c">
-      <ComingSoon title="MoPR A/c — Receipts" color="#8b5cf6" />
-    </Layout>
+    <ReceiptAccountPage
+      accountName="MOPR"
+    />
   );
 }

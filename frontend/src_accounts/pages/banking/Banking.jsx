@@ -72,7 +72,7 @@ const styles = {
   sub: { fontSize: 13, color: 'var(--text-secondary)', marginBottom: 32 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: 22 },
   card: {
-    background: 'rgba(30,41,59,0.75)', backdropFilter: 'blur(16px)',
+    background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(16px)',
     borderRadius: 20, padding: '28px 24px', cursor: 'pointer',
     transition: 'all 0.25s cubic-bezier(.4,0,.2,1)', position: 'relative', overflow: 'hidden',
   },

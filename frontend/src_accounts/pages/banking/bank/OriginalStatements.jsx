@@ -13,7 +13,9 @@ export default function OriginalStatements() {
   const [viewModal, setViewModal] = useState(null);
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem('bank_entries') || '[]');
+    const data = JSON.parse(
+  localStorage.getItem('original_bank_entries') || '[]'
+);
     setEntries(data);
   }, []);
 
@@ -169,7 +171,7 @@ const s = {
   },
   filterBar: {
     display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22,
-    background: 'rgba(30,41,59,0.7)', padding: '14px 20px', borderRadius: 14,
+    background: 'rgba(255, 255, 255, 0.7)', padding: '14px 20px', borderRadius: 14,
     border: '1px solid var(--border)', flexWrap: 'wrap',
   },
   filterLabel: { fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginRight: 4 },
@@ -180,7 +182,7 @@ const s = {
     colorScheme: 'dark',
   },
   tableWrap: {
-    background: 'rgba(30,41,59,0.75)', borderRadius: 16, overflow: 'hidden',
+    background: 'rgba(255, 255, 255, 0.75)', borderRadius: 16, overflow: 'hidden',
     border: '1px solid var(--border)', marginBottom: 18,
   },
   table: { width: '100%', borderCollapse: 'collapse' },
@@ -209,7 +211,7 @@ const s = {
     justifyContent: 'center', zIndex: 200,
   },
   modal: {
-    background: '#1e293b', borderRadius: 20, width: '90%', maxWidth: 500,
+    background: '#ffffff', borderRadius: 20, width: '90%', maxWidth: 500,
     border: '1px solid var(--border)', position: 'relative', overflow: 'hidden',
     boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
   },
