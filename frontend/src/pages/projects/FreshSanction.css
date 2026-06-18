@@ -844,3 +844,79 @@
   align-items: flex-start;
   min-width: 170px;
 }
+
+/* ===============================
+   REPORT POPUP
+================================ */
+
+.ep-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 999999;
+  padding: 20px;
+}
+
+.ep-modal {
+  background: #ffffff;
+  width: 95vw;
+  max-width: 1200px;
+  height: 90vh;
+
+  border-radius: 18px;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  box-shadow:
+    0 25px 60px rgba(0,0,0,.35);
+}
+
+.ep-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e7eb;
+
+  background: white;
+}
+
+.ep-modal-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.ep-btn-close {
+  width: 42px;
+  height: 42px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #ef4444;
+  color: white;
+
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.ep-btn-close:hover {
+  background: #dc2626;
+}
+
+.ep-report-wrap {
+  flex: 1;
+  overflow-y: auto;
+  background: #f3f4f6;
+  padding: 24px;
+}

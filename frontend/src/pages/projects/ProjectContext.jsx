@@ -153,7 +153,6 @@ const ProjectContext = createContext(null);
 
 export function ProjectProvider({ children }) {
   // Active (not yet transferred) items visible to assistant
-  const [freshActive,   setFreshActive]   = useState(FRESH_SEED);
   const [renewalActive, setRenewalActive] = useState(RENEWAL_SEED);
   const [reapActive,    setReapActive]    = useState(REAP_SEED);
   const [extActive,     setExtActive]     = useState(EXT_SEED);
@@ -169,6 +168,17 @@ export function ProjectProvider({ children }) {
   const [renewalCompleted, setRenewalCompleted] = useState([]);
   const [reapCompleted,    setReapCompleted]    = useState([]);
   const [extCompleted,     setExtCompleted]     = useState([]);
+
+  const [freshActive, setFreshActive] = useState(() => {
+  try {
+    const stored = localStorage.getItem('csrc_fresh_active');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.length > 0) return parsed;
+    }
+  } catch (_) {}
+  return FRESH_SEED;
+});
 
   // ── Generic helpers ────────────────────────────────────────────────────────
   const makeTransferFns = (

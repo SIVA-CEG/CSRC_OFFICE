@@ -121,12 +121,12 @@ export default function ProjectDashboard() {
         <div className="project-summary-bar">
           <div className="psb-item">
             <span className="psb-num">{counts.freshPending}</span>
-            <span className="psb-label">Fresh Pending</span>
+            <span className="psb-label">Fresh sanctions Pending</span>
           </div>
           <div className="psb-divider" />
           <div className="psb-item">
             <span className="psb-num">{counts.renewalPending}</span>
-            <span className="psb-label">Renewal Pending</span>
+            <span className="psb-label">Other sanctions Pending</span>
           </div>
           <div className="psb-divider" />
           <div className="psb-item">

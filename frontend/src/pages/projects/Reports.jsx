@@ -1,34 +1,6 @@
-import React, { useState } from "react";
-import "./Reports.css";
+import React, { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
-
-
-
-const dummyReports = [
-  {
-    id: 1,
-    fileNo: "CMRG/2025/014",
-    title: "AI Based Smart Agriculture",
-    pi: "Dr. Arun Kumar",
-    department: "IT",
-    campus: "CEG Campus",
-    funding: "CMRG",
-    amount: "25,00,000",
-    status: "Ongoing"
-  },
-  {
-    id: 2,
-    fileNo: "CRG/2025/021",
-    title: "IoT Smart Monitoring",
-    pi: "Dr. Priya",
-    department: "CSE",
-    campus: "MIT Campus",
-    funding: "CRG",
-    amount: "40,00,000",
-    status: "Completed"
-  }
-];
-
+import "./Reports.css";
 
 const fundingAgency = [
     {
@@ -7272,474 +7244,1065 @@ const campuses = [
     }
   ];
 
-export default function Reports() {
+// ── Dummy projects ─────────────────────────────────────────────────────────────
+const initialProjects = [
+  {
+    id: 1,
+    fileNo: "CMRG/2025/014",
+    title: "AI Based Smart Agriculture",
+    pi: "Dr. Arun Kumar",
+    coPI1: "Dr. Meena Raj",
+    coPI2: "",
+    coPI3: "",
+    department: "Information Science And Technology",
+    campus: "CEG Campus",
+    funding: "CMRG",
+    scheme: "CRG",
+    agencyType: "C",
+    amount: "25,00,000",
+    sanctionDate: "2023-04-01",
+    endDate: "2025-03-31",
+    status: "ongoing",
+    closureSubmitted: false,
+    closureData: null,
+    closureStatus: null, // null | "under_review" | "approved"
+  },
+  {
+    id: 2,
+    fileNo: "CRG/2025/021",
+    title: "IoT Smart Monitoring System",
+    pi: "Dr. Priya Natarajan",
+    coPI1: "Dr. Suresh K",
+    coPI2: "",
+    coPI3: "",
+    department: "Computer Science and Engineering",
+    campus: "MIT Campus",
+    funding: "SERB",
+    scheme: "Core Research Grant {CRG}",
+    agencyType: "C",
+    amount: "40,00,000",
+    sanctionDate: "2022-06-15",
+    endDate: "2024-06-14",
+    status: "completed",
+    closureSubmitted: false,
+    closureData: null,
+    closureStatus: null,
+  },
+  {
+    id: 3,
+    fileNo: "DST/2023/008",
+    title: "Nano Material Synthesis for Energy Storage",
+    pi: "Dr. Kavitha R.",
+    coPI1: "",
+    coPI2: "",
+    coPI3: "",
+    department: "Centre for Nanoscience And Technology",
+    campus: "CEG Campus",
+    funding: "DST",
+    scheme: "SERB",
+    agencyType: "C",
+    amount: "18,50,000",
+    sanctionDate: "2021-01-10",
+    endDate: "2023-01-09",
+    status: "closed",
+    closureSubmitted: true,
+    closureData: null,
+    closureStatus: "approved",
+  },
+];
 
-const [selectedReport, setSelectedReport] = useState(null);
-const [showPreview, setShowPreview] = useState(false);
-
-const openPreview = (report) => {
-  setSelectedReport(report);
-  setShowPreview(true);
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const statusMeta = {
+  ongoing: { label: "Ongoing", color: "#0d6efd", bg: "#e7f0ff" },
+  completed: { label: "Completed", color: "#d97706", bg: "#fef3c7" },
+  closed: { label: "Closed", color: "#15803d", bg: "#dcfce7" },
+  under_review: { label: "Under Review", color: "#7c3aed", bg: "#f3f0ff" },
 };
 
-const downloadPDF = () => {
-
-  const element = document.getElementById(
-    "report-preview-content"
+const ClosureStatus = ({ s }) => {
+  const m = statusMeta[s] || statusMeta.ongoing;
+  return (
+    <span
+      style={{
+        background: m.bg,
+        color: m.color,
+        borderRadius: 20,
+        padding: "3px 12px",
+        fontSize: 12,
+        fontWeight: 600,
+      }}
+    >
+      {m.label}
+    </span>
   );
-
-  if (!element || !selectedReport) {
-    alert("No report selected");
-    return;
-  }
-
-  const options = {
-    margin: 10,
-    filename: `${selectedReport.fileNo}.pdf`,
-    image: { type: "jpeg", quality: 1 },
-    html2canvas: { scale: 2 },
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait"
-    }
-  };
-
-  html2pdf()
-    .set(options)
-    .from(element)
-    .save();
 };
 
-const directDownloadPDF = (report) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// Filters panel (shared)
+// ─────────────────────────────────────────────────────────────────────────────
+function FiltersPanel({ filters, setFilters, onSearch, onReset }) {
+  const set = (k) => (e) => setFilters((p) => ({ ...p, [k]: e.target.value }));
+  return (
+    <div className="rp-filters">
+      <div className="rp-fh">
+        <h2 className="rp-sec-title">Filters</h2>
+        <span className="rp-sec-sub">Narrow your search</span>
+      </div>
+      <div className="rp-fgrid">
+        <select value={filters.funding} onChange={set("funding")}>
+          <option value="">Funding Agency</option>
+          {fundingAgency.map((x, i) => (
+            <option key={i} value={x.value}>{x.text}</option>
+          ))}
+        </select>
+        <select value={filters.scheme} onChange={set("scheme")}>
+          <option value="">Project Scheme</option>
+          {projectScheme.map((x, i) => (
+            <option key={i} value={x.value}>{x.text}</option>
+          ))}
+        </select>
+        <select value={filters.agencyType} onChange={set("agencyType")}>
+          <option value="">Agency Type</option>
+          {agencyType.map((x, i) => (
+            <option key={i} value={x.value}>{x.text}</option>
+          ))}
+        </select>
+        <select value={filters.faculty} onChange={set("faculty")}>
+          <option value="">Faculty Name</option>
+          {facultyNames.map((x, i) => (
+            <option key={i} value={x.value}>{x.text}</option>
+          ))}
+        </select>
+        <select value={filters.department} onChange={set("department")}>
+          <option value="">Department</option>
+          {departments.map((x, i) => (
+            <option key={i} value={x.value}>{x.text}</option>
+          ))}
+        </select>
+        <select value={filters.campus} onChange={set("campus")}>
+          <option value="">Campus</option>
+          {campuses.map((x, i) => (
+            <option key={i} value={x.value}>{x.text}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="Search by title or file no."
+          value={filters.q}
+          onChange={set("q")}
+          className="rp-search-input"
+        />
+      </div>
+      <div className="rp-fdate">
+        {[
+          ["Sanction Date", "sanctionFrom", "sanctionTo"],
+          ["Project End Date", "endFrom", "endTo"],
+        ].map(([label, f, t]) => (
+          <div className="rp-date-card" key={f}>
+            <label>{label}</label>
+            <div className="rp-di">
+              <input type="date" value={filters[f]} onChange={set(f)} />
+              <span style={{ color: "#94a3b8", fontSize: 12 }}>to</span>
+              <input type="date" value={filters[t]} onChange={set(t)} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="rp-factions">
+        <button className="rp-btn-primary" onClick={onSearch}>Search</button>
+        <button className="rp-btn-ghost" onClick={onReset}>Reset</button>
+      </div>
+    </div>
+  );
+}
 
-  const element = document.createElement("div");
-
-  element.innerHTML = `
-    <h1>ANNA UNIVERSITY</h1>
-    <h3>Centre for Sponsored Research & Consultancy</h3>
-
-    <hr/>
-
-    <h2>Project Report</h2>
-
-    <p><b>File No:</b> ${report.fileNo}</p>
-    <p><b>Title:</b> ${report.title}</p>
-    <p><b>PI:</b> ${report.pi}</p>
-    <p><b>Department:</b> ${report.department}</p>
-    <p><b>Campus:</b> ${report.campus}</p>
-    <p><b>Funding:</b> ${report.funding}</p>
-    <p><b>Amount:</b> ₹${report.amount}</p>
-  `;
-
-  html2pdf()
-    .set({
-      margin: 10,
-      filename: `${report.fileNo}.pdf`,
-      image: { type: "jpeg", quality: 1 },
-      html2canvas: { scale: 2 },
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait"
-      }
-    })
-    .from(element)
-    .save();
-};
+// ─────────────────────────────────────────────────────────────────────────────
+// Project detail drawer
+// ─────────────────────────────────────────────────────────────────────────────
+function ProjectDrawer({ project, onClose, onSubmitClosure, onApproveClosure }) {
+  if (!project) return null;
+  const isCompleted = project.status === "completed";
+  const isUnderReview = project.closureStatus === "under_review";
+  const isClosed = project.status === "closed";
 
   return (
-    <div className="reports-page">
-
-      <div className="reports-header">
-        <div>
-          <h1>Project Reports</h1>
-          <p>
-            Generate, preview and download project reports
-          </p>
+    <div className="rp-drawer-overlay" onClick={onClose}>
+      <div className="rp-drawer" onClick={(e) => e.stopPropagation()}>
+        <div className="rp-drawer-head">
+          <div>
+            <p className="rp-drawer-fileno">{project.fileNo}</p>
+            <h2 className="rp-drawer-title">{project.title}</h2>
+          </div>
+          <button className="rp-close-btn" onClick={onClose}>✕</button>
         </div>
 
-        <button className="generate-all-btn">
-          Generate Combined PDF
+        <div className="rp-drawer-body">
+          <div className="rp-detail-grid">
+            {[
+              ["Principal Investigator", project.pi],
+              ["Co-PI 1", project.coPI1 || "—"],
+              ["Co-PI 2", project.coPI2 || "—"],
+              ["Co-PI 3", project.coPI3 || "—"],
+              ["Department", project.department],
+              ["Campus", project.campus],
+              ["Funding Agency", project.funding],
+              ["Scheme", project.scheme],
+              ["Agency Type", agencyType.find(a => a.value === project.agencyType)?.text || project.agencyType],
+              ["Sanction Amount", "₹" + project.amount],
+              ["Sanction Date", project.sanctionDate],
+              ["End Date", project.endDate],
+            ].map(([k, v]) => (
+              <div className="rp-detail-row" key={k}>
+                <span className="rp-detail-key">{k}</span>
+                <span className="rp-detail-val">{v}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="rp-status-row">
+            <span className="rp-detail-key">Status</span>
+            <ClosureStatus s={isUnderReview ? "under_review" : project.status} />
+          </div>
+
+          {isCompleted && !isUnderReview && (
+            <button
+              className="rp-btn-amber rp-mt"
+              onClick={() => onSubmitClosure(project)}
+            >
+              Submit Project Closure Report
+            </button>
+          )}
+
+          {isUnderReview && (
+            <div className="rp-review-banner">
+              <span>📋 Closure report submitted — awaiting office review.</span>
+              {/* Admin action (can be hidden for PI role) */}
+              <button className="rp-btn-green rp-ml" onClick={() => onApproveClosure(project.id)}>
+                Approve (Office)
+              </button>
+            </div>
+          )}
+
+          {isClosed && (
+            <div className="rp-closed-banner">
+              ✅ Project closed. Closure report approved.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Project list row
+// ─────────────────────────────────────────────────────────────────────────────
+function ProjectRow({ project, onClick, onSubmitClosure }) {
+  const isCompleted = project.status === "completed";
+  const isUnderReview = project.closureStatus === "under_review";
+  const statusKey = isUnderReview ? "under_review" : project.status;
+
+  return (
+    <tr className="rp-row" onClick={() => onClick(project)}>
+      <td className="rp-td rp-td-fileno">{project.fileNo}</td>
+      <td className="rp-td">{project.title}</td>
+      <td className="rp-td">{project.pi}</td>
+      <td className="rp-td">{project.department}</td>
+      <td className="rp-td">{project.campus}</td>
+      <td className="rp-td rp-td-center">
+        <ClosureStatus s={statusKey} />
+      </td>
+      <td className="rp-td rp-td-center" onClick={(e) => e.stopPropagation()}>
+        {isCompleted && !isUnderReview && (
+          <button
+            className="rp-btn-amber-sm"
+            onClick={() => onSubmitClosure(project)}
+          >
+            Submit Closure Report
+          </button>
+        )}
+        {isUnderReview && (
+          <span className="rp-tag-review">Under Review</span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Closure Report Form  (3-page form based on the actual CSRC form)
+// ─────────────────────────────────────────────────────────────────────────────
+const emptyForm = {
+  // Page 1 – Project Details
+  projectTitle: "",
+  fundingAgency: "",
+  national: "national",
+  pi: "",
+  piDesignation: "",
+  coPI1: "",
+  coPI1Designation: "",
+  coPI2: "",
+  coPI3: "",
+  externalCollaborators: "no",
+  moaSigned: "no",
+  // Project details
+  sanctionRef: "",
+  projectDuration: "",
+  budgetSanctioned: "",
+  installment1Amount: "",
+  installment1Date: "",
+  installment2Amount: "",
+  installment2Date: "",
+  installment3Amount: "",
+  installment3Date: "",
+  majorEquipment: "no",
+  equipmentCost: "",
+  ctdtProcNo: "",
+  ctdtSNo: "",
+  ctdtPgNo: "",
+  stockRegisterEnclose: "no",
+  extensionObtained: "no",
+  extensionAgency: "",
+  utilizationI: "",
+  utilizationII: "",
+  utilizationIII: "",
+  // Page 2 – Completion details
+  unspentReturned: "no",
+  unspentAmount: "",
+  unspentMode: "",
+  auditObjection: "no",
+  completionReportSubmitted: "no",
+  closureCertificateReceived: "no",
+  outcomeProduct: false,
+  outcomePatent: false,
+  outcomePublications: false,
+  outcomePhD: false,
+  trlLevel: "",
+  piInterestedContinue: "no",
+  // Documents (checklist)
+  docProjectSanction: "",
+  docCTDTProceedings: "",
+  docExtensionLetter: "",
+  docUCYearwise: "",
+  docUCFinal: "",
+  docAuditReply: "",
+  docCompletionReport: "",
+  docUnspentReturn: "",
+  docPublication: "",
+  docPatent: "",
+  docConference: "",
+  docClosureCert: "",
+  docStockRegister: "",
+  // Uploads
+  uploads: [],
+};
+
+function ClosureForm({ project, onClose, onSubmit }) {
+  const [page, setPage] = useState(1);
+  const [form, setForm] = useState({
+    ...emptyForm,
+    projectTitle: project.title,
+    fundingAgency: project.funding,
+    pi: project.pi,
+    coPI1: project.coPI1 || "",
+    coPI2: project.coPI2 || "",
+    coPI3: project.coPI3 || "",
+    budgetSanctioned: project.amount,
+  });
+  const fileRef = useRef();
+
+  const set = (k) => (e) => {
+    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setForm((p) => ({ ...p, [k]: val }));
+  };
+
+  const handleFiles = (e) => {
+    const files = Array.from(e.target.files).map((f) => f.name);
+    setForm((p) => ({ ...p, uploads: [...p.uploads, ...files] }));
+  };
+
+  const handleSubmit = () => onSubmit(project.id, form);
+
+  // PDF generation
+  const downloadPDF = () => {
+    const el = document.getElementById("closure-pdf-content");
+    if (!el) return;
+    html2pdf().set({
+      margin: 10,
+      filename: `${project.fileNo}_ClosureReport.pdf`,
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    }).from(el).save();
+  };
+
+  const YNRadio = ({ name, val, onChange, label = "" }) => (
+    <div className="rp-yn">
+      {label && <span className="rp-yn-label">{label}</span>}
+      {["yes", "no"].map((v) => (
+        <label key={v} className="rp-yn-opt">
+          <input type="radio" name={name} value={v} checked={val === v} onChange={onChange} />
+          <span>{v === "yes" ? "Yes" : "No"}</span>
+        </label>
+      ))}
+    </div>
+  );
+
+  const CheckDoc = ({ label, fKey }) => (
+    <tr>
+      <td className="rp-chtd">{label}</td>
+      {["yes", "no", "na"].map((v) => (
+        <td key={v} className="rp-chtd rp-chtd-center">
+          <input
+            type="radio"
+            name={fKey}
+            value={v}
+            checked={form[fKey] === v}
+            onChange={set(fKey)}
+          />
+        </td>
+      ))}
+    </tr>
+  );
+
+  return (
+    <div className="rp-drawer-overlay">
+      <div className="rp-modal rp-modal-lg">
+        {/* Header */}
+        <div className="rp-modal-head">
+          <div>
+            <p className="rp-drawer-fileno">{project.fileNo}</p>
+            <h2 className="rp-drawer-title">Project Closure Report</h2>
+          </div>
+          <button className="rp-close-btn" onClick={onClose}>✕</button>
+        </div>
+
+        {/* Steps */}
+        <div className="rp-steps">
+          {["Project Details", "Completion Details", "Documents Checklist"].map((s, i) => (
+            <div
+              key={i}
+              className={`rp-step ${page === i + 1 ? "rp-step-active" : page > i + 1 ? "rp-step-done" : ""}`}
+            >
+              <div className="rp-step-num">{page > i + 1 ? "✓" : i + 1}</div>
+              <span>{s}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="rp-modal-body">
+
+          {/* ── PAGE 1 ── */}
+          {page === 1 && (
+            <div>
+              <h3 className="rp-form-section-title">A. Investigators Details</h3>
+              <div className="rp-form-grid">
+                <div className="rp-field-full">
+                  <label>Project Title</label>
+                  <input type="text" value={form.projectTitle} onChange={set("projectTitle")} />
+                </div>
+                <div>
+                  <label>Funding Agency</label>
+                  <input type="text" value={form.fundingAgency} onChange={set("fundingAgency")} />
+                </div>
+                <div>
+                  <label>National / International</label>
+                  <select value={form.national} onChange={set("national")}>
+                    <option value="national">National</option>
+                    <option value="international">International</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Principal Investigator</label>
+                  <input type="text" value={form.pi} onChange={set("pi")} />
+                </div>
+                <div>
+                  <label>PI Designation & Address</label>
+                  <input type="text" value={form.piDesignation} onChange={set("piDesignation")} />
+                </div>
+                <div>
+                  <label>Co-PI 1 & Designation</label>
+                  <input type="text" value={form.coPI1} onChange={set("coPI1")} />
+                  <input type="text" placeholder="Designation & Address" value={form.coPI1Designation} onChange={set("coPI1Designation")} style={{ marginTop: 6 }} />
+                </div>
+                <div>
+                  <label>Co-PI 2 Designation & Address</label>
+                  <input type="text" value={form.coPI2} onChange={set("coPI2")} />
+                </div>
+                <div>
+                  <label>Co-PI 3 Designation & Address</label>
+                  <input type="text" value={form.coPI3} onChange={set("coPI3")} />
+                </div>
+              </div>
+              <div className="rp-form-row">
+                <YNRadio name="externalCollaborators" val={form.externalCollaborators} onChange={set("externalCollaborators")} label="Any external collaborators involved in the project?" />
+              </div>
+              <div className="rp-form-row">
+                <YNRadio name="moaSigned" val={form.moaSigned} onChange={set("moaSigned")} label="Any MOA/MOU signed?" />
+              </div>
+
+              <h3 className="rp-form-section-title" style={{ marginTop: 24 }}>B. Project Details</h3>
+              <div className="rp-form-grid">
+                <div>
+                  <label>Project Sanction Reference No.</label>
+                  <input type="text" value={form.sanctionRef} onChange={set("sanctionRef")} />
+                </div>
+                <div>
+                  <label>Project Duration</label>
+                  <input type="text" value={form.projectDuration} onChange={set("projectDuration")} placeholder="e.g. 3 years" />
+                </div>
+                <div>
+                  <label>Budget Sanctioned (₹)</label>
+                  <input type="text" value={form.budgetSanctioned} onChange={set("budgetSanctioned")} />
+                </div>
+              </div>
+
+              <p className="rp-sublabel">Budget Released</p>
+              <div className="rp-installment-grid">
+                {[
+                  ["I Instalment", "installment1Amount", "installment1Date"],
+                  ["II Instalment", "installment2Amount", "installment2Date"],
+                  ["III Instalment", "installment3Amount", "installment3Date"],
+                ].map(([label, aKey, dKey]) => (
+                  <div className="rp-instalment" key={label}>
+                    <span className="rp-inst-label">{label}</span>
+                    <input type="text" placeholder="Amount (₹)" value={form[aKey]} onChange={set(aKey)} />
+                    <input type="date" placeholder="Date of release" value={form[dKey]} onChange={set(dKey)} />
+                  </div>
+                ))}
+              </div>
+
+              <div className="rp-form-row rp-mt">
+                <YNRadio name="majorEquipment" val={form.majorEquipment} onChange={set("majorEquipment")} label="Any major equipment purchased (costing more than ₹10 lakhs)?" />
+              </div>
+              {form.majorEquipment === "yes" && (
+                <div className="rp-form-grid rp-conditional">
+                  <div>
+                    <label>Cost of Equipment</label>
+                    <input type="text" value={form.equipmentCost} onChange={set("equipmentCost")} />
+                  </div>
+                  <div>
+                    <label>CTDT Proc No.</label>
+                    <input type="text" value={form.ctdtProcNo} onChange={set("ctdtProcNo")} />
+                  </div>
+                  <div>
+                    <label>S.No.</label>
+                    <input type="text" value={form.ctdtSNo} onChange={set("ctdtSNo")} />
+                  </div>
+                  <div>
+                    <label>Pg.No.</label>
+                    <input type="text" value={form.ctdtPgNo} onChange={set("ctdtPgNo")} />
+                  </div>
+                  <div>
+                    <label>Enclose copy of stock register?</label>
+                    <YNRadio name="stockRegisterEnclose" val={form.stockRegisterEnclose} onChange={set("stockRegisterEnclose")} />
+                  </div>
+                </div>
+              )}
+
+              <div className="rp-form-row rp-mt">
+                <YNRadio name="extensionObtained" val={form.extensionObtained} onChange={set("extensionObtained")} label="Any extension obtained from funding agency?" />
+              </div>
+              {form.extensionObtained === "yes" && (
+                <div className="rp-form-grid rp-conditional">
+                  <div>
+                    <label>Funding Agency for Extension</label>
+                    <input type="text" value={form.extensionAgency} onChange={set("extensionAgency")} />
+                  </div>
+                </div>
+              )}
+
+              <p className="rp-sublabel rp-mt">Percentage of Fund Utilization (based on amount received)</p>
+              <div className="rp-form-grid">
+                {[["I Year", "utilizationI"], ["II Year", "utilizationII"], ["III Year", "utilizationIII"]].map(([lbl, k]) => (
+                  <div key={k}>
+                    <label>{lbl} (%)</label>
+                    <input type="text" value={form[k]} onChange={set(k)} placeholder="e.g. 85%" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── PAGE 2 ── */}
+          {page === 2 && (
+            <div>
+              <h3 className="rp-form-section-title">Closure Details</h3>
+              <table className="rp-detail-table">
+                <tbody>
+                  <tr>
+                    <td className="rp-dtd">9. Any unspent money returned to the funding agency</td>
+                    <td className="rp-dtd">
+                      <YNRadio name="unspentReturned" val={form.unspentReturned} onChange={set("unspentReturned")} />
+                    </td>
+                    <td className="rp-dtd">
+                      {form.unspentReturned === "yes" && (
+                        <div className="rp-inline-fields">
+                          <div>
+                            <label>Amount</label>
+                            <input type="text" value={form.unspentAmount} onChange={set("unspentAmount")} />
+                          </div>
+                          <div>
+                            <label>Mode of Return</label>
+                            <select value={form.unspentMode} onChange={set("unspentMode")}>
+                              <option value="">Select</option>
+                              <option value="DD">DD</option>
+                              <option value="Bharatkosh">Bharatkosh</option>
+                              <option value="Others">Others</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="rp-dtd">10. Any audit objection received</td>
+                    <td className="rp-dtd">
+                      <YNRadio name="auditObjection" val={form.auditObjection} onChange={set("auditObjection")} />
+                    </td>
+                    <td className="rp-dtd"></td>
+                  </tr>
+                  <tr>
+                    <td className="rp-dtd">11. Whether the project closure report submitted to the funding agency</td>
+                    <td className="rp-dtd">
+                      <YNRadio name="completionReportSubmitted" val={form.completionReportSubmitted} onChange={set("completionReportSubmitted")} />
+                    </td>
+                    <td className="rp-dtd"></td>
+                  </tr>
+                  <tr>
+                    <td className="rp-dtd">12. Whether project closure certificate received from funding agency</td>
+                    <td className="rp-dtd">
+                      <YNRadio name="closureCertificateReceived" val={form.closureCertificateReceived} onChange={set("closureCertificateReceived")} />
+                    </td>
+                    <td className="rp-dtd"></td>
+                  </tr>
+                  <tr>
+                    <td className="rp-dtd">13. Outcome of the project</td>
+                    <td className="rp-dtd" colSpan={2}>
+                      <div className="rp-checkbox-row">
+                        {[["outcomeProduct", "Product"], ["outcomePatent", "Patent"], ["outcomePublications", "Publications"], ["outcomePhD", "Ph.D"]].map(([k, lbl]) => (
+                          <label key={k} className="rp-cb-label">
+                            <input type="checkbox" checked={form[k]} onChange={set(k)} />
+                            <span>{lbl}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="rp-dtd">14. The TRL level of the Project outcome</td>
+                    <td className="rp-dtd" colSpan={2}>
+                      <div className="rp-radio-row">
+                        {["TRL 1-3", "TRL 4-6", "TRL 7-9"].map((v) => (
+                          <label key={v} className="rp-cb-label">
+                            <input type="radio" name="trlLevel" value={v} checked={form.trlLevel === v} onChange={set("trlLevel")} />
+                            <span>{v}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="rp-dtd">15. Whether the PI is interested in continuing the project to improve the TRL?</td>
+                    <td className="rp-dtd" colSpan={2}>
+                      <div className="rp-radio-row">
+                        {["yes", "no", "na"].map((v) => (
+                          <label key={v} className="rp-cb-label">
+                            <input type="radio" name="piInterestedContinue" value={v} checked={form.piInterestedContinue === v} onChange={set("piInterestedContinue")} />
+                            <span>{v === "na" ? "NA" : v.charAt(0).toUpperCase() + v.slice(1)}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="rp-certification-box">
+                <p>It is certified that the project has been closed and the proposed objectives are met. The received fund has been utilized as per the Funding agency/Anna University norms. There is no unspent money left in the project. The project closure report and final UC have been submitted to the funding agency.</p>
+              </div>
+
+              <div className="rp-signature-grid">
+                <div className="rp-sig-box">
+                  <span>Name and Signature of PI</span>
+                  <div className="rp-sig-line" />
+                </div>
+                <div className="rp-sig-box">
+                  <span>Name and Signature of Co-PIs</span>
+                  <div className="rp-sig-line" />
+                </div>
+              </div>
+              <div className="rp-sig-center">
+                <div className="rp-sig-box" style={{ maxWidth: 360 }}>
+                  <span>Signature of the Director/HOD with seal and Date</span>
+                  <div className="rp-sig-line" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── PAGE 3 ── */}
+          {page === 3 && (
+            <div>
+              <h3 className="rp-form-section-title">Checklist: Project Closure Report</h3>
+              <table className="rp-checklist-table">
+                <thead>
+                  <tr>
+                    <th className="rp-chth rp-chth-doc">Documents Enclosed</th>
+                    <th className="rp-chth rp-chth-yn">Yes</th>
+                    <th className="rp-chth rp-chth-yn">No</th>
+                    <th className="rp-chth rp-chth-yn">NA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["1. Project Sanction copy", "docProjectSanction"],
+                    ["2. CTDT proceedings", "docCTDTProceedings"],
+                    ["3. Project Extension letter", "docExtensionLetter"],
+                    ["4. Utilization certificate copies (year wise)", "docUCYearwise"],
+                    ["5. Utilization certificate copy Final", "docUCFinal"],
+                    ["6. Reply to audit objection (if any)", "docAuditReply"],
+                    ["7. Project Closure Report", "docCompletionReport"],
+                    ["8. Unspent money return details (if any)", "docUnspentReturn"],
+                    ["9. Publication (First page of publication)", "docPublication"],
+                    ["11. Patent details", "docPatent"],
+                    ["12. Conference/Seminar presented", "docConference"],
+                    ["13. Project closure certificate received from Funding agency", "docClosureCert"],
+                    ["14. Equipment stock register entry (copy) in case of equipment cost more than 10 Lakhs", "docStockRegister"],
+                  ].map(([lbl, fKey]) => (
+                    <CheckDoc key={fKey} label={lbl} fKey={fKey} />
+                  ))}
+                </tbody>
+              </table>
+
+              {/* File upload */}
+              <div className="rp-upload-section">
+                <h4>Upload Supporting Documents</h4>
+                <div
+                  className="rp-dropzone"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <span>📎 Click to upload files (PDF, JPG, PNG)</span>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    style={{ display: "none" }}
+                    onChange={handleFiles}
+                  />
+                </div>
+                {form.uploads.length > 0 && (
+                  <div className="rp-upload-list">
+                    {form.uploads.map((f, i) => (
+                      <div key={i} className="rp-upload-file">
+                        📄 {f}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="rp-signature-grid">
+                <div className="rp-sig-box">
+                  <span>Name and Signature of PI</span>
+                  <div className="rp-sig-line" />
+                </div>
+                <div className="rp-sig-box">
+                  <span>Name and Signature of Co-PIs</span>
+                  <div className="rp-sig-line" />
+                </div>
+              </div>
+              <div className="rp-office-use">
+                <strong>Office Use</strong>
+                <p>Verified the submitted documents</p>
+                <div className="rp-office-sig-grid">
+                  <span>Dealing hand</span>
+                  <span>Superintendent</span>
+                  <span>Director CSRC</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer navigation */}
+        <div className="rp-modal-foot">
+          <div>
+            {page > 1 && (
+              <button className="rp-btn-ghost" onClick={() => setPage(p => p - 1)}>← Back</button>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button className="rp-btn-ghost" onClick={downloadPDF}>Download PDF</button>
+            {page < 3 ? (
+              <button className="rp-btn-primary" onClick={() => setPage(p => p + 1)}>Next →</button>
+            ) : (
+              <button className="rp-btn-green" onClick={handleSubmit}>Submit for Review</button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Hidden PDF content */}
+      <div id="closure-pdf-content" style={{ position: "absolute", left: -9999, top: 0, width: 794, background: "white", padding: 40, fontFamily: "sans-serif", fontSize: 13, color: "#000" }}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <strong style={{ fontSize: 16 }}>CENTRE FOR SPONSORED RESEARCH AND CONSULTANCY</strong><br />
+          <strong>ANNA UNIVERSITY</strong><br />
+          <strong>PROJECT CLOSURE REPORT</strong><br />
+          <em style={{ fontSize: 12 }}>[To be submitted to CSRC after closure of each funded project]</em>
+        </div>
+        <hr />
+        <h3>A. Investigators Details</h3>
+        {[
+          ["Project Title", form.projectTitle],
+          ["Funding Agency", form.fundingAgency],
+          ["National/International", form.national],
+          ["Principal Investigator", form.pi],
+          ["PI Designation", form.piDesignation],
+          ["Co-PI 1", form.coPI1],
+          ["Co-PI 2", form.coPI2],
+          ["Co-PI 3", form.coPI3],
+          ["External Collaborators", form.externalCollaborators],
+          ["MOA/MOU Signed", form.moaSigned],
+        ].map(([k, v]) => v ? <p key={k}><strong>{k}:</strong> {v}</p> : null)}
+        <h3>B. Project Details</h3>
+        {[
+          ["Sanction Reference No.", form.sanctionRef],
+          ["Project Duration", form.projectDuration],
+          ["Budget Sanctioned", "₹" + form.budgetSanctioned],
+          ["I Instalment Amount", form.installment1Amount],
+          ["I Instalment Date", form.installment1Date],
+          ["II Instalment Amount", form.installment2Amount],
+          ["II Instalment Date", form.installment2Date],
+          ["III Instalment Amount", form.installment3Amount],
+          ["III Instalment Date", form.installment3Date],
+          ["Major Equipment", form.majorEquipment],
+          ["Extension Obtained", form.extensionObtained],
+          ["Utilization I Year", form.utilizationI],
+          ["Utilization II Year", form.utilizationII],
+          ["Utilization III Year", form.utilizationIII],
+        ].map(([k, v]) => v ? <p key={k}><strong>{k}:</strong> {v}</p> : null)}
+        <h3>Closure Details</h3>
+        {[
+          ["Unspent Money Returned", form.unspentReturned],
+          ["Unspent Amount", form.unspentAmount],
+          ["Mode of Return", form.unspentMode],
+          ["Audit Objection", form.auditObjection],
+          ["Closure Report Submitted", form.completionReportSubmitted],
+          ["Closure Certificate Received", form.closureCertificateReceived],
+          ["TRL Level", form.trlLevel],
+          ["PI Interested in Continuing", form.piInterestedContinue],
+        ].map(([k, v]) => v ? <p key={k}><strong>{k}:</strong> {v}</p> : null)}
+        <p><strong>Outcome:</strong>{form.outcomeProduct ? " Product" : ""}{form.outcomePatent ? " Patent" : ""}{form.outcomePublications ? " Publications" : ""}{form.outcomePhD ? " Ph.D" : ""}</p>
+        <h3>Checklist – Documents Enclosed</h3>
+        <table border="1" cellPadding="6" style={{ borderCollapse: "collapse", width: "100%" }}>
+          <thead><tr><th>Document</th><th>Yes</th><th>No</th><th>NA</th></tr></thead>
+          <tbody>
+            {[
+              ["Project Sanction copy", form.docProjectSanction],
+              ["CTDT proceedings", form.docCTDTProceedings],
+              ["Project Extension letter", form.docExtensionLetter],
+              ["Utilization certificate copies (year wise)", form.docUCYearwise],
+              ["Utilization certificate copy Final", form.docUCFinal],
+              ["Reply to audit objection", form.docAuditReply],
+              ["Project Closure Report", form.docCompletionReport],
+              ["Unspent money return details", form.docUnspentReturn],
+              ["Publication", form.docPublication],
+              ["Patent details", form.docPatent],
+              ["Conference/Seminar presented", form.docConference],
+              ["Project closure certificate", form.docClosureCert],
+              ["Equipment stock register entry", form.docStockRegister],
+            ].map(([doc, val]) => (
+              <tr key={doc}>
+                <td>{doc}</td>
+                <td style={{ textAlign: "center" }}>{val === "yes" ? "✓" : ""}</td>
+                <td style={{ textAlign: "center" }}>{val === "no" ? "✓" : ""}</td>
+                <td style={{ textAlign: "center" }}>{val === "na" ? "✓" : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ marginTop: 40 }}>
+          <p>It is certified that the project has been closed and the proposed objectives are met. The received fund has been utilized as per the Funding agency/Anna University norms.</p>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 40 }}>
+          <div style={{ borderTop: "1px solid #000", width: 200, paddingTop: 4, textAlign: "center" }}>Name and Signature of PI</div>
+          <div style={{ borderTop: "1px solid #000", width: 200, paddingTop: 4, textAlign: "center" }}>Name and Signature of Co-PIs</div>
+        </div>
+        <div style={{ textAlign: "center", marginTop: 32 }}>
+          <div style={{ borderTop: "1px solid #000", width: 260, margin: "0 auto", paddingTop: 4 }}>Signature of the Director/HOD with seal and Date</div>
+        </div>
+        <div style={{ marginTop: 40, borderTop: "2px solid #000", paddingTop: 10 }}>
+          <strong>Office Use</strong><br />
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24 }}>
+            <span>Dealing hand</span>
+            <span>Superintendent</span>
+            <span>Director CSRC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main component
+// ─────────────────────────────────────────────────────────────────────────────
+export default function Reports() {
+  const [projects, setProjects] = useState(initialProjects);
+  const [activeTab, setActiveTab] = useState("ongoing");
+  const [detailProject, setDetailProject] = useState(null);
+  const [closureProject, setClosureProject] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    q: "", funding: "", scheme: "", agencyType: "", faculty: "", department: "", campus: "",
+    sanctionFrom: "", sanctionTo: "", endFrom: "", endTo: "",
+  });
+  const [appliedFilters, setAppliedFilters] = useState(filters);
+
+  const counts = {
+    ongoing: projects.filter(p => p.status === "ongoing").length,
+    completed: projects.filter(p => p.status === "completed" || (p.closureStatus === "under_review")).length,
+    closed: projects.filter(p => p.status === "closed").length,
+  };
+
+  const tabProjects = projects.filter((p) => {
+    if (activeTab === "ongoing") return p.status === "ongoing";
+    if (activeTab === "completed") return p.status === "completed" || p.closureStatus === "under_review";
+    if (activeTab === "closed") return p.status === "closed";
+    return false;
+  }).filter((p) => {
+    const f = appliedFilters;
+    if (f.q && !p.title.toLowerCase().includes(f.q.toLowerCase()) && !p.fileNo.toLowerCase().includes(f.q.toLowerCase())) return false;
+    if (f.campus && !p.campus.includes(f.campus)) return false;
+    if (f.department && !p.department.includes(f.department)) return false;
+    return true;
+  });
+
+  const handleSearch = () => setAppliedFilters(filters);
+  const handleReset = () => { const e = { q: "", funding: "", scheme: "", agencyType: "", faculty: "", department: "", campus: "", sanctionFrom: "", sanctionTo: "", endFrom: "", endTo: "" }; setFilters(e); setAppliedFilters(e); };
+
+  const handleSubmitClosure = (p) => { setDetailProject(null); setClosureProject(p); };
+
+  const handleClosureSubmit = (id, formData) => {
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, closureSubmitted: true, closureData: formData, closureStatus: "under_review" } : p));
+    setClosureProject(null);
+  };
+
+  const handleApproveClosure = (id) => {
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, status: "closed", closureStatus: "approved" } : p));
+    setDetailProject(null);
+  };
+
+  const tabs = [
+    { key: "ongoing", label: "Ongoing Projects", icon: "🔵" },
+    { key: "completed", label: "Completed Projects", icon: "🟡" },
+    { key: "closed", label: "Closed Projects", icon: "🟢" },
+  ];
+
+  return (
+    <div className="rp-page">
+      {/* Page header */}
+      <div className="rp-page-header">
+        <div>
+          <h1 className="rp-page-title">Project Reports</h1>
+          <p className="rp-page-sub">CSRC — Centre for Sponsored Research and Consultancy, Anna University</p>
+        </div>
+        <button className="rp-btn-ghost" onClick={() => setShowFilters(v => !v)}>
+          {showFilters ? "Hide Filters ↑" : "Show Filters ↓"}
         </button>
       </div>
 
-      <div className="reports-container">
-
-        {/* Filters Section */}
-
-        <div className="reports-filters">
-
-  <div className="filters-header">
-    <h2>Report Filters</h2>
-    <span>Select criteria to generate reports</span>
-  </div>
-
-  <div className="filters-grid">
-
-    <select>
-      <option>Funding Agency</option>
-      {fundingAgency.map((item,index)=>(
-        <option
-          key={index}
-          value={item.value}
-        >
-          {item.text}
-        </option>
-      ))}
-    </select>
-
-    <select>
-      <option>Project Scheme</option>
-      {projectScheme.map((item,index)=>(
-        <option
-          key={index}
-          value={item.value}
-        >
-          {item.text}
-        </option>
-      ))}
-    </select>
-
-    <select>
-      <option>Agency Type</option>
-      {agencyType.map((item,index)=>(
-        <option
-          key={index}
-          value={item.value}
-        >
-          {item.text}
-        </option>
-      ))}
-    </select>
-
-    <select>
-      <option>Faculty Name</option>
-      {facultyNames.map((item,index)=>(
-        <option
-          key={index}
-          value={item.value}
-        >
-          {item.text}
-        </option>
-      ))}
-    </select>
-
-    <select>
-      <option>Department</option>
-      {departments.map((item,index)=>(
-        <option
-          key={index}
-          value={item.value}
-        >
-          {item.text}
-        </option>
-      ))}
-    </select>
-
-    <select>
-      <option>Campus</option>
-      {campuses.map((item,index)=>(
-        <option
-          key={index}
-          value={item.value}
-        >
-          {item.text}
-        </option>
-      ))}
-    </select>
-
-    <select>
-      <option>Project Status</option>
-      <option>Ongoing</option>
-      <option>Completed</option>
-      <option>Closed</option>
-      <option>Pending</option>
-    </select>
-
-    <select>
-      <option>Report Type</option>
-      <option>Project Report</option>
-      <option>Financial Report</option>
-      <option>Claims Report</option>
-      <option>Complete Report</option>
-    </select>
-
-  </div>
-
-  <div className="date-filter-section">
-
-    <div className="date-card">
-
-      <label>Sanction Date</label>
-
-      <div className="date-inputs">
-        <input type="date" />
-        <input type="date" />
+      {/* Summary cards */}
+      <div className="rp-summary-cards">
+        {tabs.map(({ key, label, icon }) => (
+          <div
+            key={key}
+            className={`rp-summary-card ${activeTab === key ? "rp-summary-active" : ""}`}
+            onClick={() => setActiveTab(key)}
+          >
+            <span className="rp-summary-icon">{icon}</span>
+            <div>
+              <div className="rp-summary-count">{counts[key]}</div>
+              <div className="rp-summary-label">{label}</div>
+            </div>
+          </div>
+        ))}
       </div>
 
-    </div>
+      {/* Filters */}
+      {showFilters && (
+        <FiltersPanel
+          filters={filters}
+          setFilters={setFilters}
+          onSearch={handleSearch}
+          onReset={handleReset}
+        />
+      )}
 
-    <div className="date-card">
-
-      <label>Project End Date</label>
-
-      <div className="date-inputs">
-        <input type="date" />
-        <input type="date" />
-      </div>
-
-    </div>
-
-    <div className="date-card">
-
-      <label>Credit Date</label>
-
-      <div className="date-inputs">
-        <input type="date" />
-        <input type="date" />
-      </div>
-
-    </div>
-
-  </div>
-
-  <div className="filter-actions">
-
-    <button className="search-report-btn">
-      Search Reports
-    </button>
-
-    <button className="reset-report-btn">
-      Reset
-    </button>
-
-  </div>
-
-</div>
-
-        {/* Results Section */}
-
-        <div className="reports-results">
-
-  <div className="results-header">
-
-    <div>
-      <h2>Generated Reports</h2>
-      <p>Preview and download project reports</p>
-    </div>
-
-    <div className="results-actions">
-      <button className="select-all-btn">
-        Select All
-      </button>
-
-      <button className="combined-pdf-btn">
-        Generate Combined PDF
-      </button>
-    </div>
-
-  </div>
-
-  <div className="reports-grid">
-
-    {dummyReports.map((report) => (
-
-      <div
-        className="report-card"
-        key={report.id}
-      >
-
-        <div className="report-card-top">
-
-          <input
-            type="checkbox"
-            className="report-checkbox"
-          />
-
-          <span className={`status-badge ${report.status.toLowerCase()}`}>
-            {report.status}
-          </span>
-
+      {/* Tab content */}
+      <div className="rp-content-panel">
+        <div className="rp-tab-header">
+          <div>
+            <h2 className="rp-sec-title">
+              {tabs.find(t => t.key === activeTab)?.label}
+            </h2>
+            <p className="rp-sec-sub">{tabProjects.length} project{tabProjects.length !== 1 ? "s" : ""}</p>
+          </div>
         </div>
 
-        <div className="report-info">
-
-          <h3>{report.fileNo}</h3>
-
-          <h4>{report.title}</h4>
-
-          <p>
-            <strong>PI:</strong> {report.pi}
-          </p>
-
-          <p>
-            <strong>Department:</strong> {report.department}
-          </p>
-
-          <p>
-            <strong>Campus:</strong> {report.campus}
-          </p>
-
-          <p>
-            <strong>Funding:</strong> {report.funding}
-          </p>
-
-          <p>
-            <strong>Amount:</strong> ₹{report.amount}
-          </p>
-
-        </div>
-
-        <div className="report-actions">
-
-          <div className="report-actions">
-
-  <button
-    className="preview-btn"
-    onClick={() => openPreview(report)}
-  >
-    Preview
-  </button>
-
-  <button
-    className="download-btn"
-    onClick={() => directDownloadPDF(report)}
-  >
-    Direct Download
-  </button>
-
-</div>
-
-        </div>
-
+        {tabProjects.length === 0 ? (
+          <div className="rp-empty">
+            <p>No projects found. Adjust filters or check back later.</p>
+          </div>
+        ) : (
+          <div className="rp-table-wrap">
+            <table className="rp-table">
+              <thead>
+                <tr>
+                  <th className="rp-th">File No.</th>
+                  <th className="rp-th">Project Title</th>
+                  <th className="rp-th">Principal Investigator</th>
+                  <th className="rp-th">Department</th>
+                  <th className="rp-th">Campus</th>
+                  <th className="rp-th rp-th-center">Status</th>
+                  {activeTab === "completed" && <th className="rp-th rp-th-center">Action</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {tabProjects.map((p) => (
+                  <ProjectRow
+                    key={p.id}
+                    project={p}
+                    onClick={setDetailProject}
+                    onSubmitClosure={handleSubmitClosure}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-    ))}
+      {/* Project detail drawer */}
+      {detailProject && (
+        <ProjectDrawer
+          project={detailProject}
+          onClose={() => setDetailProject(null)}
+          onSubmitClosure={handleSubmitClosure}
+          onApproveClosure={handleApproveClosure}
+        />
+      )}
 
-  </div>
-
-</div>
-
-      </div>
-
-{showPreview && selectedReport && (
-
-<div className="preview-overlay">
-
-  <div className="preview-modal">
-
-    <div className="preview-top">
-
-      <h2>Project Report Preview</h2>
-
-      <button
-        onClick={() => setShowPreview(false)}
-      >
-        ✕
-      </button>
-
-    </div>
-
-    <div
-      id="report-preview-content"
-      className="report-document"
-    >
-
-      <div className="report-header">
-
-        <h1>ANNA UNIVERSITY</h1>
-
-        <h3>
-          Centre for Sponsored Research &
-          Consultancy
-        </h3>
-
-      </div>
-
-      <hr />
-
-      <h2>Project Report</h2>
-
-      <p>
-        <strong>File No:</strong>
-        {selectedReport.fileNo}
-      </p>
-
-      <p>
-        <strong>Project Title:</strong>
-        {selectedReport.title}
-      </p>
-
-      <p>
-        <strong>Principal Investigator:</strong>
-        {selectedReport.pi}
-      </p>
-
-      <p>
-        <strong>Department:</strong>
-        {selectedReport.department}
-      </p>
-
-      <p>
-        <strong>Campus:</strong>
-        {selectedReport.campus}
-      </p>
-
-      <p>
-        <strong>Funding Agency:</strong>
-        {selectedReport.funding}
-      </p>
-
-      <p>
-        <strong>Sanction Amount:</strong>
-        ₹{selectedReport.amount}
-      </p>
-
-      <br/>
-
-      <h3>Claims Summary</h3>
-
-      <table className="pdf-table">
-        <tbody>
-          <tr>
-            <td>Total Claims</td>
-            <td>12</td>
-          </tr>
-          <tr>
-            <td>Approved</td>
-            <td>8</td>
-          </tr>
-          <tr>
-            <td>Pending</td>
-            <td>3</td>
-          </tr>
-          <tr>
-            <td>Rejected</td>
-            <td>1</td>
-          </tr>
-        </tbody>
-      </table>
-
-    </div>
-
-    <div className="preview-footer">
-
-      <button
-        className="download-btn"
-        onClick={downloadPDF}
-      >
-        Download PDF
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
-)}
-
+      {/* Closure form modal */}
+      {closureProject && (
+        <ClosureForm
+          project={closureProject}
+          onClose={() => setClosureProject(null)}
+          onSubmit={handleClosureSubmit}
+        />
+      )}
     </div>
   );
 }
