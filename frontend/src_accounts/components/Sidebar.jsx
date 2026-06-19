@@ -110,6 +110,7 @@ const NAV = [
       { label: 'Payment Types', path: '/accounts/payments/payment-types' },
       { label: 'Sub-head Types', path: '/accounts/payments/subhead-types' },
       { label: 'Payment Lock', path: '/accounts/payments/payment-lock' },
+      { label: 'Payment Reports', path : '/accounts/payments/payment-report'},
     ]
   },
 ];

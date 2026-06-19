@@ -52,9 +52,7 @@ const projectItems = [
       },
     ],
   },
-  { label: 'ZBA Claim Requests', path: '/projects/zba-claims', icon: '🏦' },
-  { label: 'TSA(H) Claim Requests', path: '/projects/tsa-claims', icon: '🏥' },
-  { label: 'CMRG Claim Requests', path: '/projects/cmrg-claims', icon: '📊' },
+  { label: 'Bill Claim Requests', path: '/projects/zba-claims', icon: '🏦' },
   { label: 'Search', path: '/projects/search', icon: '🔍' },
   { label: 'Reports', path: '/projects/reports', icon: '📑' },
 ];

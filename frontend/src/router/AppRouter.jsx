@@ -113,6 +113,8 @@ import PaymentTypes from '../../src_accounts/pages/payments/PaymentTypes';
 import SubheadTypes from '../../src_accounts/pages/payments/SubheadTypes';
 import PaymentLock from '../../src_accounts/pages/payments/PaymentLock';
 
+import PaymentReport from "../../src_accounts/pages/payments/PaymentReports";
+
 
 
 
@@ -135,6 +137,8 @@ import ProfilePage from '../components/ProfilePage';
 
 import MonthWiseReceiptReport from "../../src_accounts/pages/receipts/MonthWiseReceiptReport";
 import ReceiptReportView from "../../src_accounts/pages/receipts/ReceiptReportView";
+
+
 
 
 
@@ -301,6 +305,7 @@ export default function AppRouter() {
 />
 
 
+
 {/* Payments */}
 <Route path="/accounts/payments" element={<Payments />} />
 <Route path="/accounts/payments/revenue-account" element={<RevenueAcP />} />
@@ -315,6 +320,7 @@ export default function AppRouter() {
 <Route path="/accounts/payments/payment-types" element={<PaymentTypes />} />
 <Route path="/accounts/payments/subhead-types" element={<SubheadTypes />} />
 <Route path="/accounts/payments/payment-lock" element={<PaymentLock />} />
+<Route path="/accounts/payments/payment-report" element={<PaymentReport />} />
 
 
 
