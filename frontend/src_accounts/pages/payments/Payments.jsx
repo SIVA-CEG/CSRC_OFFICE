@@ -43,7 +43,7 @@ function PaymentCard({ card, onClick }) {
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
       style={{
-        background: 'rgba(30,41,59,0.75)', borderRadius: 18, padding: '22px 18px',
+        background: 'rgb(255, 255, 255)', borderRadius: 18, padding: '22px 18px',
         cursor: 'pointer', position: 'relative', overflow: 'hidden',
         transition: 'all 0.22s cubic-bezier(.4,0,.2,1)',
         transform: h ? 'translateY(-3px)' : 'none',

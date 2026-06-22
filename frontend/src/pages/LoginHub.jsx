@@ -12,14 +12,6 @@ const modules = [
   wip: false,              // ← change to false
 },
   {
-    id: 'salary',
-    title: 'STAFF SALARY CLAIMS',
-    icon: '💰',
-    desc: 'Salary & Claims Processing Portal',
-    route: null,
-    wip: true,
-  },
-  {
     id: 'proceedings',
     title: 'CSRC PROCEEDINGS',
     icon: '📋',

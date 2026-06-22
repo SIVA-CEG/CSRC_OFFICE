@@ -62,8 +62,6 @@ import ProjectRequestsPage from '../pages/projects/ProjectRequestPage';
 import OfficeReappropriation from '../pages/projects/OfficeReappropriationPage';
 import ProjectExtension    from '../pages/projects/OfficeProjectExtensionPage';
 import ZBAClaims           from '../pages/projects/ZBAOfficePage';
-import TSAClaims           from '../pages/projects/TSAHOfficePage';
-import CMRGClaims          from '../pages/projects/CMRGOfficePage';
 import SearchProjects      from '../pages/projects/Search';
 import Reports             from '../pages/projects/Reports';
 
@@ -114,6 +112,8 @@ import SubheadTypes from '../../src_accounts/pages/payments/SubheadTypes';
 import PaymentLock from '../../src_accounts/pages/payments/PaymentLock';
 
 import PaymentReport from "../../src_accounts/pages/payments/PaymentReports";
+import StatementOfExpenditure from "../../src_accounts/pages/statementofexpenditure/StatementOfExpenditure";
+import BRS from "../../src_accounts/pages/BRS/BRS";
 
 
 
@@ -218,8 +218,6 @@ export default function AppRouter() {
           <Route path="office-reappropriation" element={<OfficeReappropriation />} />
           <Route path="project-extension"      element={<ProjectExtension />} />
           <Route path="zba-claims"             element={<ZBAClaims />} />
-          <Route path="tsa-claims"             element={<TSAClaims />} />
-          <Route path="cmrg-claims"            element={<CMRGClaims />} />
           <Route path="search"                 element={<SearchProjects />} />
           <Route path="reports"                element={<Reports />} />
         </Route>
@@ -321,6 +319,20 @@ export default function AppRouter() {
 <Route path="/accounts/payments/subhead-types" element={<SubheadTypes />} />
 <Route path="/accounts/payments/payment-lock" element={<PaymentLock />} />
 <Route path="/accounts/payments/payment-report" element={<PaymentReport />} />
+
+
+<Route
+  path="/accounts/brs"
+  element={<BRS />}
+/>
+
+
+{/* Statement Of Expenditure */}
+<Route
+  path="/accounts/statement-of-expenditure"
+  element={<StatementOfExpenditure />}
+/>
+
 
 
 

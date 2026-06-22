@@ -113,6 +113,16 @@ const NAV = [
       { label: 'Payment Reports', path : '/accounts/payments/payment-report'},
     ]
   },
+  {
+  label: 'Bank Reconciliation Statement',
+  icon: '🏦',
+  path: '/accounts/brs'
+},
+  {
+  label: 'Statement Of Expenditure',
+  icon: '🧾',
+  path: '/accounts/statement-of-expenditure'
+},
 ];
 
 export default function Sidebar() {
