@@ -218,47 +218,54 @@
   box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.15);
 }
 
-/* ── SUMMARY STRIP ───────────────────────────────────────────────────── */
-.brs-summary-strip {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1px;
+/* ── SUMMARY TABLE ───────────────────────────── */
+
+.brs-summary-table-wrap {
   margin-bottom: 24px;
   border-radius: 18px;
   overflow: hidden;
-  background: var(--line);
+  background: var(--glass-strong);
   border: 1px solid var(--line);
   box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
 }
 
-.brs-summary-cell {
-  padding: 18px 18px 16px;
-  background: var(--glass-strong);
-  backdrop-filter: blur(12px);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.brs-summary-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.brs-summary-cell.is-lead {
-  background: linear-gradient(165deg, rgba(0, 119, 230, 0.08), rgba(0, 119, 230, 0.02));
+.brs-summary-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
 }
 
-.brs-summary-label {
-  font-size: 11px;
+.brs-summary-table tr:last-child td {
+  border-bottom: none;
+}
+
+.brs-summary-table td:first-child {
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.03em;
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 
-.brs-summary-value {
+.brs-summary-table td:last-child {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
 }
 
-.brs-summary-cell.is-lead .brs-summary-value {
+.brs-summary-table .closing-row {
+  background: rgba(0, 119, 230, 0.06);
+}
+
+.brs-summary-table .closing-row td:first-child {
   color: var(--blue);
+}
+
+.brs-summary-table .closing-row td:last-child {
+  color: var(--blue);
+  font-size: 22px;
 }
 
 /* ── LEDGER SPINE (signature element) ────────────────────────────────── */

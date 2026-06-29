@@ -11,6 +11,7 @@ export default function OriginalStatements() {
   const [year, setYear] = useState('2025-2026');
   const [account, setAccount] = useState('Revenue');
   const [viewModal, setViewModal] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
     const data = JSON.parse(
@@ -28,8 +29,29 @@ export default function OriginalStatements() {
     return { ...e, runningBalance: balance };
   });
 
+
   const formatINR = (n) =>
     Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+
+    // 1. Remove from Original Statements
+    const updatedOriginal = entries.filter(e => e.id !== deleteTarget.id);
+    setEntries(updatedOriginal);
+    localStorage.setItem('original_bank_entries', JSON.stringify(updatedOriginal));
+
+    // 2. Cascade-remove from Current Statements:
+    //    - the un-split copy carrying the same id
+    //    - every split fragment whose id starts with `${originalId}_split_`
+    const currentData = JSON.parse(localStorage.getItem('current_bank_entries') || '[]');
+    const updatedCurrent = currentData.filter(
+      e => e.id !== deleteTarget.id && !String(e.id).startsWith(`${deleteTarget.id}_split_`)
+    );
+    localStorage.setItem('current_bank_entries', JSON.stringify(updatedCurrent));
+
+    setDeleteTarget(null);
+  };
 
   return (
     <Layout title="Original Statements" subtitle="Banking / Bank / Original Statements">
@@ -62,7 +84,7 @@ export default function OriginalStatements() {
         <table style={s.table}>
           <thead>
             <tr>
-              {['Sl.No','Cr. Date','Bank Details','Reference','Debit','Credit','Balance','Action'].map(h => (
+              {['Sl.No','Cr. Date','Bank Details','Reference','Debit','Credit','Balance','Action','Delete'].map(h => (
                 <th key={h} style={s.th}>{h}</th>
               ))}
             </tr>
@@ -70,7 +92,7 @@ export default function OriginalStatements() {
           <tbody>
             {withBalance.length === 0 ? (
               <tr>
-                <td colSpan={8} style={s.empty}>
+                <td colSpan={9} style={s.empty}>
                   <div style={s.emptyInner}>
                     <span style={{ fontSize: 32 }}>📄</span>
                     <div>No entries found for {account} account in {month} {year}</div>
@@ -98,6 +120,9 @@ export default function OriginalStatements() {
                   </td>
                   <td style={s.td}>
                     <button style={s.viewBtn} onClick={() => setViewModal(entry)}>View</button>
+                  </td>
+                  <td style={s.td}>
+                    <button style={s.deleteBtn} onClick={() => setDeleteTarget(entry)}>🗑 Delete</button>
                   </td>
                 </tr>
               ))
@@ -137,6 +162,34 @@ export default function OriginalStatements() {
           </div>
         </div>
       )}
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div style={s.overlay} onClick={() => setDeleteTarget(null)}>
+          <div style={{ ...s.modal, maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+            <div style={{ ...s.modalAccent, background: 'linear-gradient(90deg,#f43f5e,#dc2626,transparent)' }} />
+            <div style={s.modalHeader}>
+              <div style={s.modalTitle}>Delete Transaction</div>
+              <button style={s.closeBtn} onClick={() => setDeleteTarget(null)}>✕</button>
+            </div>
+            <div style={{ padding: '0 24px 22px' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14, lineHeight: 1.6 }}>
+                Are you sure you want to delete this entry from <strong>Original Statements</strong>?
+                <br />
+                This will also permanently remove the matching entry — and{' '}
+                <strong>all of its split fragments</strong> — from <strong>Current Statements</strong>.
+              </div>
+              <div style={{ ...s.modalNote, marginBottom: 18 }}>
+                ⚠️ This action cannot be undone.
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button style={s.cancelBtnLight} onClick={() => setDeleteTarget(null)}>Cancel</button>
+                <button style={s.confirmDeleteBtn} onClick={confirmDelete}>🗑 Delete Permanently</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </Layout>
   );
 }
@@ -237,5 +290,29 @@ const s = {
     margin: '0 24px 22px', padding: '10px 14px', borderRadius: 10,
     background: 'rgba(244,63,94,0.08)', border: '1px solid rgba(244,63,94,0.2)',
     fontSize: 12, color: '#f87171',
+  },
+  viewBtn: {
+    padding: '5px 14px', borderRadius: 7, border: '1px solid rgba(6,182,212,0.4)',
+    background: 'rgba(6,182,212,0.1)', color: '#06b6d4',
+    fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'Sora, sans-serif',
+    transition: 'all 0.15s',
+  },
+  deleteBtn: {
+    padding: '5px 14px', borderRadius: 7, border: '1px solid rgba(244,63,94,0.4)',
+    background: 'rgba(244,63,94,0.1)', color: '#f43f5e',
+    fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'Sora, sans-serif',
+    transition: 'all 0.15s', whiteSpace: 'nowrap',
+  },
+  cancelBtnLight: {
+    padding: '10px 20px', borderRadius: 9, border: '1px solid var(--border)',
+    background: 'rgba(0,0,0,0.04)', color: 'var(--text-secondary)',
+    fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Sora, sans-serif',
+  },
+  confirmDeleteBtn: {
+    padding: '10px 22px', borderRadius: 9, border: 'none',
+    background: 'linear-gradient(135deg,#f43f5e,#dc2626)',
+    color: '#fff', fontSize: 13, fontWeight: 700,
+    cursor: 'pointer', fontFamily: 'Sora, sans-serif',
+    boxShadow: '0 4px 16px rgba(244,63,94,0.35)',
   },
 };

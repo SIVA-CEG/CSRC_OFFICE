@@ -65,51 +65,19 @@ const NAV = [
   icon: '🧾',
   path: '/accounts/receipts',
   children: [
-    {
-      label: 'Project A/c',
-      path: '/accounts/receipts/project-account'
-    },
-    {
-      label: 'MoPR A/c',
-      path: '/accounts/receipts/mopr-account'
-    },
-    {
-      label: 'TTDF A/c',
-      path: '/accounts/receipts/ttdf-account'
-    },
-    {
-      label: 'Revenue A/c',
-      path: '/accounts/receipts/revenue-account'
-    },
-    {
-      label: 'Tax A/c',
-      path: '/accounts/receipts/tax-account'
-    },
-    {
-  label: 'Receipt Lock',
-  path: '/accounts/receipts/receipt-lock'
-},
-{
-  label: 'Month Wise Report',
-  path: '/accounts/receipts/month-wise-report'
-}
+    { label: 'Receipt Accounts', path: '/accounts/receipts/receipts-accounts' },
+    { label: 'Receipt Abstract', path: '/accounts/receipts/receipt-abstract' },
+    { label: 'Receipt Lock', path: '/accounts/receipts/receipt-lock' },
+    { label: 'Month Wise Report', path: '/accounts/receipts/month-wise-report' }
   ]
 },
   {
     label: 'Payments', icon: '💳', path: '/accounts/payments',
     children: [
-      { label: 'Revenue A/c', path: '/accounts/payments/revenue-account' },
-      { label: 'Project A/c', path: '/accounts/payments/project-account' },
-      { label: 'MOPR A/c', path: '/accounts/payments/mopr-account' },
-      { label: 'TTDF A/c', path: '/accounts/payments/ttdf-account' },
-      { label: 'Tax A/c', path: '/accounts/payments/tax-account' },
-      { label: 'Unspent Amount', path: '/accounts/payments/unspent-amount' },
-      { label: 'Adv Settlement', path: '/accounts/payments/adv-settlement' },
-      { label: 'Bank Clearance', path: '/accounts/payments/bank-clearance' },
+      { label: 'Voucher Processing', path: '/accounts/payments/voucher-processing' },
       { label: 'Voucher Clearance', path: '/accounts/payments/voucher-clearance' },
-      { label: 'Payment Types', path: '/accounts/payments/payment-types' },
-      { label: 'Sub-head Types', path: '/accounts/payments/subhead-types' },
-      { label: 'Payment Lock', path: '/accounts/payments/payment-lock' },
+      { label: 'Bank Clearance', path: '/accounts/payments/bank-clearance' },
+      { label: 'Payment Processing', path: '/accounts/payments/reports' },
       { label: 'Payment Reports', path : '/accounts/payments/payment-report'},
     ]
   },
@@ -123,6 +91,40 @@ const NAV = [
   icon: '🧾',
   path: '/accounts/statement-of-expenditure'
 },
+  {
+    label: 'TSA Reports',
+    icon: '📑',
+    path: '/accounts/tsa-reports',
+    children: [
+      {
+        label: 'Receipts',
+        path: '/accounts/tsa-reports/receipts',
+        children: [
+          { label: 'ASSG Abstract', path: '/accounts/tsa-reports/receipts/assg-abstract' },
+        ],
+      },
+      {
+        label: 'General',
+        path: '/accounts/tsa-reports/general',
+        children: [
+          { label: 'PFMS Allocation', path: '/accounts/tsa-reports/general/pfms-allocation' },
+          { label: 'Compilation', path: '/accounts/tsa-reports/general/compilation' },
+        ],
+      },
+      {
+        label: 'Payments',
+        path: '/accounts/tsa-reports/payments',
+        children: [
+          { label: 'Abstract', path: '/accounts/tsa-reports/payments/abstract' },
+          { label: 'Compilation', path: '/accounts/tsa-reports/payments/compilation' },
+          { label: 'University Overhead', path: '/accounts/tsa-reports/payments/university-overhead' },
+          { label: 'CSRC Overhead', path: '/accounts/tsa-reports/payments/csrc-overhead' },
+          { label: 'Dept Overhead', path: '/accounts/tsa-reports/payments/dept-overhead' },
+          { label: 'PDF A/C', path: '/accounts/tsa-reports/payments/pdf-ac' },
+        ],
+      },
+    ],
+  },
 ];
 
 export default function Sidebar() {
@@ -146,7 +148,16 @@ const [openGroups, setOpenGroups] = useState(() => {
 
   return initial;
 });
-  const [openSubs, setOpenSubs] = useState({});
+  const [openSubs, setOpenSubs] = useState(() => {
+    const initial = {};
+    NAV.forEach(item => {
+      item.children?.forEach(child => {
+        const hasMatch = child.children?.some(gc => location.pathname.startsWith(gc.path));
+        if (hasMatch) initial[child.label] = true;
+      });
+    });
+    return initial;
+  });
 
   const toggle = (label) => setOpenGroups(p => ({ ...p, [label]: !p[label] }));
   const toggleSub = (label) => setOpenSubs(p => ({ ...p, [label]: !p[label] }));
@@ -193,9 +204,13 @@ const [openGroups, setOpenGroups] = useState(() => {
     }
   }}
   onClick={() => {
-    if (item.children) toggle(item.label);
-    else navigate(item.path);
-  }}
+  if (item.children) {
+    toggle(item.label);
+    navigate(item.path);  // ← add this line
+  } else {
+    navigate(item.path);
+  }
+}}
 >
               <span style={sideStyles.navIcon}>{item.icon}</span>
               <span style={sideStyles.navLabel}>{item.label}</span>
@@ -219,9 +234,13 @@ const [openGroups, setOpenGroups] = useState(() => {
                         ...(isActive(child.path) ? sideStyles.childActive : {}),
                       }}
                       onClick={() => {
-                        if (child.children) toggleSub(child.label);
-                        else navigate(child.path);
-                      }}
+  if (child.children) {
+    toggleSub(child.label);
+    navigate(child.path);  // ← add this line
+  } else {
+    navigate(child.path);
+  }
+}}
                     >
                       <span style={sideStyles.dot}>○</span>
                       <span>{child.label}</span>
@@ -235,14 +254,14 @@ const [openGroups, setOpenGroups] = useState(() => {
                     {/* Level-2 children */}
                     {child.children &&
  (openSubs[child.label] ||
-  child.children.some(gc => location.pathname === gc.path)) && (
+  child.children.some(gc => location.pathname.startsWith(gc.path))) && (
                       <div style={sideStyles.grandchildGroup}>
                         {child.children.map(gc => (
   <div
     key={gc.label}
     style={{
       ...sideStyles.grandchildItem,
-      ...(location.pathname === gc.path
+      ...(location.pathname === gc.path || location.pathname.startsWith(gc.path + '/')
         ? sideStyles.grandchildActive
         : {}),
     }}
@@ -427,6 +446,9 @@ navIcon: {
 
   cursor: 'pointer',
   transition: 'all 0.25s ease',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
 },
   childActive: {
   background:

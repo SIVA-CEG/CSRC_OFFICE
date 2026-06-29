@@ -17,20 +17,17 @@ export default function ReceiptAccountPage({
     );
 
     const filtered = data.filter(
-  x =>
-    x.account === accountName &&
-    !x.receiptCreated
-);
+      x =>
+        x.account === accountName &&
+        !x.receiptCreated &&
+        x.creditAmount > 0          // ← only credit entries
+    );
 
     setEntries(filtered);
   }, [accountName]);
 
   const formatAmount = entry =>
-    (
-      entry.creditAmount ||
-      entry.debitAmount ||
-      0
-    ).toLocaleString("en-IN", {
+    (entry.creditAmount || 0).toLocaleString("en-IN", {
       minimumFractionDigits: 2,
     });
 
@@ -61,89 +58,43 @@ export default function ReceiptAccountPage({
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>
-                  Sl.No
-                </th>
-
-                <th style={styles.th}>
-                  Date
-                </th>
-
-                <th style={styles.th}>
-                  Description
-                </th>
-
-                <th style={styles.th}>
-                  Reference
-                </th>
-
-                <th style={styles.th}>
-                  Amount
-                </th>
-
-                <th style={styles.th}>
-                  Action
-                </th>
+                <th style={styles.th}>Sl.No</th>
+                <th style={styles.th}>Date</th>
+                <th style={styles.th}>Description</th>
+                <th style={styles.th}>Reference</th>
+                <th style={styles.th}>Credit Amount</th>
+                <th style={styles.th}>Action</th>
               </tr>
             </thead>
 
             <tbody>
               {entries.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="6"
-                    style={styles.empty}
-                  >
-                    No entries found
+                  <td colSpan="6" style={styles.empty}>
+                    No credit entries found
                   </td>
                 </tr>
               ) : (
                 entries.map((entry, idx) => (
                   <tr key={entry.id}>
-                    <td style={styles.td}>
-                      {idx + 1}
-                    </td>
-
-                    <td style={styles.td}>
-                      {
-                        entry.transactionDate
-                      }
-                    </td>
-
-                    <td style={styles.td}>
-                      {
-                        entry.bankDescription
-                      }
-                    </td>
-
-                    <td style={styles.td}>
-                      {entry.bankReference ||
-                        "—"}
-                    </td>
-
+                    <td style={styles.td}>{idx + 1}</td>
+                    <td style={styles.td}>{entry.transactionDate}</td>
+                    <td style={styles.td}>{entry.bankDescription}</td>
+                    <td style={styles.td}>{entry.bankReference || "—"}</td>
                     <td
                       style={{
                         ...styles.td,
                         textAlign: "right",
                         fontWeight: 700,
+                        color: "#10b981",
                       }}
                     >
-                      ₹{" "}
-                      {formatAmount(
-                        entry
-                      )}
+                      ₹ {formatAmount(entry)}
                     </td>
-
                     <td style={styles.td}>
                       <button
-                        style={
-                          styles.actionBtn
-                        }
-                        onClick={() =>
-                          setSelectedEntry(
-                            entry
-                          )
-                        }
+                        style={styles.actionBtn}
+                        onClick={() => setSelectedEntry(entry)}
                       >
                         Create Receipt
                       </button>
@@ -158,9 +109,7 @@ export default function ReceiptAccountPage({
         {selectedEntry && (
           <ReceiptForm
             entry={selectedEntry}
-            onClose={() =>
-              setSelectedEntry(null)
-            }
+            onClose={() => setSelectedEntry(null)}
           />
         )}
       </div>
@@ -177,8 +126,7 @@ const styles = {
 
   header: {
     display: "flex",
-    justifyContent:
-      "space-between",
+    justifyContent: "space-between",
     alignItems: "center",
   },
 
@@ -195,7 +143,7 @@ const styles = {
   stat: {
     padding: "10px 16px",
     borderRadius: 12,
-    background: "#0ea5e9",
+    background: "#10b981",
     color: "white",
     fontWeight: 700,
   },
@@ -204,8 +152,7 @@ const styles = {
     background: "white",
     borderRadius: 20,
     overflow: "hidden",
-    boxShadow:
-      "0 8px 30px rgba(0,0,0,.08)",
+    boxShadow: "0 8px 30px rgba(0,0,0,.08)",
   },
 
   table: {
@@ -222,18 +169,17 @@ const styles = {
 
   td: {
     padding: 16,
-    borderBottom:
-      "1px solid #e2e8f0",
+    borderBottom: "1px solid #e2e8f0",
   },
 
   empty: {
     textAlign: "center",
     padding: 40,
+    color: "#94a3b8",
   },
 
   actionBtn: {
-    background:
-      "linear-gradient(135deg,#2563eb,#1d4ed8)",
+    background: "linear-gradient(135deg,#2563eb,#1d4ed8)",
     border: "none",
     color: "white",
     padding: "10px 16px",

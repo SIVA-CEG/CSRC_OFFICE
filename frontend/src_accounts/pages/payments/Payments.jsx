@@ -8,13 +8,8 @@ const CARDS = [
   { label: 'MOPR A/c', icon: '🏛️', desc: 'MOPR account payments management', path: '/payments/mopr-ac', color: '#8b5cf6' },
   { label: 'TTDF A/c', icon: '🔬', desc: 'TTDF account payment transactions', path: '/payments/ttdf-ac', color: '#f59e0b' },
   { label: 'Tax A/c', icon: '🧾', desc: 'Tax account payment and deductions', path: '/payments/tax-ac', color: '#f43f5e' },
-  { label: 'Unspent Amount', icon: '🏦', desc: 'Track and manage unspent fund amounts', path: '/payments/unspent-amount', color: '#0ea5e9' },
-  { label: 'Adv Settlement', icon: '📋', desc: 'Advance payment settlement records', path: '/payments/adv-settlement', color: '#a78bfa' },
   { label: 'Bank Clearance', icon: '✅', desc: 'Bank payment clearance management', path: '/payments/bank-clearance', color: '#34d399' },
   { label: 'Voucher Clearance', icon: '🗂️', desc: 'Voucher-based payment clearance', path: '/payments/voucher-clearance', color: '#fb923c' },
-  { label: 'Payment Types', icon: '🏷️', desc: 'Configure and manage payment type categories', path: '/payments/payment-types', color: '#e879f9' },
-  { label: 'Sub-head Types', icon: '📑', desc: 'Sub-head classification for payments', path: '/payments/subhead-types', color: '#38bdf8' },
-  { label: 'Payment Lock', icon: '🔒', desc: 'Lock and finalise payment period entries', path: '/payments/payment-lock', color: '#f472b6' },
 ];
 
 export default function Payments() {

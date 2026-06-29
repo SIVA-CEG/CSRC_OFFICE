@@ -256,21 +256,37 @@ return (
       {/* ── PDF PRINTABLE AREA ── */}
       <div ref={printRef} className="brs-print-area">
 
-        {/* ── SUMMARY STRIP ── */}
-        <div className="brs-summary-strip">
-          {[
-            { label: "Opening Balance",        val: summary.openingBalance },
-            { label: "Receipts",               val: summary.receipts },
-            { label: "Total Receipts",         val: summary.totalReceipts },
-            { label: "Payments",               val: summary.payments },
-            { label: "Closing Balance (Cash Book)", val: summary.closingBalance, lead: true },
-          ].map((card) => (
-            <div key={card.label} className={`brs-summary-cell ${card.lead ? "is-lead" : ""}`}>
-              <div className="brs-summary-label">{card.label}</div>
-              <div className="brs-summary-value mono">₹{fmt(card.val)}</div>
-            </div>
-          ))}
-        </div>
+        {/* ── SUMMARY TABLE ── */}
+<div className="brs-summary-table-wrap">
+  <table className="brs-summary-table">
+    <tbody>
+      <tr>
+        <td>Opening Balance</td>
+        <td className="mono right">₹{fmt(summary.openingBalance)}</td>
+      </tr>
+
+      <tr>
+        <td>Receipts</td>
+        <td className="mono right">₹{fmt(summary.receipts)}</td>
+      </tr>
+
+      <tr>
+        <td>Total Receipts</td>
+        <td className="mono right">₹{fmt(summary.totalReceipts)}</td>
+      </tr>
+
+      <tr>
+        <td>Payments</td>
+        <td className="mono right">₹{fmt(summary.payments)}</td>
+      </tr>
+
+      <tr className="closing-row">
+        <td>Closing Balance (Cash Book)</td>
+        <td className="mono right">₹{fmt(summary.closingBalance)}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
         {/* ── RECONCILIATION LEDGER (signature element) ── */}
         <div className="brs-ledger-spine">

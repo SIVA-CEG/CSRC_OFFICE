@@ -1,0 +1,37 @@
+.voucher-page {
+  padding: 24px;
+}
+
+.voucher-header {
+  margin-bottom: 24px;
+}
+
+.voucher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.voucher-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: 0.3s;
+  text-align: center;
+}
+
+.voucher-card:hover {
+  transform: translateY(-4px);
+}
+
+.voucher-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.voucher-title {
+  font-size: 18px;
+  font-weight: 600;
+}

@@ -60,6 +60,7 @@ let COMPLETED_BILLS = [
     id: 8,
     _projectId: "ZBA003",
     _projectTitle: "Smart Agriculture Analytics",
+    _accountType: "project",         // ← account bucket for VoucherClearance filter
     csrcProcNo: "01/NHHID/Ph-II/Admin/Training & workshop/2024-25",
     mhNo: "15.1.16",
     dept: "NHHID",
@@ -73,12 +74,15 @@ let COMPLETED_BILLS = [
     beneficiary: "M/S COORDINATOR NHHID (IRG)",
     status: "approved",
     bills: seedBills(2),
-    voucher: null, // filled after voucher entry
+    voucher: null,
+    accountedOn: null,
+    reportBatch: null,   // ← null = Section 1 (pending), string = Section 2 (queued), accountedOn set = Section 3
   },
   {
     id: 12,
     _projectId: "ZBA001",
     _projectTitle: "AI Based Research Project",
+    _accountType: "project",
     csrcProcNo: "02/EDIC/2024/TEC/Training Program",
     mhNo: "15.1.11",
     dept: "TEC",
@@ -93,11 +97,14 @@ let COMPLETED_BILLS = [
     status: "approved",
     bills: seedBills(1),
     voucher: null,
+    accountedOn: null,
+    reportBatch: null,
   },
   {
     id: 15,
     _projectId: "ZBA002",
     _projectTitle: "IoT Smart Monitoring System",
+    _accountType: "project",
     csrcProcNo: "1695/CES/PROJ/STAFF/CLAIM-9",
     mhNo: "15.1.20",
     dept: "CES",
@@ -112,6 +119,8 @@ let COMPLETED_BILLS = [
     status: "approved",
     bills: seedBills(3),
     voucher: null,
+    accountedOn: null,
+    reportBatch: null,
   },
 ];
 
@@ -134,6 +143,20 @@ export const accountsStore = {
   setVoucher: (id, voucher) => {
     COMPLETED_BILLS = COMPLETED_BILLS.map((b) =>
       b.id === id ? { ...b, voucher } : b
+    );
+    emit();
+  },
+  /** Called from VoucherClearance Section 1 — marks the bill as part of a report batch (moves to Section 2) */
+  setReportBatch: (id, batchId) => {
+    COMPLETED_BILLS = COMPLETED_BILLS.map((b) =>
+      b.id === id ? { ...b, reportBatch: batchId } : b
+    );
+    emit();
+  },
+  /** Called from VoucherClearance Section 2 — records the "accounted on" date (moves to Section 3) */
+  setAccountedOn: (id, dateStr) => {
+    COMPLETED_BILLS = COMPLETED_BILLS.map((b) =>
+      b.id === id ? { ...b, accountedOn: dateStr } : b
     );
     emit();
   },

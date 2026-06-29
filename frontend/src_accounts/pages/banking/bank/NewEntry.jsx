@@ -340,7 +340,7 @@ card: {
     borderRadius: 10, padding: '11px 14px', color: 'var(--text-primary)',
     fontSize: 14, fontFamily: 'Sora, sans-serif', outline: 'none',
     transition: 'border-color 0.2s', width: '100%',
-    colorScheme: 'dark',
+    colorScheme: 'light',
   },
   inputError: { borderColor: '#f43f5e' },
   amountWrapper: { position: 'relative' },

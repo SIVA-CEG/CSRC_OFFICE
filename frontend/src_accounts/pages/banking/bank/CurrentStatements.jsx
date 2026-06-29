@@ -143,6 +143,9 @@ splitInfo: `${i + 1}/${splitRows.length}`,
         </div>
         <div style={s.editBadge}>✏️ Editable</div>
       </div>
+      <div style={s.deleteNote}>
+        🔒 Entries can only be deleted from <strong>Original Statements</strong> — deleting there removes the matching entry and all of its split fragments here automatically.
+      </div>
 
       {/* Filters */}
       <div style={s.filterBar}>
@@ -698,5 +701,15 @@ const sp = {
     fontSize: 11, fontWeight: 700, color: '#a78bfa',
     textTransform: 'uppercase', letterSpacing: '0.6px',
     padding: '10px 14px', borderBottom: '1px solid rgba(139,92,246,0.15)',
+  },
+  editBadge: {
+    padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 600,
+    background: 'rgba(245,158,11,0.12)', color: '#f59e0b',
+    border: '1px solid rgba(245,158,11,0.25)', alignSelf: 'flex-start',
+  },
+  deleteNote: {
+    fontSize: 12, color: 'var(--text-muted)', marginBottom: 18,
+    padding: '10px 14px', borderRadius: 10,
+    background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.18)',
   },
 };

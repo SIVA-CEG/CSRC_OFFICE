@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import LoginHub from '../pages/LoginHub';
@@ -65,6 +64,10 @@ import ZBAClaims           from '../pages/projects/ZBAOfficePage';
 import SearchProjects      from '../pages/projects/Search';
 import Reports             from '../pages/projects/Reports';
 
+/* =======================
+   PROJECT STAFF IMPORTS
+======================= */
+import OfficeApprovalsPage from '../pages/projects/OfficeApprovalPage';
 
 import { ProjectProvider } from '../pages/projects/ProjectContext';
 
@@ -96,6 +99,7 @@ import MOPRAc from '../../src_accounts/pages/receipts/MOPRAc';
 import TTDFAc from '../../src_accounts/pages/receipts/TTDFAc';
 import RevenueAc from '../../src_accounts/pages/receipts/RevenueAc';
 import TaxAc from '../../src_accounts/pages/receipts/TaxAc';
+import ReceiptAbstract from '../../src_accounts/pages/receipts/ReceiptAbstract';
 import ReceiptLock from '../../src_accounts/pages/receipts/ReceiptLock';
 import Payments from '../../src_accounts/pages/payments/Payments';
 import RevenueAcP from '../../src_accounts/pages/payments/RevenueAc';
@@ -103,19 +107,22 @@ import ProjectAcP from '../../src_accounts/pages/payments/ProjectAc';
 import MOPRAcP from '../../src_accounts/pages/payments/MOPRAc';
 import TTDFAcP from '../../src_accounts/pages/payments/TTDFAc';
 import TaxAcP from '../../src_accounts/pages/payments/TaxAc';
-import UnspentAmount from '../../src_accounts/pages/payments/UnspentAmount';
-import AdvSettlement from '../../src_accounts/pages/payments/AdvSettlement';
 import BankClearance from '../../src_accounts/pages/payments/BankClearance';
 import VoucherClearance from '../../src_accounts/pages/payments/VoucherClearance';
-import PaymentTypes from '../../src_accounts/pages/payments/PaymentTypes';
-import SubheadTypes from '../../src_accounts/pages/payments/SubheadTypes';
-import PaymentLock from '../../src_accounts/pages/payments/PaymentLock';
+import VoucherProcessing from "../../src_accounts/pages/payments/VoucherProcessing";
+import ReceiptAccounts from "../../src_accounts/pages/receipts/ReceiptAccounts"
 
 import PaymentReport from "../../src_accounts/pages/payments/PaymentReports";
 import StatementOfExpenditure from "../../src_accounts/pages/statementofexpenditure/StatementOfExpenditure";
 import BRS from "../../src_accounts/pages/BRS/BRS";
 
-
+/* ── Payment Reports (new hub under /accounts/payments) ── */
+import PaymentProcessing from "../../src_accounts/pages/payments/PaymentProcessing";
+import PaymentAbstract from "../../src_accounts/pages/payments/PaymentAbstract";
+import Compilation from "../../src_accounts/pages/payments/Compilation";
+import TDS from "../../src_accounts/pages/payments/TDS";
+import TDSonGST from "../../src_accounts/pages/payments/TDSonGST";
+import GST from "../../src_accounts/pages/payments/GST";
 
 
 /* =======================
@@ -132,14 +139,27 @@ import AccountsPIRoles         from '../../src_accounts/pages/master/PIRoles';
 import AccountsSchemes         from '../../src_accounts/pages/master/Schemes';
 
 
+/* =======================
+  TSA REPORTS IMPORTS
+======================= */
+
+import TSAReports              from '../../src_accounts/pages/TSAReports/TSAReports';
+import ReceiptsHub             from '../../src_accounts/pages/TSAReports/ReceiptsHub';
+import AssgAbstract            from '../../src_accounts/pages/TSAReports/AssgAbstract';
+import GeneralHub              from '../../src_accounts/pages/TSAReports/GeneralHub';
+import PFMSAllocation          from '../../src_accounts/pages/TSAReports/PFMSAllocation';
+import GeneralCompilation      from '../../src_accounts/pages/TSAReports/GeneralCompilation';
+import PaymentsHub             from '../../src_accounts/pages/TSAReports/PaymentsHub';
+import PaymentsAbstract        from '../../src_accounts/pages/TSAReports/PaymentsAbstract';
+import PaymentsCompilation     from '../../src_accounts/pages/TSAReports/PaymentsCompilation';
+import PaymentsUnderConstruction from '../../src_accounts/pages/TSAReports/PaymentsUnderConstruction';
+
+
 import ProfilePage from '../components/ProfilePage';
 
 
 import MonthWiseReceiptReport from "../../src_accounts/pages/receipts/MonthWiseReceiptReport";
 import ReceiptReportView from "../../src_accounts/pages/receipts/ReceiptReportView";
-
-
-
 
 
 export default function AppRouter() {
@@ -204,13 +224,13 @@ export default function AppRouter() {
 
         {/* ── PROJECTS ── */}
         <Route
-  path="/projects"
-  element={
-    <ProjectProvider>
-      <MasterLayout />
-    </ProjectProvider>
-  }
->
+          path="/projects"
+          element={
+            <ProjectProvider>
+              <MasterLayout />
+            </ProjectProvider>
+          }
+        >
           <Route index                         element={<ProjectDashboard />} />
           <Route path="fresh-sanction"         element={<FreshSanction />} />
           <Route path="renewal-sanction"       element={<RenewalSanction />} />
@@ -220,6 +240,11 @@ export default function AppRouter() {
           <Route path="zba-claims"             element={<ZBAClaims />} />
           <Route path="search"                 element={<SearchProjects />} />
           <Route path="reports"                element={<Reports />} />
+
+          {/* ── PROJECT STAFF ── */}
+          <Route path="staff-approvals"            element={<OfficeApprovalsPage />} />
+          <Route path="staff-approvals/appointments" element={<OfficeApprovalsPage defaultView="appointments" />} />
+          <Route path="staff-approvals/extensions"   element={<OfficeApprovalsPage defaultView="extensions" />} />
         </Route>
 
         {/* ── OTHER MODULES ── */}
@@ -230,110 +255,97 @@ export default function AppRouter() {
 
         {/* ── ACCOUNTS ── */}
 
-<Route path="/accounts-login" element={<AccountsLogin />} />
+        <Route path="/accounts-login" element={<AccountsLogin />} />
 
-<Route path="/accounts" element={<AccountsDashboard />} />
+        <Route path="/accounts" element={<AccountsDashboard />} />
 
-<Route path="/accounts/master" element={<Master />} />
-<Route path="/accounts/budget" element={<Budget />} />
-
-
-{/* Accounts Master */}
-<Route path="/accounts/master/campus" element={<AccountsCampus />} />
-<Route path="/accounts/master/departments" element={<AccountsDepartments />} />
-<Route path="/accounts/master/beneficiaries" element={<AccountsBeneficiaries />} />
-<Route path="/accounts/master/designation" element={<AccountsDesignation />} />
-<Route path="/accounts/master/faculties" element={<AccountsFaculties />} />
-<Route path="/accounts/master/user-activation" element={<AccountsUserActivation />} />
-<Route path="/accounts/master/pi-roles" element={<AccountsPIRoles />} />
-<Route path="/accounts/master/schemes" element={<AccountsSchemes />} />
+        <Route path="/accounts/master" element={<Master />} />
+        <Route path="/accounts/budget" element={<Budget />} />
 
 
-{/* Banking */}
-<Route path="/accounts/banking" element={<Banking />} />
-<Route path="/accounts/banking/bank" element={<Bank />} />
-<Route path="/accounts/banking/bank/new-entry" element={<NewEntry />} />
-<Route path="/accounts/banking/bank/original-statements" element={<OriginalStatements />} />
-<Route path="/accounts/banking/bank/current-statements" element={<CurrentStatements />} />
-
-<Route path="/accounts/banking/fund-transfer" element={<FundTransfer />} />
-<Route path="/accounts/banking/fund-transfer/revenue-account" element={<RevenueAccount />} />
-<Route path="/accounts/banking/fund-transfer/project-account" element={<ProjectAccount />} />
-<Route path="/accounts/banking/fund-transfer/mopr-account" element={<MOPRAccount />} />
-<Route path="/accounts/banking/fund-transfer/ttdf-account" element={<TTDFAccount />} />
-<Route path="/accounts/banking/fund-transfer/consultancy-account" element={<ConsultancyAccount />} />
-<Route path="/accounts/banking/fund-transfer/tec-account" element={<TECAccount />} />
-<Route path="/accounts/banking/fund-transfer/tax-account" element={<TAXAccount />} />
-
-{/* Receipts */}
-<Route path="/accounts/receipts" element={<Receipts />} />
-<Route
-  path="/accounts/receipts/project-account"
-  element={<ProjectAc />}
-/>
-
-<Route
-  path="/accounts/receipts/mopr-account"
-  element={<MOPRAc />}
-/>
-
-<Route
-  path="/accounts/receipts/ttdf-account"
-  element={<TTDFAc />}
-/>
-
-<Route
-  path="/accounts/receipts/revenue-account"
-  element={<RevenueAc />}
-/>
-
-<Route
-  path="/accounts/receipts/tax-account"
-  element={<TaxAc />}
-/>
-
-<Route
-  path="/accounts/receipts/month-wise-report"
-  element={<MonthWiseReceiptReport />}
-/>
-
-<Route
-  path="/accounts/receipts/report/:id"
-  element={<ReceiptReportView />}
-/>
+        {/* Accounts Master */}
+        <Route path="/accounts/master/campus" element={<AccountsCampus />} />
+        <Route path="/accounts/master/departments" element={<AccountsDepartments />} />
+        <Route path="/accounts/master/beneficiaries" element={<AccountsBeneficiaries />} />
+        <Route path="/accounts/master/designation" element={<AccountsDesignation />} />
+        <Route path="/accounts/master/faculties" element={<AccountsFaculties />} />
+        <Route path="/accounts/master/user-activation" element={<AccountsUserActivation />} />
+        <Route path="/accounts/master/pi-roles" element={<AccountsPIRoles />} />
+        <Route path="/accounts/master/schemes" element={<AccountsSchemes />} />
 
 
+        {/* Banking */}
+        <Route path="/accounts/banking" element={<Banking />} />
+        <Route path="/accounts/banking/bank" element={<Bank />} />
+        <Route path="/accounts/banking/bank/new-entry" element={<NewEntry />} />
+        <Route path="/accounts/banking/bank/original-statements" element={<OriginalStatements />} />
+        <Route path="/accounts/banking/bank/current-statements" element={<CurrentStatements />} />
 
-{/* Payments */}
-<Route path="/accounts/payments" element={<Payments />} />
-<Route path="/accounts/payments/revenue-account" element={<RevenueAcP />} />
-<Route path="/accounts/payments/project-account" element={<ProjectAcP />} />
-<Route path="/accounts/payments/mopr-account" element={<MOPRAcP />} />
-<Route path="/accounts/payments/ttdf-account" element={<TTDFAcP />} />
-<Route path="/accounts/payments/tax-account" element={<TaxAcP />} />
-<Route path="/accounts/payments/unspent-amount" element={<UnspentAmount />} />
-<Route path="/accounts/payments/advance-settlement" element={<AdvSettlement />} />
-<Route path="/accounts/payments/bank-clearance" element={<BankClearance />} />
-<Route path="/accounts/payments/voucher-clearance" element={<VoucherClearance />} />
-<Route path="/accounts/payments/payment-types" element={<PaymentTypes />} />
-<Route path="/accounts/payments/subhead-types" element={<SubheadTypes />} />
-<Route path="/accounts/payments/payment-lock" element={<PaymentLock />} />
-<Route path="/accounts/payments/payment-report" element={<PaymentReport />} />
+        <Route path="/accounts/banking/fund-transfer" element={<FundTransfer />} />
+        <Route path="/accounts/banking/fund-transfer/revenue-account" element={<RevenueAccount />} />
+        <Route path="/accounts/banking/fund-transfer/project-account" element={<ProjectAccount />} />
+        <Route path="/accounts/banking/fund-transfer/mopr-account" element={<MOPRAccount />} />
+        <Route path="/accounts/banking/fund-transfer/ttdf-account" element={<TTDFAccount />} />
+        <Route path="/accounts/banking/fund-transfer/consultancy-account" element={<ConsultancyAccount />} />
+        <Route path="/accounts/banking/fund-transfer/tec-account" element={<TECAccount />} />
+        <Route path="/accounts/banking/fund-transfer/tax-account" element={<TAXAccount />} />
+
+        {/* Receipts */}
+        <Route path="/accounts/receipts" element={<Receipts />} />
+        <Route path="/accounts/receipts/receipts-accounts" element={<ReceiptAccounts />} />
+        <Route path="/accounts/receipts/project-account"   element={<ProjectAc />} />
+        <Route path="/accounts/receipts/mopr-account"      element={<MOPRAc />} />
+        <Route path="/accounts/receipts/ttdf-account"      element={<TTDFAc />} />
+        <Route path="/accounts/receipts/revenue-account"   element={<RevenueAc />} />
+        <Route path="/accounts/receipts/tax-account"       element={<TaxAc />} />
+        <Route path="/accounts/receipts/receipt-abstract"  element={<ReceiptAbstract />} />
+        <Route path="/accounts/receipts/month-wise-report" element={<MonthWiseReceiptReport />} />
+        <Route path="/accounts/receipts/report/:id"        element={<ReceiptReportView />} />
+
+        {/* Payments */}
+        <Route path="/accounts/payments"                      element={<Payments />} />
+        <Route path="/accounts/payments/voucher-processing"   element={<VoucherProcessing />} />
+        <Route path="/accounts/payments/revenue-account"      element={<RevenueAcP />} />
+        <Route path="/accounts/payments/project-account"      element={<ProjectAcP />} />
+        <Route path="/accounts/payments/mopr-account"         element={<MOPRAcP />} />
+        <Route path="/accounts/payments/ttdf-account"         element={<TTDFAcP />} />
+        <Route path="/accounts/payments/tax-account"          element={<TaxAcP />} />
+        <Route path="/accounts/payments/bank-clearance"       element={<BankClearance />} />
+        <Route path="/accounts/payments/voucher-clearance"    element={<VoucherClearance />} />
+        <Route path="/accounts/payments/payment-report"       element={<PaymentReport />} />
+
+        {/* Payments → Payment Reports hub (new) */}
+        <Route path="/accounts/payments/reports"               element={<PaymentProcessing />} />
+        <Route path="/accounts/payments/abstract"               element={<PaymentAbstract />} />
+        <Route path="/accounts/payments/compilation"            element={<Compilation />} />
+        <Route path="/accounts/payments/tds"                    element={<TDS />} />
+        <Route path="/accounts/payments/tds-on-gst"              element={<TDSonGST />} />
+        <Route path="/accounts/payments/gst"                    element={<GST />} />
+
+        <Route path="/accounts/brs"                        element={<BRS />} />
+        <Route path="/accounts/statement-of-expenditure"   element={<StatementOfExpenditure />} />
 
 
-<Route
-  path="/accounts/brs"
-  element={<BRS />}
-/>
+        {/* ── TSA REPORTS ── */}
+        <Route path="/accounts/tsa-reports"                                   element={<TSAReports />} />
 
+        {/* Receipts */}
+        <Route path="/accounts/tsa-reports/receipts"                          element={<ReceiptsHub />} />
+        <Route path="/accounts/tsa-reports/receipts/assg-abstract"            element={<AssgAbstract />} />
 
-{/* Statement Of Expenditure */}
-<Route
-  path="/accounts/statement-of-expenditure"
-  element={<StatementOfExpenditure />}
-/>
+        {/* General */}
+        <Route path="/accounts/tsa-reports/general"                           element={<GeneralHub />} />
+        <Route path="/accounts/tsa-reports/general/pfms-allocation"           element={<PFMSAllocation />} />
+        <Route path="/accounts/tsa-reports/general/compilation"               element={<GeneralCompilation />} />
 
-
+        {/* Payments */}
+        <Route path="/accounts/tsa-reports/payments"                          element={<PaymentsHub />} />
+        <Route path="/accounts/tsa-reports/payments/abstract"                 element={<PaymentsAbstract />} />
+        <Route path="/accounts/tsa-reports/payments/compilation"              element={<PaymentsCompilation />} />
+        <Route path="/accounts/tsa-reports/payments/university-overhead"      element={<PaymentsUnderConstruction module="University Overhead" />} />
+        <Route path="/accounts/tsa-reports/payments/csrc-overhead"            element={<PaymentsUnderConstruction module="CSRC Overhead" />} />
+        <Route path="/accounts/tsa-reports/payments/dept-overhead"            element={<PaymentsUnderConstruction module="Department Overhead" />} />
+        <Route path="/accounts/tsa-reports/payments/pdf-ac"                   element={<PaymentsUnderConstruction module="PDF A/C" />} />
 
 
         <Route path="*" element={<Navigate to="/" replace />} />
