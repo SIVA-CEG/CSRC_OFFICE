@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import ReceiptForm from "./ReceiptForm";
+import { useNavigate } from "react-router-dom";
 
 export default function ReceiptAccountPage({
   accountName,
@@ -8,6 +9,15 @@ export default function ReceiptAccountPage({
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] =
     useState(null);
+
+  const navigate = useNavigate();
+  const role = localStorage.getItem("userRole");
+
+  useEffect(() => {
+    if (role === "director") {
+      navigate("/accounts/receipts");
+    }
+  }, []);
 
   useEffect(() => {
     const data = JSON.parse(

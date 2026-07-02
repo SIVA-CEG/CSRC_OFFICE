@@ -60,10 +60,6 @@ const styles = {
 const cards = [
   { key: 'abstract', label: 'Abstract', icon: '📊', iconBg: 'linear-gradient(135deg,#fef3c7,#fde68a)', desc: 'Monthly abstract by scheme code', path: '/accounts/tsa-reports/payments/abstract', uc: false },
   { key: 'compilation', label: 'Compilation', icon: '📁', iconBg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', desc: 'Compiled payments by file and M.H. number', path: '/accounts/tsa-reports/payments/compilation', uc: false },
-  { key: 'university-overhead', label: 'University Overhead', icon: '🏛️', iconBg: 'linear-gradient(135deg,#f0fdf4,#bbf7d0)', desc: 'University overhead accounts', path: '/accounts/tsa-reports/payments/university-overhead', uc: true },
-  { key: 'csrc-overhead', label: 'CSRC Overhead', icon: '🏢', iconBg: 'linear-gradient(135deg,#eff6ff,#bfdbfe)', desc: 'CSRC overhead payments summary', path: '/accounts/tsa-reports/payments/csrc-overhead', uc: true },
-  { key: 'dept-overhead', label: 'Department Overhead', icon: '🏫', iconBg: 'linear-gradient(135deg,#fdf4ff,#e9d5ff)', desc: 'Department overhead payments', path: '/accounts/tsa-reports/payments/dept-overhead', uc: true },
-  { key: 'pdf-ac', label: 'PDF A/C', icon: '📄', iconBg: 'linear-gradient(135deg,#fff1f2,#fecaca)', desc: 'PDF account statements', path: '/accounts/tsa-reports/payments/pdf-ac', uc: true },
 ];
 
 export default function PaymentsHub() {

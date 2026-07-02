@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
+import { useNavigate } from "react-router-dom";
 
 export default function BankClearance() {
   const [entries, setEntries] = useState([]);
   const [confirmTarget, setConfirmTarget] = useState(null);
+  const navigate = useNavigate();
+  const role = localStorage.getItem("userRole");
+
+  useEffect(() => {
+    if (role === "director") {
+      navigate("/accounts/payments");
+    }
+  }, []);
 
   useEffect(() => {
     const data = JSON.parse(

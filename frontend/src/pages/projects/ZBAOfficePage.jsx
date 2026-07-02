@@ -697,7 +697,10 @@ ZBA001: [
     { id: 1, date: "18-06-2026", type: "Non-Recurring", head: "Equipment", amount: 250000, status: "review", bills: seedBills(2), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
     { id: 2, date: "19-06-2026", type: "Recurring", head: "Manpower", amount: 38440, status: "review", bills: seedBills(1), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
     { id: 3, date: "20-06-2026", type: "Recurring", head: "Travel", amount: 25000, status: "review", bills: seedBills(3), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
-    { id: 9, date: "21-06-2026", type: "Recurring", head: "Overhead", amount: 75000, status: "review", bills: seedBills(1), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
+    { id: 9, date: "21-06-2026", type: "Recurring", head: "The Registrar A/C, Chennai", amount: 25000, status: "review", bills: seedBills(1), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
+    { id: 10, date: "21-06-2026", type: "Recurring", head: "CSRC Revenue, Chennai", amount: 20000, status: "review", bills: seedBills(1), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
+    { id: 11, date: "21-06-2026", type: "Recurring", head: "The Dean, Campus A/C", amount: 20000, status: "review", bills: seedBills(1), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
+    { id: 12, date: "21-06-2026", type: "Recurring", head: "The Principal Investigator PDF", amount: 10000, status: "review", bills: seedBills(1), currentHolder: { name: userName(), role: "assistant" }, transferHistory: [] },
   ],
   ZBA002: [
     { id: 4, date: "17-06-2026", type: "Recurring", head: "Consumables & Accessories", amount: 85000, status: "review", bills: seedBills(2), currentHolder: { name: "S. Ramesh", role: "superintendent" }, transferHistory: [{ from: userName(), fromRole: "assistant", to: { name: "S. Ramesh", role: "superintendent" }, date: today(), approved: true }] },

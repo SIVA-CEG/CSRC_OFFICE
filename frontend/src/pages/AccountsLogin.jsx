@@ -6,10 +6,24 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    navigate('/accounts');
+const handleLogin = (e) => {
+  e.preventDefault();
+
+  const creds = {
+    ast1: { password: '123', role: 'assistant' },
+    dir1: { password: '123', role: 'director' },
   };
+
+  const match = creds[username.trim()];
+
+  if (match && match.password === password) {
+    localStorage.setItem('userRole', match.role);
+    localStorage.setItem('userName', username.trim());
+    navigate('/accounts');
+  } else {
+    alert('Invalid username or password');
+  }
+};
 
   return (
     <div style={styles.root}>

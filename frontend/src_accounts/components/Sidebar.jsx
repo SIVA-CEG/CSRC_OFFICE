@@ -12,7 +12,7 @@ const NAV = [
 {
   label: 'Master',
   icon: '🗂️',
-  path: '/master',
+  path: '/accounts/master',
   children: [
     { label: 'Campus', path: '/accounts/master/campus' },
     { label: 'Departments', path: '/accounts/master/departments' },
@@ -117,10 +117,6 @@ const NAV = [
         children: [
           { label: 'Abstract', path: '/accounts/tsa-reports/payments/abstract' },
           { label: 'Compilation', path: '/accounts/tsa-reports/payments/compilation' },
-          { label: 'University Overhead', path: '/accounts/tsa-reports/payments/university-overhead' },
-          { label: 'CSRC Overhead', path: '/accounts/tsa-reports/payments/csrc-overhead' },
-          { label: 'Dept Overhead', path: '/accounts/tsa-reports/payments/dept-overhead' },
-          { label: 'PDF A/C', path: '/accounts/tsa-reports/payments/pdf-ac' },
         ],
       },
     ],
@@ -130,6 +126,14 @@ const NAV = [
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const role = localStorage.getItem('userRole') || 'assistant';
+const userName = localStorage.getItem('userName') || 'Admin User';
+
+const handleLogout = () => {
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('userName');
+  navigate('/accounts-login');
+};
 const [openGroups, setOpenGroups] = useState(() => {
   const initial = {};
 
@@ -293,13 +297,24 @@ const [openGroups, setOpenGroups] = useState(() => {
       </nav>
 
       {/* Bottom user chip */}
-      <div style={sideStyles.userChip}>
-        <div style={sideStyles.userAvatar}>A</div>
-        <div>
-          <div style={sideStyles.userName}>Admin User</div>
-          <div style={sideStyles.userRole}>Accounts Office</div>
-        </div>
-      </div>
+<div style={sideStyles.userChip}>
+  <div style={sideStyles.userAvatar}>{userName.charAt(0).toUpperCase()}</div>
+  <div style={{ flex: 1 }}>
+    <div style={sideStyles.userName}>{userName}</div>
+    <div style={sideStyles.userRole}>
+      {role === 'director' ? 'Director' : 'Accounts Office'}
+    </div>
+  </div>
+  <button
+    onClick={handleLogout}
+    title="Logout"
+    style={sideStyles.logoutBtn}
+    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
+    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
+  >
+    ⏻
+  </button>
+</div>
     </aside>
   );
 }
@@ -533,4 +548,19 @@ navIcon: {
 },
   userName: { fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' },
   userRole: { fontSize: 10, color: 'var(--text-muted)' },
+  logoutBtn: {
+  width: 34,
+  height: 34,
+  borderRadius: 10,
+  border: '1px solid rgba(255,255,255,0.2)',
+  background: 'rgba(255,255,255,0.12)',
+  color: '#fff',
+  fontSize: 15,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  transition: 'background 0.2s ease',
+},
 };

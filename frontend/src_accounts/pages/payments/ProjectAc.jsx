@@ -9,6 +9,9 @@ import {
   buildNineDigit,
 } from "../../pages/payments/accountsStore";
 
+import { useNavigate } from "react-router-dom";
+import React, { useState, useMemo, useEffect } from "react";
+
 /* ───────────────────────── STYLES ───────────────────────── */
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
@@ -292,6 +295,14 @@ function VoucherModal({ bill, onSubmit, onClose }) {
 
 /* ───────────────────────── MAIN PAGE ───────────────────────── */
 export default function ProjectAc() {
+  const navigate = useNavigate();
+  const role = localStorage.getItem("userRole");
+
+  useEffect(() => {
+    if (role === "director") {
+      navigate("/accounts/payments");
+    }
+  }, []);
   const bills = useAccountsBills();
   const [search, setSearch] = useState("");
   const [viewItem, setViewItem] = useState(null);

@@ -8,8 +8,8 @@ const NAV_ITEMS = [
   { path: "/tapal/projects/sanction", label: "Sanction Tapals", icon: "✅", indent: true },
   { path: "/tapal/projects/bills", label: "Bills", icon: "🧾", indent: true },
   { path: "/tapal/projects/requests", label: "Request Tapals", icon: "📨", indent: true },
+  { path: "/tapal/projects/staff-approval", label: "Staff Approval Tapals", icon: "🧑‍💼", indent: true },
 ];
-
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();

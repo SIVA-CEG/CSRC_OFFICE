@@ -1,5 +1,5 @@
 // PATH: src_accounts/pages/receipts/ReceiptAccounts.jsx
-
+import { useEffect } from "react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout";
@@ -7,6 +7,14 @@ import "../payments/VoucherProcessing.css";
 
 export default function ReceiptAccounts() {
   const navigate = useNavigate();
+
+  const role = localStorage.getItem("userRole");
+
+  useEffect(() => {
+    if (role === "director") {
+      navigate("/accounts/receipts");
+    }
+  }, []);
 
   const accounts = [
     {

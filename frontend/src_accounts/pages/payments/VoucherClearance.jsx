@@ -5,6 +5,7 @@ import {
   useAccountsBills,
   fmt,
 } from "../../pages/payments/accountsStore";
+import { useNavigate } from "react-router-dom";
 
 /* ───────────────────────── ACCOUNT CONFIG ───────────────────────── */
 const ACCOUNT_OPTIONS = [
@@ -645,6 +646,14 @@ function PdfReportModal({ bills, account, letterIndex, onClose }) {
 /* ───────────────────────── MAIN PAGE ───────────────────────── */
 export default function VoucherClearance() {
   const allBills = useAccountsBills();
+  const navigate = useNavigate();
+  const role = localStorage.getItem("userRole");
+
+  React.useEffect(() => {
+    if (role === "director") {
+      navigate("/accounts/payments");
+    }
+  }, []);
 
   /* ── account filter ── */
   const [account, setAccount] = useState("all");

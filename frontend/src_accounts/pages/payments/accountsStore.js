@@ -170,3 +170,31 @@ export function useAccountsBills() {
   useEffect(() => accountsStore.subscribe(() => force((n) => n + 1)), []);
   return accountsStore.getBills();
 }
+
+export function getPaymentsSummary(bills) {
+  const accounts = ["revenue", "project", "mopr", "ttdf", "tax"];
+
+  const summary = {};
+  accounts.forEach(a => {
+    summary[a] = { count: 0, amount: 0, vouchered: 0, cleared: 0 };
+  });
+
+  bills.forEach(b => {
+    const acc = b._accountType || "project";
+    if (!summary[acc]) summary[acc] = { count: 0, amount: 0, vouchered: 0, cleared: 0 };
+
+    summary[acc].count += 1;
+    summary[acc].amount += Number(b.amount || 0);
+    if (b.voucher) summary[acc].vouchered += 1;
+    if (b.accountedOn) summary[acc].cleared += 1;
+  });
+
+  return {
+    totalCount: bills.length,
+    totalAmount: bills.reduce((s, b) => s + Number(b.amount || 0), 0),
+    totalVouchered: bills.filter(b => b.voucher).length,
+    totalPendingVoucher: bills.filter(b => !b.voucher).length,
+    totalCleared: bills.filter(b => b.accountedOn).length,
+    accounts: summary,
+  };
+}

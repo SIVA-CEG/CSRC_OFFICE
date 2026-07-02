@@ -41,15 +41,17 @@ function BankCard({ card, onClick }) {
   const [h, setH] = useState(false);
   return (
     <div
-      style={{
-        ...styles.card,
-        boxShadow: h ? `0 20px 60px ${card.glow}, 0 0 0 1px ${card.color}33` : '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--border)',
-        transform: h ? 'translateY(-4px)' : 'none',
-      }}
-      onClick={onClick}
-      onMouseEnter={() => setH(true)}
-      onMouseLeave={() => setH(false)}
-    >
+  style={{
+    ...styles.card,
+    transform: h ? 'translateY(-3px)' : 'none',
+    boxShadow: h
+      ? `0 16px 48px rgba(0,0,0,0.35), 0 0 0 1px ${card.color}44`
+      : '0 6px 24px rgba(0,0,0,0.25), 0 0 0 1px var(--border)',
+  }}
+  onClick={onClick}
+  onMouseEnter={() => setH(true)}
+  onMouseLeave={() => setH(false)}
+>
       <div style={{ ...styles.accent, background: `linear-gradient(90deg,${card.color},transparent)` }} />
       <div style={{ ...styles.iconBox, background: `${card.color}18` }}>
         <span style={{ fontSize: 30 }}>{card.icon}</span>
@@ -70,9 +72,15 @@ const styles = {
   breadcrumb: { fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 },
   heading: { fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: 6 },
   sub: { fontSize: 13, color: 'var(--text-secondary)', marginBottom: 32 },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: 22 },
+  grid: {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 340px))',
+  justifyContent: 'center',
+  gap: 24,
+  marginTop: 20,
+},
   card: {
-    background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(16px)',
+    background: 'rgb(255, 255, 255)', backdropFilter: 'blur(16px)',
     borderRadius: 20, padding: '28px 24px', cursor: 'pointer',
     transition: 'all 0.25s cubic-bezier(.4,0,.2,1)', position: 'relative', overflow: 'hidden',
   },

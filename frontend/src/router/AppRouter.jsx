@@ -20,6 +20,7 @@ import NewTapal         from '../../src_tapal/pages/NewTapal';
 import AssignedTapal    from '../../src_tapal/pages/AssignedTapal';
 import CompletedTapal   from '../../src_tapal/pages/CompletedTapal';
 import TapalSearch      from '../../src_tapal/pages/TapalSearch';
+import StaffApprovalTapal from '../../src_tapal/pages/StaffApprovalTapal';
 
 
 
@@ -181,7 +182,8 @@ export default function AppRouter() {
           <Route path="projects/endorsement" element={<EndorsementTapal />} />
           <Route path="projects/sanction"    element={<SanctionTapal />} />
           <Route path="projects/bills"       element={<BillsTapal />} />
-          <Route path="projects/requests"    element={<RequestTapal />} />
+          <Route path="projects/requests"       element={<RequestTapal />} />
+          <Route path="projects/staff-approval" element={<StaffApprovalTapal />} />
           <Route path="legacy/new"           element={<NewTapal tapals={[]} />} />
           <Route path="legacy/assigned"      element={<AssignedTapal tapals={[]} />} />
           <Route path="legacy/completed"     element={<CompletedTapal tapals={[]} />} />

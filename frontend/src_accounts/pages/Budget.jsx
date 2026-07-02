@@ -5,6 +5,41 @@ import "./Budget.css";
 
 const PAGE_SIZE = 10;
 
+const REQUESTS_KEY = "budgetChangeRequests";
+const OVERRIDES_KEY = "budgetApprovedOverrides";
+const VIEWS = ["digit23", "digit45", "digit67", "digit89"];
+
+function loadOverrides() {
+  try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function loadRequests() {
+  try { return JSON.parse(localStorage.getItem(REQUESTS_KEY)) || []; }
+  catch { return []; }
+}
+
+function baseData() {
+  return {
+    digit23: budgetData.digit23 || [],
+    digit45: budgetData.digit45 || [],
+    digit67: budgetData.digit67 || [],
+    digit89: budgetData.digit89 || [],
+  };
+}
+
+function applyOverrides(base, overrides) {
+  const cloned = structuredClone(base);
+  VIEWS.forEach((v) => {
+    const vOverrides = overrides[v] || {};
+    Object.entries(vOverrides).forEach(([key, val]) => {
+      const [r, c] = key.split("-").map(Number);
+      if (cloned[v][r]) cloned[v][r][c] = val;
+    });
+  });
+  return cloned;
+}
+
 export default function Budget() {
   const [view, setView] = useState("23");
   const [search, setSearch] = useState("");
@@ -15,12 +50,13 @@ export default function Budget() {
   const [page, setPage] = useState(1);
 
     const [isEditing, setIsEditing] = useState(false);
-const [dataState, setDataState] = useState({
-  digit23: budgetData.digit23 || [],
-  digit45: budgetData.digit45 || [],
-  digit67: budgetData.digit67 || [],
-  digit89: budgetData.digit89 || [],
-});
+const role = localStorage.getItem("userRole") || "assistant";
+const userName = localStorage.getItem("userName") || "ast1";
+
+const [dataState, setDataState] = useState(() =>
+  applyOverrides(baseData(), loadOverrides())
+);
+const [pendingRequests, setPendingRequests] = useState(loadRequests);
 
 
 
@@ -29,6 +65,18 @@ const digit23 = dataState.digit23;
 const digit45 = dataState.digit45;
 const digit67 = dataState.digit67;
 const digit89 = dataState.digit89;
+
+const pendingCellMap = useMemo(() => {
+  const map = {};
+  pendingRequests
+    .filter((r) => r.status === "pending")
+    .forEach((r) =>
+      r.changes.forEach((c) => {
+        map[`${c.view}-${c.rowIndex}-${c.colIndex}`] = req;
+      })
+    );
+  return map;
+}, [pendingRequests]);
 
 
 const toggleValue = (rowIndex, colIndex) => {
@@ -166,28 +214,24 @@ const toggleValue = (rowIndex, colIndex) => {
     page * PAGE_SIZE
   );
 
-  const renderYN = (
-  value,
-  rowIndex,
-  colIndex
-) => {
+const renderYN = (value, rowIndex, colIndex) => {
   const val = value === "Y" ? "Y" : "N";
+  const isPending = !!pendingCellMap[`${view}-${rowIndex}-${colIndex}`];
 
   return (
     <button
       type="button"
       disabled={!isEditing}
-      className={`yn-badge ${val === "Y" ? "yes" : "no"} ${
-        isEditing ? "editable" : ""
-      }`}
-      onClick={() =>
-        toggleValue(rowIndex, colIndex)
-      }
+      className={`yn-badge ${val === "Y" ? "yes" : "no"} ${isEditing ? "editable" : ""}`}
+      onClick={() => toggleValue(rowIndex, colIndex)}
+      style={isPending ? { outline: "2px solid #f59e0b", outlineOffset: 2 } : undefined}
+      title={isPending ? "Pending director approval" : undefined}
     >
       {val}
     </button>
   );
 };
+
 
 const renderRow = (row, rowIndex) => {
   return row.map((cell, idx) => {
@@ -301,44 +345,127 @@ const renderRow = (row, rowIndex) => {
 
 <div className="budget-actions">
 
-  {!isEditing ? (
+{!isEditing ? (
+  <button className="edit-btn" onClick={() => setIsEditing(true)}>Edit</button>
+) : (
+  <>
     <button
-      className="edit-btn"
-      onClick={() => setIsEditing(true)}
-    >
-      Edit
-    </button>
-  ) : (
-    <>
-      <button
-        className="save-btn"
-        onClick={() => {
-          console.log(dataState);
-          setIsEditing(false);
-        }}
-      >
-        Save
-      </button>
-
-      <button
-        className="cancel-btn"
-        onClick={() => {
-          setDataState({
-            digit23: budgetData.digit23 || [],
-            digit45: budgetData.digit45 || [],
-            digit67: budgetData.digit67 || [],
-            digit89: budgetData.digit89 || [],
+      className="save-btn"
+      onClick={() => {
+        if (role === "director") {
+          const overrides = loadOverrides();
+          VIEWS.forEach((v) => {
+            overrides[v] = overrides[v] || {};
+            dataState[v].forEach((row, rIdx) =>
+              row.forEach((cell, cIdx) => {
+                if (cell === "Y" || cell === "N") overrides[v][`${rIdx}-${cIdx}`] = cell;
+              })
+            );
           });
+          localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
+        } else {
+          const baseline = applyOverrides(baseData(), loadOverrides());
+          const changes = [];
+          VIEWS.forEach((v) =>
+            dataState[v].forEach((row, rIdx) =>
+              row.forEach((cell, cIdx) => {
+                const oldVal = baseline[v]?.[rIdx]?.[cIdx];
+                if ((cell === "Y" || cell === "N") && cell !== oldVal) {
+                  changes.push({ view: v, rowIndex: rIdx, colIndex: cIdx, oldValue: oldVal, newValue: cell });
+                }
+              })
+            )
+          );
+          if (changes.length > 0) {
+            const newRequest = {
+              id: Date.now(),
+              requestedBy: userName,
+              timestamp: new Date().toISOString(),
+              status: "pending",
+              changes,
+            };
+            const updated = [...pendingRequests, newRequest];
+            setPendingRequests(updated);
+            localStorage.setItem(REQUESTS_KEY, JSON.stringify(updated));
+          }
+          setDataState(baseline); // revert visible values until approved
+        }
+        setIsEditing(false);
+      }}
+    >
+      {role === "director" ? "Save" : "Submit for Approval"}
+    </button>
 
-          setIsEditing(false);
-        }}
-      >
-        Cancel
-      </button>
-    </>
-  )}
+    <button
+      className="cancel-btn"
+      onClick={() => {
+        setDataState(applyOverrides(baseData(), loadOverrides()));
+        setIsEditing(false);
+      }}
+    >
+      Cancel
+    </button>
+  </>
+)}
 
 </div>
+
+{role === "director" && (
+  <div style={{ margin: "16px 0", padding: 16, border: "1px solid #e5e7eb", borderRadius: 12, background: "#fafafa" }}>
+    <h3 style={{ margin: "0 0 12px", fontSize: 15 }}>
+      Pending Budget Edit Requests
+      {pendingRequests.filter((r) => r.status === "pending").length > 0 &&
+        ` (${pendingRequests.filter((r) => r.status === "pending").length})`}
+    </h3>
+
+    {pendingRequests.filter((r) => r.status === "pending").length === 0 ? (
+      <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>No pending requests.</p>
+    ) : (
+      pendingRequests.filter((r) => r.status === "pending").map((req) => (
+        <div key={req.id} style={{ padding: "10px 0", borderTop: "1px solid #e5e7eb" }}>
+          <div style={{ fontSize: 13, marginBottom: 6 }}>
+            <strong>{req.requestedBy}</strong> requested {req.changes.length} change(s) ·{" "}
+            <span style={{ color: "#9ca3af" }}>{new Date(req.timestamp).toLocaleString()}</span>
+          </div>
+          <ul style={{ margin: "0 0 8px", paddingLeft: 18, fontSize: 12, color: "#4b5563" }}>
+            {req.changes.map((c, i) => (
+              <li key={i}>[{c.view}] Row {c.rowIndex + 1}, Col {c.colIndex + 1}: {c.oldValue || "N"} → {c.newValue}</li>
+            ))}
+          </ul>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              className="save-btn"
+              onClick={() => {
+                const overrides = loadOverrides();
+                req.changes.forEach((c) => {
+                  overrides[c.view] = overrides[c.view] || {};
+                  overrides[c.view][`${c.rowIndex}-${c.colIndex}`] = c.newValue;
+                });
+                localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
+                const updated = pendingRequests.map((r) => (r.id === req.id ? { ...r, status: "approved" } : r));
+                setPendingRequests(updated);
+                localStorage.setItem(REQUESTS_KEY, JSON.stringify(updated));
+                setDataState((prev) => applyOverrides(prev, overrides));
+              }}
+            >
+              Approve
+            </button>
+            <button
+              className="cancel-btn"
+              onClick={() => {
+                const updated = pendingRequests.map((r) => (r.id === req.id ? { ...r, status: "rejected" } : r));
+                setPendingRequests(updated);
+                localStorage.setItem(REQUESTS_KEY, JSON.stringify(updated));
+              }}
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+)}
 
 <div className="budget-table-wrapper">
           <table className="budget-table">

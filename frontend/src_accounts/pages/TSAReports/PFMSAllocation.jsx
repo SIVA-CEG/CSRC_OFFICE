@@ -1,6 +1,31 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
+
+/* ── shared schemes master (same data as master/Schemes.jsx) ── */
+const MASTER_SCHEMES = [
+  { schemeCode: '4211', schemeName: 'Advanced Research Grant (ARG) Program' },
+  { schemeCode: '0150', schemeName: 'BIOTECH RESEARCH AND DEVELOPMENT' },
+  { schemeCode: '4306', schemeName: 'Biotechnology Research Innovation and Entrepreneurship Development (Bio-Ride)' },
+  { schemeCode: '1827', schemeName: 'Capacity Building and Human Resources Development' },
+  { schemeCode: '4197', schemeName: 'Capacity Building and Skill Development Scheme' },
+  { schemeCode: '3989', schemeName: 'CONSERVATION DEVELOPMENT AND SUSTAINABLE MANAGEMENT OF MEDICINAL PLANTS' },
+  { schemeCode: '1023', schemeName: 'Core Research Grant (erstwhile SERB Scheme)' },
+  { schemeCode: '0538', schemeName: 'Cyber Security Projects (NCCC & Others)' },
+  { schemeCode: '1819', schemeName: 'Innovation, Technology, Development and Deployment' },
+  { schemeCode: '3655', schemeName: 'O-SMART' },
+  { schemeCode: '4308', schemeName: 'Prithvi Vighyan (Prithvi)' },
+  { schemeCode: '3943', schemeName: 'PUBLIC HEALTH ENGINEERING (PHE) SECTOR DEPARTMENT' },
+  { schemeCode: '2354', schemeName: 'R and D in IT/Electronics/CCBT' },
+  { schemeCode: '3237', schemeName: 'Research & Development' },
+  { schemeCode: '1166', schemeName: 'Research & Development Programme in Water Sector' },
+  { schemeCode: '1166A', schemeName: 'Research and Development and Implementation of National Water Mission' },
+  { schemeCode: '1817', schemeName: 'S & T Institutional And Human Capacity Building' },
+  { schemeCode: '3668', schemeName: 'Scheme for Transformation and Advanced Research in Sciences' },
+  { schemeCode: '2792', schemeName: 'Space Science Promotion' },
+  { schemeCode: '3614', schemeName: 'SPARC' },
+  { schemeCode: '4305', schemeName: 'Vigyan Dhara' },
+];
 
 const FINANCIAL_YEARS = ['2023-24', '2024-25', '2025-26'];
 
@@ -28,11 +53,22 @@ const styles = {
     fontSize: '14px', color: '#334155', background: '#fff', cursor: 'pointer',
     outline: 'none', fontFamily: 'inherit',
   },
+  schemeFilterSelect: {
+    padding: '9px 14px', borderRadius: '10px', border: '1.5px solid #e2e8f0',
+    fontSize: '14px', color: '#334155', background: '#fff', cursor: 'pointer',
+    outline: 'none', fontFamily: 'inherit', maxWidth: '260px',
+  },
   addBtn: {
     padding: '10px 20px', borderRadius: '10px',
     background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
     color: '#fff', fontWeight: '700', fontSize: '14px',
     border: 'none', cursor: 'pointer',
+  },
+  addBtnDisabled: {
+    padding: '10px 20px', borderRadius: '10px',
+    background: '#c7c9f5',
+    color: '#fff', fontWeight: '700', fontSize: '14px',
+    border: 'none', cursor: 'not-allowed',
   },
   downloadBtn: {
     padding: '10px 20px', borderRadius: '10px',
@@ -75,7 +111,10 @@ const styles = {
     background: '#fff', borderRadius: '20px', padding: '36px',
     width: '100%', maxWidth: '480px', boxShadow: '0 24px 64px rgba(15,23,42,0.18)',
   },
-  modalTitle: { fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '24px' },
+  modalTitle: { fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '8px' },
+  modalScheme: {
+    fontSize: '13px', color: '#6366f1', fontWeight: '600', marginBottom: '24px',
+  },
   field: { marginBottom: '16px' },
   label: { fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', display: 'block' },
   input: {
@@ -113,8 +152,32 @@ export default function PFMSAllocation() {
   const [form, setForm] = useState(empty);
   const [err, setErr] = useState('');
   const [selectedYear, setSelectedYear] = useState('2024-25');
+  const [selectedScheme, setSelectedScheme] = useState('');
 
-  const openAdd = () => { setForm(empty); setEditId(null); setErr(''); setShowModal(true); };
+  // Merge local storage schemes with master (same source as ASSG Abstract page)
+  const allSchemes = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('tsa_schemes_extra');
+      const extra = saved ? JSON.parse(saved) : [];
+      return [...MASTER_SCHEMES, ...extra];
+    } catch {
+      return MASTER_SCHEMES;
+    }
+  }, []);
+
+  const schemeNameFor = (code) => {
+    const s = allSchemes.find(s => s.schemeCode === code);
+    return s ? s.schemeName : '';
+  };
+
+  const filteredRecords = selectedScheme
+    ? records.filter(r => r.schemeCode === selectedScheme)
+    : records;
+
+  const openAdd = () => {
+    if (!selectedScheme) return;
+    setForm(empty); setEditId(null); setErr(''); setShowModal(true);
+  };
   const openEdit = (r) => { setForm({ ...r }); setEditId(r.id); setErr(''); setShowModal(true); };
 
   const save = () => {
@@ -123,9 +186,9 @@ export default function PFMSAllocation() {
       setErr('Please fill all required fields.'); return;
     }
     if (editId !== null) {
-      setRecords(prev => prev.map(r => r.id === editId ? { ...form, id: editId } : r));
+      setRecords(prev => prev.map(r => r.id === editId ? { ...form, id: editId, schemeCode: r.schemeCode } : r));
     } else {
-      setRecords(prev => [...prev, { ...form, id: Date.now() }]);
+      setRecords(prev => [...prev, { ...form, id: Date.now(), schemeCode: selectedScheme }]);
     }
     setShowModal(false);
   };
@@ -169,8 +232,27 @@ export default function PFMSAllocation() {
           <select style={styles.filterSelect} value={selectedYear} onChange={e => setSelectedYear(e.target.value)}>
             {FINANCIAL_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+          <select
+            style={styles.schemeFilterSelect}
+            value={selectedScheme}
+            onChange={e => setSelectedScheme(e.target.value)}
+          >
+            <option value="">All Schemes</option>
+            {allSchemes.map(s => (
+              <option key={s.schemeCode} value={s.schemeCode}>
+                {s.schemeCode} – {s.schemeName.slice(0, 40)}
+              </option>
+            ))}
+          </select>
           <button style={styles.downloadBtn} onClick={handleDownload}>⬇ PDF</button>
-          <button style={styles.addBtn} onClick={openAdd}>+ New Fund Allocation</button>
+          <button
+            style={selectedScheme ? styles.addBtn : styles.addBtnDisabled}
+            onClick={openAdd}
+            disabled={!selectedScheme}
+            title={!selectedScheme ? 'Select a scheme first' : ''}
+          >
+            + New Fund Allocation
+          </button>
         </div>
       </div>
 
@@ -179,22 +261,28 @@ export default function PFMSAllocation() {
           <table style={styles.table}>
             <thead>
               <tr>
-                {['#', 'Allocation Date', 'Allocated Fund (₹)', 'File Name', 'Remarks', 'Action'].map(h => (
+                {['#', 'Scheme', 'Allocation Date', 'Allocated Fund (₹)', 'File Name', 'Remarks', 'Action'].map(h => (
                   <th key={h} style={styles.th}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {records.length === 0 ? (
+              {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={styles.emptyState}>
-                    No allocations yet. Click <strong>+ New Fund Allocation</strong> to add one.
+                  <td colSpan={7} style={styles.emptyState}>
+                    {selectedScheme
+                      ? <>No allocations yet for this scheme. Click <strong>+ New Fund Allocation</strong> to add one.</>
+                      : <>Select a scheme above to view or add allocations.</>}
                   </td>
                 </tr>
               ) : (
-                records.map((r, i) => (
+                filteredRecords.map((r, i) => (
                   <tr key={r.id} style={i % 2 === 1 ? { background: '#fafafa' } : {}}>
                     <td style={styles.td}>{i + 1}</td>
+                    <td style={styles.td}>
+                      <div style={{ fontWeight: '700', color: '#0f172a' }}>{r.schemeCode}</div>
+                      <div style={{ fontSize: '12px', color: '#94a3b8' }}>{schemeNameFor(r.schemeCode).slice(0, 40)}</div>
+                    </td>
                     <td style={styles.td}>{r.allocationDate}</td>
                     <td style={{ ...styles.td, fontWeight: '600', color: '#4f46e5' }}>
                       ₹{parseFloat(r.allocatedFund || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -217,6 +305,10 @@ export default function PFMSAllocation() {
         <div style={styles.overlay}>
           <div style={styles.modal}>
             <div style={styles.modalTitle}>{editId !== null ? 'Edit Allocation' : 'New Fund Allocation'}</div>
+            <div style={styles.modalScheme}>
+              {form.schemeCode || selectedScheme} – {schemeNameFor(form.schemeCode || selectedScheme)}
+            </div>
+
             {[
               { key: 'allocationDate', label: 'Allocation Date *', type: 'date' },
               { key: 'allocatedFund', label: 'Allocated Fund (₹) *', type: 'number', placeholder: 'e.g. 500000' },

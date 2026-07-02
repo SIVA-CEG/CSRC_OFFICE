@@ -2,51 +2,41 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 
-const CARDS = [
-  {
-    label: 'Master',
-    icon: '◈',
-    description: 'Master data & configuration settings',
-    path: '/accounts/master',
-    color: '#f59e0b',
-    glow: 'rgba(245,158,11,0.20)',
-  },
-  {
-    label: 'Budget',
-    icon: '◉',
-    description: 'Budget allocation and planning',
-    path: '/accounts/budget',
-    color: '#8b5cf6',
-    glow: 'rgba(139,92,246,0.20)',
-  },
-  {
-    label: 'Banking',
-    icon: '⬡',
-    description: 'Bank accounts, statements & fund transfers',
-    path: '/accounts/banking',
-    color: '#06b6d4',
-    glow: 'rgba(6,182,212,0.22)',
-  },
-  {
-    label: 'Receipts',
-    icon: '◎',
-    description: 'Project, revenue & tax receipt management',
-    path: '/accounts/receipts',
-    color: '#10b981',
-    glow: 'rgba(16,185,129,0.20)',
-  },
-  {
-    label: 'Payments',
-    icon: '◐',
-    description: 'All payment types, settlements & clearances',
-    path: '/accounts/payments',
-    color: '#f43f5e',
-    glow: 'rgba(244,63,94,0.20)',
-  },
-];
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const role = localStorage.getItem('userRole');
+
+const CARDS = [
+  { label: "Master", icon: "📁", description: "Master data & configuration", path: "/accounts/master", color: "#F59E0B", glow: "rgba(245,158,11,.22)" },
+  {
+    label: "Budget",
+    icon: "💰",
+    description: role === 'director' ? "Review & approve budget edit requests" : "Budget allocation & planning",
+    path: "/accounts/budget", color: "#A855F7", glow: "rgba(168,85,247,.22)",
+  },
+  {
+    label: "Banking",
+    icon: "🏦",
+    description: role === 'director' ? "Collective banking report" : "Bank accounts, transfers & statements",
+    path: "/accounts/banking", color: "#06B6D4", glow: "rgba(6,182,212,.22)",
+  },
+  {
+    label: "Receipts",
+    icon: "🧾",
+    description: role === 'director' ? "Collective receipts overview" : "Receipt accounts & receipt reports",
+    path: "/accounts/receipts", color: "#10B981", glow: "rgba(16,185,129,.22)",
+  },
+  {
+    label: "Payments",
+    icon: "💳",
+    description: role === 'director' ? "Collective payments overview" : "Voucher processing & payment reports",
+    path: "/accounts/payments", color: "#EF4444", glow: "rgba(239,68,68,.22)",
+  },
+  { label: "Bank Reconciliation Statement", icon: "🏛️", description: "Bank reconciliation & statement matching", path: "/accounts/brs", color: "#2563EB", glow: "rgba(37,99,235,.22)" },
+  { label: "Statement Of Expenditure", icon: "📄", description: "Generate expenditure statements", path: "/accounts/statement-of-expenditure", color: "#14B8A6", glow: "rgba(20,184,166,.22)" },
+  { label: "TSA Reports", icon: "📑", description: "Receipts, General & Payments reports", path: "/accounts/tsa-reports", color: "#6366F1", glow: "rgba(99,102,241,.22)" },
+];
   return (
     <Layout title="Accounts Dashboard" subtitle="Centre for Sponsored Research and Consultancy · Anna University">
       <div style={styles.welcome}>

@@ -229,3 +229,30 @@ export function deleteReceipt(id) {
 
   return updated;
 }
+
+export function calculateAccountWiseTotals(receipts) {
+  const accounts = ["Project", "Revenue", "MOPR", "TTDF", "Tax"];
+
+  const summary = {};
+  accounts.forEach(acc => {
+    summary[acc] = { count: 0, amount: 0 };
+  });
+
+  receipts.forEach(r => {
+    if (summary[r.account]) {
+      summary[r.account].count += 1;
+      summary[r.account].amount += Number(r.amount || 0);
+    }
+  });
+
+  const totalAmount = receipts.reduce(
+    (sum, r) => sum + Number(r.amount || 0),
+    0
+  );
+
+  return {
+    totalCount: receipts.length,
+    totalAmount,
+    accounts: summary,
+  };
+}

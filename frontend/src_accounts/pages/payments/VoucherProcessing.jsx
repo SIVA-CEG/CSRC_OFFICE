@@ -4,37 +4,65 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./VoucherProcessing.css";
 import Layout from "../../components/Layout";
+import { useEffect } from "react";  
 
 export default function VoucherProcessing() {
   const navigate = useNavigate();
+  const role = localStorage.getItem("userRole");
 
-  const vouchers = [
-    {
-      title: "Revenue A/c",
-      path: "/accounts/payments/revenue-account",
-      icon: "💰",
-    },
-    {
-      title: "Project A/c",
-      path: "/accounts/payments/project-account",
-      icon: "📁",
-    },
-    {
-      title: "MOPR A/c",
-      path: "/accounts/payments/mopr-account",
-      icon: "📊",
-    },
-    {
-      title: "TTDF A/c",
-      path: "/accounts/payments/ttdf-account",
-      icon: "📄",
-    },
-    {
-      title: "Tax A/c",
-      path: "/accounts/payments/tax-account",
-      icon: "🧾",
-    },
-  ];
+  useEffect(() => {
+    if (role === "director") {
+      navigate("/accounts/payments");
+    }
+  }, []);
+
+const vouchers = [
+  {
+    title: "Revenue A/c",
+    path: "/accounts/payments/revenue-account",
+    icon: "💰",
+  },
+  {
+    title: "Project A/c",
+    path: "/accounts/payments/project-account",
+    icon: "📁",
+  },
+  {
+    title: "MOPR A/c",
+    path: "/accounts/payments/mopr-account",
+    icon: "📊",
+  },
+  {
+    title: "TTDF A/c",
+    path: "/accounts/payments/ttdf-account",
+    icon: "📄",
+  },
+  {
+    title: "Tax A/c",
+    path: "/accounts/payments/tax-account",
+    icon: "🧾",
+  },
+  {
+    title: "University Overhead",
+    path: "/accounts/tsa-reports/payments/university-overhead",
+    icon: "🏛️",
+  },
+  {
+    title: "CSRC Overhead",
+    path: "/accounts/tsa-reports/payments/csrc-overhead",
+    icon: "🏢",
+  },
+  {
+    title: "Department Overhead",
+    path: "/accounts/tsa-reports/payments/dept-overhead",
+    icon: "🏫",
+  },
+  {
+    title: "PDF A/C",
+    path: "/accounts/tsa-reports/payments/pdf-ac",
+    icon: "📄",
+  },
+];
 
 return (
   <Layout
