@@ -123,10 +123,52 @@ const NAV = [
   },
 ];
 
+const DIRECTOR_HIDDEN_PATHS = [
+  '/accounts/receipts/receipts-accounts',
+  '/accounts/receipts/receipt-lock',
+  '/accounts/payments/voucher-processing',
+  '/accounts/payments/voucher-clearance',
+  '/accounts/payments/bank-clearance',
+];
+
+function getNavForRole(role) {
+  if (role !== 'director') return NAV;
+
+  return NAV.map(item => {
+    // Banking: director only sees the collective report — strip all sub-menus
+    if (item.path === '/accounts/banking') {
+      const { children, ...rest } = item;
+      return rest;
+    }
+
+    // Other sections: drop specific processing-only children
+    if (item.children) {
+      const filteredChildren = item.children
+        .filter(child => !DIRECTOR_HIDDEN_PATHS.includes(child.path))
+        .map(child => {
+          if (child.children) {
+            return {
+              ...child,
+              children: child.children.filter(
+                gc => !DIRECTOR_HIDDEN_PATHS.includes(gc.path)
+              ),
+            };
+          }
+          return child;
+        });
+
+      return { ...item, children: filteredChildren };
+    }
+
+    return item;
+  });
+}
+
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const role = localStorage.getItem('userRole') || 'assistant';
+  const navItems = getNavForRole(role);
 const userName = localStorage.getItem('userName') || 'Admin User';
 
 const handleLogout = () => {
@@ -137,7 +179,7 @@ const handleLogout = () => {
 const [openGroups, setOpenGroups] = useState(() => {
   const initial = {};
 
-  NAV.forEach(item => {
+  navItems.forEach(item => {
     const hasMatch = item.children?.some(child =>
       location.pathname.startsWith(child.path) ||
       child.children?.some(gc =>
@@ -154,7 +196,7 @@ const [openGroups, setOpenGroups] = useState(() => {
 });
   const [openSubs, setOpenSubs] = useState(() => {
     const initial = {};
-    NAV.forEach(item => {
+    navItems.forEach(item => {
       item.children?.forEach(child => {
         const hasMatch = child.children?.some(gc => location.pathname.startsWith(gc.path));
         if (hasMatch) initial[child.label] = true;
@@ -188,7 +230,7 @@ const [openGroups, setOpenGroups] = useState(() => {
       <div style={sideStyles.divider} />
 
       <nav style={sideStyles.nav}>
-        {NAV.map(item => (
+        {navItems.map(item => (
           <div key={item.label}>
             <div
   style={{

@@ -49,6 +49,7 @@ const projectItems = [
     path: '/projects/staff-approvals',
     icon: '👨‍💼',
   },
+  { label: 'Project Transfer',       path: '/projects/transfer-requests',      icon: '🔀' },
   { label: 'Search',  path: '/projects/search',  icon: '🔍' },
   { label: 'Reports', path: '/projects/reports', icon: '📑' },
 ];
@@ -85,7 +86,8 @@ export default function Sidebar() {
   useEffect(() => {
     if (
       location.pathname.startsWith('/projects/office-reappropriation') ||
-      location.pathname.startsWith('/projects/project-extension')
+      location.pathname.startsWith('/projects/project-extension') ||
+      location.pathname.startsWith('/projects/transfer-requests')
     ) {
       setOpenChildKey('/projects/project-requests');
     } else if (

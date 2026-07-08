@@ -70,6 +70,11 @@ import Reports             from '../pages/projects/Reports';
 ======================= */
 import OfficeApprovalsPage from '../pages/projects/OfficeApprovalPage';
 
+/* =======================
+   PROJECT TRANSFER IMPORTS
+======================= */
+import ProjectTransferRequests from '../pages/projects/ProjectTransferRequests';   // ← NEW
+
 import { ProjectProvider } from '../pages/projects/ProjectContext';
 
 
@@ -247,6 +252,9 @@ export default function AppRouter() {
           <Route path="staff-approvals"            element={<OfficeApprovalsPage />} />
           <Route path="staff-approvals/appointments" element={<OfficeApprovalsPage defaultView="appointments" />} />
           <Route path="staff-approvals/extensions"   element={<OfficeApprovalsPage defaultView="extensions" />} />
+
+          {/* ── PROJECT TRANSFER ── */}
+          <Route path="transfer-requests"          element={<ProjectTransferRequests />} />   {/* ← NEW */}
         </Route>
 
         {/* ── OTHER MODULES ── */}

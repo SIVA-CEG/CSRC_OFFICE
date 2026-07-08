@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
-import { useEffect, useState } from 'react';
 import { getReceipts, calculateAccountWiseTotals } from './ReceiptReportService';
 
 
