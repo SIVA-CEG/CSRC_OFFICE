@@ -1,16 +1,40 @@
-# React + Vite
+# Frontend Application Documentation
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder contains the main React frontend for the CSRC Office application.
 
-Currently, two official plugins are available:
+## Purpose
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The frontend provides the user interface for administrative modules covering:
 
-## React Compiler
+- login and dashboard navigation
+- master data maintenance
+- tapal workflows
+- endorsement processing
+- project administration
+- accounts and reporting screens
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Main Entry Points
 
-## Expanding the ESLint configuration
+- src/main.jsx - React application bootstrap
+- src/App.jsx - Root app component and providers
+- src/router/AppRouter.jsx - Route definitions for all major modules
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Key Folders
+
+- src/pages/ - Page-level screens for the main application
+- src/components/ - Shared UI components such as Navbar, Sidebar, and ProfilePage
+- src_accounts/ - Accounts-specific pages and components
+- src_tapal/ - Tapal-specific pages and components
+
+## Development Commands
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+```
+
+## Notes
+
+The frontend is currently built as a single Vite-based React application with several feature areas organized into separate folders. Some modules are still under development and may appear as placeholder or construction screens.

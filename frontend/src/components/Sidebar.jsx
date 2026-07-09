@@ -39,10 +39,10 @@ const projectItems = [
     path: '/projects/project-requests',
     icon: '📩',
     children: [
-      { label: 'Reappropriation Claims', path: '/projects/office-reappropriation', icon: '💼' },
-      { label: 'Project Extension',      path: '/projects/project-extension',      icon: '⏳' },
-    ],
-  },
+  { label: 'Reappropriation Claims', path: '/projects/office-reappropriation', icon: '💼' },
+  { label: 'Project Extension',      path: '/projects/project-extension',      icon: '⏳' },
+  { label: 'Advance Sanctions',      path: '/projects/office-advance-sanctions', icon: '💵' },
+],},
   { label: 'Bill Claim Requests', path: '/projects/zba-claims', icon: '🏦' },
   {
     label: 'Project Staff Approvals',

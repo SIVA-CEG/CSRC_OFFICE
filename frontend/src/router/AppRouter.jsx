@@ -64,6 +64,7 @@ import ProjectExtension    from '../pages/projects/OfficeProjectExtensionPage';
 import ZBAClaims           from '../pages/projects/ZBAOfficePage';
 import SearchProjects      from '../pages/projects/Search';
 import Reports             from '../pages/projects/Reports';
+import OfficeAdvanceSanctions from '../pages/projects/OfficeAdvanceSanctionsPage';
 
 /* =======================
    PROJECT STAFF IMPORTS
@@ -244,6 +245,7 @@ export default function AppRouter() {
           <Route path="project-requests"       element={<ProjectRequestsPage />} />
           <Route path="office-reappropriation" element={<OfficeReappropriation />} />
           <Route path="project-extension"      element={<ProjectExtension />} />
+          <Route path="office-advance-sanctions" element={<OfficeAdvanceSanctions />} />
           <Route path="zba-claims"             element={<ZBAClaims />} />
           <Route path="search"                 element={<SearchProjects />} />
           <Route path="reports"                element={<Reports />} />

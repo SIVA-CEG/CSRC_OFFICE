@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import { piAdvanceToOfficeShape } from "./OfficeAdvanceSanctionsPage";
 
 // ── Seed Data ─────────────────────────────────────────────────────────────────
 const FRESH_SEED = [
@@ -238,6 +239,103 @@ const EXT_SEED = [
   },
 ];
 
+
+const ADV_SEED = [
+  {
+    id: "ADV-2026-001",
+    procNo: "ADV/CSRC/2026/001",
+    submittedOn: "10-06-2026",
+    projectTitle: "Development of Ti(C,N) based cermets modified by Si3N4, B4C and Cr3C2 for metal cutting application",
+    fileNo: "2433/CSRC-2/2020",
+    piName: "Dr. S. Balasivanandha Prabu",
+    piDesig: "Professor",
+    piDept: "Department of Mechanical Engineering",
+    piCampus: "CEG Campus",
+    agency: "SERB",
+    csrcProcNo: "2433/CSRC-2/2020",
+    csrcProcDate: "10-12-2020",
+    headKey: "consumables",
+    allotment: 400000,
+    incurred: 120000,
+    amount: "25000",
+    purpose: "Conduct of departmental seminar on advanced materials",
+    beneficiaryName: "Dr. S. Balasivanandha Prabu",
+    settlementDate: "30-09-2026",
+    letterSubject: "Request for release of advance towards seminar expenses",
+    letterRef: "",
+    letterBody: "I am currently organizing a departmental seminar under the above project for which an advance is required to meet the expenses.",
+    signedFile: null,
+    status: "PENDING",
+    remarks: "",
+    transferHistory: [],
+    currentHolder: null,
+    signatures: {},
+  },
+
+  {
+    id: "ADV-2026-002",
+    procNo: "ADV/CSRC/2026/002",
+    submittedOn: "12-06-2026",
+    projectTitle: "Technology Enabling Centre",
+    fileNo: "TEC/2026/045",
+    piName: "Dr. R. Kumar",
+    piDesig: "Coordinator",
+    piDept: "Technology Enabling Centre",
+    piCampus: "ACT Campus",
+    agency: "DST",
+    csrcProcNo: "TEC/2026/045",
+    csrcProcDate: "01-04-2023",
+    headKey: "travel",
+    allotment: 150000,
+    incurred: 22000,
+    amount: "18000",
+    purpose: "Field visit to collaborating industry partner site",
+    beneficiaryName: "Dr. R. Kumar",
+    settlementDate: "15-08-2026",
+    letterSubject: "Request for advance towards field visit travel expenses",
+    letterRef: "TEC/2026/045, dated 01-04-2023",
+    letterBody: "I am required to undertake a field visit under the above project to inspect equipment at the collaborating site.",
+    signedFile: null,
+    status: "PENDING",
+    remarks: "",
+    transferHistory: [],
+    currentHolder: null,
+    signatures: {},
+  },
+
+  {
+    id: "ADV-2026-003",
+    procNo: "ADV/CSRC/2026/003",
+    submittedOn: "15-06-2026",
+    projectTitle: "AI Enabled Smart Agriculture",
+    fileNo: "SERB/2026/112",
+    piName: "Dr. V. Rajesh",
+    piDesig: "Associate Professor",
+    piDept: "Agricultural Engineering",
+    piCampus: "CEG Campus",
+    agency: "SERB",
+    csrcProcNo: "SERB/2026/112",
+    csrcProcDate: "01-01-2024",
+    headKey: "manpower",
+    allotment: 1200000,
+    incurred: 350000,
+    amount: "40000",
+    purpose: "Stipend advance for project JRF pending PFMS release",
+    beneficiaryName: "JRF - Project Staff",
+    settlementDate: "",
+    letterSubject: "Request for advance towards manpower stipend disbursal",
+    letterRef: "",
+    letterBody: "The stipend for the project JRF is due and the PFMS release for this quarter is delayed. An advance is requested to avoid disruption.",
+    signedFile: null,
+    status: "PENDING",
+    remarks: "",
+    transferHistory: [],
+    currentHolder: null,
+    signatures: {},
+  },
+];
+
+
 // ── Staff List ─────────────────────────────────────────────────────────────────
 export const PROJECT_STAFF = [
   { id: 1, name: "Mr. R. Senthilkumar", role: "assistant" },
@@ -267,6 +365,19 @@ export function ProjectProvider({ children }) {
   const [renewalCompleted, setRenewalCompleted] = useState([]);
   const [reapCompleted,    setReapCompleted]    = useState([]);
   const [extCompleted,     setExtCompleted]     = useState([]);
+
+  // Advance Sanction — active list bridges in PI-submitted requests from
+  // localStorage (written by AdvanceSanctionsPage.jsx), same pattern as freshActive below.
+const [advActive, setAdvActive] = useState(() => {
+  try {
+    const raw = JSON.parse(localStorage.getItem("csrc_advance_sanction_requests") || "[]");
+    const submitted = raw.filter(r => r.status === "submitted").map(piAdvanceToOfficeShape);
+    if (submitted.length) return submitted;
+  } catch (_) {}
+  return ADV_SEED;   // ← was: return [];
+});
+  const [advTransferred, setAdvTransferred] = useState([]);
+  const [advCompleted,   setAdvCompleted]   = useState([]);
 
   const [freshActive, setFreshActive] = useState(() => {
   try {
@@ -349,6 +460,7 @@ export function ProjectProvider({ children }) {
   const renewalFns = makeTransferFns(setRenewalActive, setRenewalTransferred, setRenewalCompleted);
   const reapFns    = makeTransferFns(setReapActive,    setReapTransferred,    setReapCompleted);
   const extFns     = makeTransferFns(setExtActive,     setExtTransferred,     setExtCompleted);
+  const advFns     = makeTransferFns(setAdvActive,     setAdvTransferred,     setAdvCompleted);
 
   return (
     <ProjectContext.Provider value={{
@@ -375,6 +487,12 @@ export function ProjectProvider({ children }) {
       extTransferred,
       extCompleted,
       ...Object.fromEntries(Object.entries(extFns).map(([k,v]) => [`ext_${k}`, v])),
+
+      // Advance Sanction
+      advActive,   setAdvActive,
+      advTransferred,
+      advCompleted,
+      ...Object.fromEntries(Object.entries(advFns).map(([k,v]) => [`adv_${k}`, v])),
     }}>
       {children}
     </ProjectContext.Provider>
