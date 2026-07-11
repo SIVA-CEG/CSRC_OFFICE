@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import LoginHub from '../pages/LoginHub';
 import ProceedingsLogin from '../pages/ProceedingsLogin';
+import RevenueLogin from '../pages/RevenueLogin';
 import Dashboard from '../pages/Dashboard';
 
 
@@ -169,6 +170,38 @@ import MonthWiseReceiptReport from "../../src_accounts/pages/receipts/MonthWiseR
 import ReceiptReportView from "../../src_accounts/pages/receipts/ReceiptReportView";
 
 
+
+
+/* =======================
+   REVENUE IMPORTS
+======================= */
+import RevenueLayout        from '../../src_revenue/components/Layout/Layout';
+import RevenueDashboard     from '../../src_revenue/pages/Dashboard/Dashboard';
+import StaffDetails         from '../../src_revenue/pages/StaffDetails/StaffDetails';
+import StaffSalary          from '../../src_revenue/pages/StaffSalary/StaffSalary';
+import StaffOT              from '../../src_revenue/pages/StaffOT/StaffOT';
+import PDF                  from '../../src_revenue/pages/PDF/PDF';
+import DepartmentOverhead   from '../../src_revenue/pages/DepartmentOverhead/DepartmentOverhead';
+import CSRCExpenditure      from '../../src_revenue/pages/CSRCExpenditure/CSRCExpenditure';
+
+
+import StaffList from "../../src_revenue/pages/StaffDetails/StaffList";
+import StaffNewAppointment from "../../src_revenue/pages/StaffDetails/StaffNewAppointment";
+import StaffExtension      from "../../src_revenue/pages/StaffDetails/StaffExtension";
+import StaffResignation    from "../../src_revenue/pages/StaffDetails/StaffResignation";
+
+import SalaryStructure from '../../src_revenue/pages/StaffSalary/SalaryStructure';
+import SanctionSalary from '../../src_revenue/pages/StaffSalary/SanctionSalary';
+import SalaryReports from '../../src_revenue/pages/StaffSalary/SalaryReports';
+
+import OTDetails from '../../src_revenue/pages/StaffOT/OTDetails';
+import SanctionOT from '../../src_revenue/pages/StaffOT/SanctionOT';
+import OTReports from '../../src_revenue/pages/StaffOT/OTReports';
+import OTStructure from '../../src_revenue/pages/StaffOT/OTStructure';
+
+
+
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -177,6 +210,7 @@ export default function AppRouter() {
         <Route path="/"                  element={<LoginHub />} />
         <Route path="/tapal-login"       element={<TapalLogin />} />
         <Route path="/proceedings-login" element={<ProceedingsLogin />} />
+        <Route path="/revenue-login" element={<RevenueLogin />} />
         <Route path="/dashboard"         element={<Dashboard />} />
         <Route path="/profile" element={<ProfilePage />} />
 
@@ -358,6 +392,30 @@ export default function AppRouter() {
         <Route path="/accounts/tsa-reports/payments/csrc-overhead"            element={<PaymentsUnderConstruction module="CSRC Overhead" />} />
         <Route path="/accounts/tsa-reports/payments/dept-overhead"            element={<PaymentsUnderConstruction module="Department Overhead" />} />
         <Route path="/accounts/tsa-reports/payments/pdf-ac"                   element={<PaymentsUnderConstruction module="PDF A/C" />} />
+
+
+
+       <Route path="/revenue" element={<RevenueLayout />}>
+      <Route index element={<RevenueDashboard />} />
+      <Route path="staff"                element={<StaffDetails />} />
+      <Route path="staff/list"           element={<StaffList />} />
+      <Route path="staff/appointment"    element={<StaffNewAppointment />} />
+      <Route path="staff/extension"      element={<StaffExtension />} />
+      <Route path="staff/resignation"    element={<StaffResignation />} />
+      <Route path="staff-salary"         element={<StaffSalary />} />
+      <Route path="staff-salary" element={<StaffSalary />} />
+      <Route path="staff-salary/structure" element={<SalaryStructure />} />
+      <Route path="staff-salary/sanction" element={<SanctionSalary />} />
+      <Route path="staff-salary/reports" element={<SalaryReports />} />
+      <Route path="staff-ot"             element={<StaffOT />} />
+<Route path="staff-ot/structure"   element={<OTStructure />} />
+<Route path="staff-ot/details"     element={<OTDetails />} />
+<Route path="staff-ot/sanction"    element={<SanctionOT />} />
+<Route path="staff-ot/reports"     element={<OTReports />} />
+      <Route path="pdf"                  element={<PDF />} />
+      <Route path="department-overhead"  element={<DepartmentOverhead />} />
+      <Route path="csrc-expenditure"     element={<CSRCExpenditure />} />
+    </Route>
 
 
         <Route path="*" element={<Navigate to="/" replace />} />

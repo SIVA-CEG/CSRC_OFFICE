@@ -1,39 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ProceedingsLogin.css';
+import './ProceedingsLogin.css'; // reusing the same visual system — swap to './RevenueLogin.css' later if you want a distinct look
 
 // ── Mock DB ───────────────────────────────────────────────────────────────────
-// Same credentials work for both Endorsements and Projects portals.
-// The portal the user came from is tracked via `portalType` state.
+// CSRC Revenue has a four-tier hierarchy (one level more than Proceedings/Projects):
+// assistant → superintendent → deputy director → director
 const MOCK_DB = [
-  { userId: 'ast1', password: '123', role: 'assistant',     name: 'Mr. R. Senthilkumar' },
-  { userId: 'sup1', password: '123', role: 'superintendent', name: 'Mr. T. Anbarasan' },
-  { userId: 'dir1', password: '123', role: 'director',      name: 'Dr. S. Balasivanandha Prabu' },
+  { userId: 'ast1', password: '123', role: 'assistant',        name: 'Mr. R. Senthilkumar' },
+  { userId: 'sup1', password: '123', role: 'superintendent',   name: 'Mr. T. Anbarasan' },
+  { userId: 'dd1',  password: '123', role: 'deputy_director',  name: 'Dr. M. Kalaiselvi' },
+  { userId: 'dir1', password: '123', role: 'director',         name: 'Dr. S. Balasivanandha Prabu' },
 ];
 
-// Portal config — easily extendable
-const PORTAL_CONFIG = {
-  endorsements: {
-    icon: '📋',
-    title: 'CSRC Proceedings',
-    subtitle: 'Sign in to CSRC Proceedings Portal',
-    description: 'Unified portal for research proceedings, grant management, and institutional coordination.',
-    features: ['Proceedings Management', 'Grant Tracking', 'Faculty & Staff Records'],
-    dashboardPath: '/dashboard',
-  },
-  projects: {
-    icon: '🏗️',
-    title: 'CSRC Projects',
-    subtitle: 'Sign in to CSRC Projects Portal',
-    description: 'Manage fresh sanctions, renewal sanctions, project requests, and claims end-to-end.',
-    features: ['Fresh & Renewal Sanctions', 'Project Requests', 'ZBA / TSA(H) / CMRG Claims'],
-    dashboardPath: '/projects/dashboard',
-  },
+const CONFIG = {
+  icon: '💰',
+  title: 'CSRC Revenue',
+  subtitle: 'Sign in to CSRC Revenue Portal',
+  description: 'Manage revenue receipts, collections, and financial inflows across sponsored projects.',
+  features: ['Revenue Receipts', 'Collection Tracking', 'Four-Tier Approval Workflow'],
+  dashboardPath: '/revenue',
 };
 
-export default function ProceedingsLogin({ portalType = 'endorsements' }) {
+export default function RevenueLogin() {
   const navigate = useNavigate();
-  const config   = PORTAL_CONFIG[portalType] || PORTAL_CONFIG.endorsements;
 
   const [form,     setForm]     = useState({ userId: '', password: '' });
   const [loading,  setLoading]  = useState(false);
@@ -57,9 +46,11 @@ export default function ProceedingsLogin({ portalType = 'endorsements' }) {
         u => u.userId === form.userId && u.password === form.password
       );
       if (user) {
-        localStorage.setItem('userRole', user.role);
-        localStorage.setItem('userName', user.name);
-        navigate(config.dashboardPath);
+        // sessionStorage: role/name only persist for this tab's session,
+        // matching staffWorkflow.js's storage backend.
+        sessionStorage.setItem('userRole', user.role);
+        sessionStorage.setItem('userName', user.name);
+        navigate(CONFIG.dashboardPath);
       } else {
         setLoading(false);
         setError('Invalid User ID or Password.');
@@ -79,11 +70,11 @@ export default function ProceedingsLogin({ portalType = 'endorsements' }) {
       <div className="pl-card">
         {/* Left panel */}
         <div className="pl-panel-left">
-          <div className="pl-panel-icon">{config.icon}</div>
-          <h2 className="pl-panel-title">{config.title}</h2>
-          <p className="pl-panel-desc">{config.description}</p>
+          <div className="pl-panel-icon">{CONFIG.icon}</div>
+          <h2 className="pl-panel-title">{CONFIG.title}</h2>
+          <p className="pl-panel-desc">{CONFIG.description}</p>
           <div className="pl-features">
-            {config.features.map(f => (
+            {CONFIG.features.map(f => (
               <div key={f} className="pl-feature-item">✓ {f}</div>
             ))}
           </div>
@@ -93,7 +84,7 @@ export default function ProceedingsLogin({ portalType = 'endorsements' }) {
         <div className="pl-panel-right">
           <div className="pl-form-header">
             <h1 className="pl-form-title">Welcome Back</h1>
-            <p className="pl-form-sub">{config.subtitle}</p>
+            <p className="pl-form-sub">{CONFIG.subtitle}</p>
           </div>
 
           <form className="pl-form" onSubmit={handleSubmit} noValidate>
@@ -152,7 +143,7 @@ export default function ProceedingsLogin({ portalType = 'endorsements' }) {
             textAlign: 'center', lineHeight: 1.6,
           }}>
             <strong>Dev credentials:</strong><br />
-            ast1 / 123 &nbsp;|&nbsp; sup1 / 123 &nbsp;|&nbsp; dir1 / 123
+            ast1 / 123 &nbsp;|&nbsp; sup1 / 123 &nbsp;|&nbsp; dd1 / 123 &nbsp;|&nbsp; dir1 / 123
           </div>
         </div>
       </div>

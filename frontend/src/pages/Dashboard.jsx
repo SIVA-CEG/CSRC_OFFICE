@@ -7,7 +7,7 @@ const modules = [
   { id: 'master', title: 'MASTER', icon: '⚙️', desc: 'Manage campus, departments, faculties and more', route: '/master', active: true },
   { id: 'tapals', title: 'MY TAPALS', icon: '📬', desc: 'Inward & outward tapal management', route: '/my-tapals', active: true },
   { id: 'endorsements', title: 'ENDORSEMENTS', icon: '✅', desc: 'Approval and endorsement workflows', route: '/endorsements', active: true },
-  { id: 'projects', title: 'PROJECTS', icon: '🔬', desc: 'Research project tracking & management', route: '/projects', active: false },
+  { id: 'projects', title: 'PROJECTS', icon: '🔬', desc: 'Research project tracking & management', route: '/projects', active: true },
   { id: 'dst-inspire', title: 'DST INSPIRE', icon: '🌟', desc: 'DST INSPIRE scheme management', route: '/dst-inspire', active: false },
   { id: 'dst-inspire-faculty', title: 'DST INSPIRE FACULTY', icon: '👨‍🏫', desc: 'Faculty award and fellowship tracking', route: '/dst-inspire-faculty', active: false },
   { id: 'women-scientist', title: 'WOMEN SCIENTIST', icon: '👩‍🔬', desc: 'Women scientist scheme management', route: '/women-scientist', active: false },
@@ -22,7 +22,7 @@ export default function Dashboard() {
       <div className="dash-body">
         <div className="dash-welcome">
           <div>
-            <h1 className="dash-heading">Good Morning, Admin 👋</h1>
+            <h1 className="dash-heading">Greetings, Admin 👋</h1>
             <p className="dash-subheading">Select a module to get started with CSRC Proceedings</p>
           </div>
           <div className="dash-date">

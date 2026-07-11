@@ -4,13 +4,13 @@ import './LoginHub.css';
 
 const modules = [
   {
-  id: 'tapal',
-  title: 'TAPAL LOGIN',
-  icon: '📬',
-  desc: 'Inward & Outward Tapal Management',
-  route: '/tapal-login',   // ← add this
-  wip: false,              // ← change to false
-},
+    id: 'tapal',
+    title: 'TAPAL LOGIN',
+    icon: '📬',
+    desc: 'Inward & Outward Tapal Management',
+    route: '/tapal-login',
+    wip: false,
+  },
   {
     id: 'proceedings',
     title: 'CSRC PROCEEDINGS',
@@ -19,14 +19,22 @@ const modules = [
     route: '/proceedings-login',
     wip: false,
   },
-{
-  id: 'accounts',
-  title: 'ACCOUNTS LOGIN',
-  icon: '🏦',
-  desc: 'Financial & Accounts Management',
-  route: '/accounts-login',   // ← was null
-  wip: false,
-},
+  {
+    id: 'revenue',
+    title: 'CSRC REVENUE',
+    icon: '💰',
+    desc: 'Revenue Receipts & Collection Management',
+    route: '/revenue-login',
+    wip: false,
+  },
+  {
+    id: 'accounts',
+    title: 'ACCOUNTS LOGIN',
+    icon: '🏦',
+    desc: 'Financial & Accounts Management',
+    route: '/accounts-login',
+    wip: false,
+  },
 ];
 
 export default function LoginHub() {
