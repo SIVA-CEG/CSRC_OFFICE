@@ -22,6 +22,7 @@ import AssignedTapal    from '../../src_tapal/pages/AssignedTapal';
 import CompletedTapal   from '../../src_tapal/pages/CompletedTapal';
 import TapalSearch      from '../../src_tapal/pages/TapalSearch';
 import StaffApprovalTapal from '../../src_tapal/pages/StaffApprovalTapal';
+import ProjectTransferTapal from '../../src_tapal/pages/ProjectTransferTapal';
 
 
 
@@ -216,19 +217,20 @@ export default function AppRouter() {
 
         {/* ── TAPAL MODULE (own layout, no backend for now) ── */}
         <Route path="/tapal" element={<TapalLayout counts={{ new: 0, assigned: 0, completed: 0 }} />}>
-          <Route index element={<Navigate to="home" replace />} />
-          <Route path="home"                 element={<TapalHome />} />
-          <Route path="projects"             element={<ProjectHome />} />
-          <Route path="projects/endorsement" element={<EndorsementTapal />} />
-          <Route path="projects/sanction"    element={<SanctionTapal />} />
-          <Route path="projects/bills"       element={<BillsTapal />} />
-          <Route path="projects/requests"       element={<RequestTapal />} />
-          <Route path="projects/staff-approval" element={<StaffApprovalTapal />} />
-          <Route path="legacy/new"           element={<NewTapal tapals={[]} />} />
-          <Route path="legacy/assigned"      element={<AssignedTapal tapals={[]} />} />
-          <Route path="legacy/completed"     element={<CompletedTapal tapals={[]} />} />
-          <Route path="legacy/search"        element={<TapalSearch tapals={[]} />} />
-        </Route>
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="home"                 element={<TapalHome />} />
+        <Route path="projects"             element={<ProjectHome />} />
+        <Route path="projects/endorsement" element={<EndorsementTapal />} />
+        <Route path="projects/sanction"    element={<SanctionTapal />} />
+        <Route path="projects/project-transfer" element={<ProjectTransferTapal />} />  {/* ← NEW */}
+        <Route path="projects/bills"       element={<BillsTapal />} />
+        <Route path="projects/requests"       element={<RequestTapal />} />
+        <Route path="projects/staff-approval" element={<StaffApprovalTapal />} />
+        <Route path="legacy/new"           element={<NewTapal tapals={[]} />} />
+        <Route path="legacy/assigned"      element={<AssignedTapal tapals={[]} />} />
+        <Route path="legacy/completed"     element={<CompletedTapal tapals={[]} />} />
+        <Route path="legacy/search"        element={<TapalSearch tapals={[]} />} />
+      </Route>
 
         {/* ── MASTER ── */}
         <Route path="/master" element={<MasterLayout />}>

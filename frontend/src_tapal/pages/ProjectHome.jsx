@@ -1,3 +1,5 @@
+// PATH: CSRC_OFFICE/frontend/src_tapal/pages/ProjectHome.jsx
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -19,6 +21,15 @@ const SUB_SECTIONS = [
     color: "#1d4ed8",
     bg: "linear-gradient(135deg,#dbeafe,#eff6ff)",
     border: "#bfdbfe",
+  },
+  {
+    key: "project-transfer",
+    label: "Project Transfer Tapals",
+    icon: "🔁",
+    description: "PI-to-PI project transfer requests awaiting office processing",
+    color: "#be123c",
+    bg: "linear-gradient(135deg,#ffe4e6,#fff1f2)",
+    border: "#fecdd3",
   },
   {
     key: "bills",

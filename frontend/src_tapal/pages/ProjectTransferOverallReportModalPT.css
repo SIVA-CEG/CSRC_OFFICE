@@ -1,0 +1,156 @@
+/* PATH: CSRC_OFFICE/frontend/src_tapal/pages/ProjectTransferOverallReportModalPT.css */
+
+.ptort-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ptort-modal {
+  width: 92vw;
+  max-width: 1100px;
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ptort-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid #f1f2f4;
+}
+
+.ptort-header h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.ptort-close {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.ptort-filters {
+  display: flex;
+  gap: 20px;
+  padding: 14px 22px;
+  border-bottom: 1px solid #f1f2f4;
+  background: #fafbfc;
+}
+
+.ptort-filters div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ptort-filters label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.ptort-filters input[type="date"] {
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+}
+
+.ptort-preview {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px;
+  background: #f3f4f6;
+}
+
+.ptort-page {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  font-family: "Times New Roman", Times, serif;
+  color: #000;
+}
+
+.ptort-title {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.ptort-title h1 {
+  font-size: 20px;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.ptort-title h3 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 4px 0 14px;
+  color: #333;
+}
+
+.ptort-title h2 {
+  font-size: 16px;
+  margin: 10px 0 0;
+  text-decoration: underline;
+}
+
+.ptort-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 20px 0 26px;
+}
+
+.ptort-stat {
+  text-align: center;
+}
+
+.ptort-stat h3 {
+  font-size: 24px;
+  margin: 0;
+  color: #111827;
+}
+
+.ptort-stat p {
+  font-size: 12px;
+  margin: 2px 0 0;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ptort-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.ptort-table th,
+.ptort-table td {
+  border: 1px solid #333;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.ptort-table th {
+  background: #f3f4f6;
+  font-weight: 700;
+}
