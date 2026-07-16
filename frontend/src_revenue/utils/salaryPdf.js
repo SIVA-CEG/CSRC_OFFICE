@@ -19,8 +19,7 @@ function showsDayColumns(salaryType) {
 
 function billHeadHtml(sanction) {
   const isApproved = sanction.status === 'approved';
-  const directorEntry = (sanction.history || []).find((h) => h.role === 'director' && h.action === 'approved');
-  const dateLabel = directorEntry ? formatDate(directorEntry.date) : formatDate(sanction.createdBy.date);
+  const dateLabel = formatDate(sanction.approvedDate || sanction.createdBy.date);
 
   return `
     <div style="text-align:center; margin-bottom:18px;">
@@ -96,7 +95,6 @@ function tdStyled(html) {
 
 function signatureBlockHtml(sanction) {
   const rows = (sanction.history || [])
-    .filter((h) => h.action === 'approved')
     .map((h) => `<div style="margin-top:4px;">${h.role.replace('_', ' ').toUpperCase()} — ${h.name} (${formatDate(h.date)})</div>`)
     .join('');
 

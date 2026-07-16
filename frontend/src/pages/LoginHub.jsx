@@ -61,7 +61,7 @@ export default function LoginHub() {
           </div>
           <div className="hub-title-block">
             <h1 className="hub-title">CSRC OFFICE</h1>
-            <p className="hub-subtitle">Central Scientific Research Council — Integrated Management Portal</p>
+            <p className="hub-subtitle">Center for Sponsored Research and Consultancies — Integrated Management Portal</p>
           </div>
         </div>
 

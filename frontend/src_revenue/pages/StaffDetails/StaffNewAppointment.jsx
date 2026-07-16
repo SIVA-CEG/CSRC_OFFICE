@@ -111,8 +111,8 @@ export default function StaffNewAppointment() {
         <h1 style={styles.title}>Staff New Appointment</h1>
         <p style={styles.subtitle}>
           {isApproverRole(actor.role)
-            ? 'Review appointment requests submitted for your approval.'
-            : 'Onboard a new staff member — this will route to Superintendent → Deputy Director → Director for approval.'}
+            ? 'View all appointment requests submitted by the Assistant.'
+            : 'Onboard a new staff member — this is submitted and applied immediately.'}
         </p>
       </div>
 
@@ -161,7 +161,7 @@ function AppointmentForm({ actor }) {
     <div style={styles.formCard} className="sd-fade-in">
       {submitted && (
         <div style={styles.successBanner}>
-          ✓ Appointment request submitted — now awaiting Superintendent approval.
+          ✓ Appointment submitted and registered.
         </div>
       )}
       {error && <div style={styles.errorBanner}>{error}</div>}
@@ -203,7 +203,7 @@ function AppointmentForm({ actor }) {
       </div>
 
       <button className="sd-btn" style={styles.submitBtn} onClick={handleSubmit}>
-        Submit for Approval →
+        Submit & Register →
       </button>
     </div>
   );
@@ -254,12 +254,7 @@ function ApprovalQueue({ actor }) {
     <div className="sd-fade-in">
       {flash && <div style={styles.successBanner}>{flash}</div>}
 
-      <Section title={`Awaiting your approval (${pendingMine.length})`}>
-        {pendingMine.length === 0 && <EmptyRow text="Nothing waiting on you right now." />}
-        {pendingMine.map((r) => (
-          <RequestRow key={r.id} req={r} onClick={() => open(r)} highlight />
-        ))}
-      </Section>
+      
 
       <Section title="All appointment requests">
         {others.length === 0 && <EmptyRow text="No other requests yet." />}

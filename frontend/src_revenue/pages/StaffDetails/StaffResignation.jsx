@@ -31,8 +31,8 @@ export default function StaffResignation() {
         <h1 style={styles.title}>Staff Resignation</h1>
         <p style={styles.subtitle}>
           {isApproverRole(actor.role)
-            ? 'Review resignation requests submitted for your approval.'
-            : 'Pick a staff member who is resigning — routes to Superintendent → Deputy Director → Director.'}
+            ? 'View all resignation requests submitted by the Assistant.'
+            : 'Pick a staff member who is resigning — applied immediately.'}
         </p>
       </div>
 
@@ -97,7 +97,7 @@ function ResignationFlow({ actor }) {
   if (!selected) {
     return (
       <div className="sd-fade-in">
-        {submitted && <div style={styles.successBanner}>✓ Resignation request submitted — awaiting Superintendent approval.</div>}
+        {submitted && <div style={styles.successBanner}>✓ Resignation submitted and applied.</div>}
         <div style={styles.searchWrap}>
           <span style={styles.searchIcon}>🔍</span>
           <input
@@ -154,7 +154,7 @@ function ResignationFlow({ actor }) {
       </div>
 
       <button className="sd-btn" style={styles.submitBtn} onClick={handleSubmit}>
-        Submit Resignation for Approval →
+        Submit Resignation →
       </button>
     </div>
   );
@@ -191,11 +191,6 @@ function ApprovalQueue({ actor }) {
   return (
     <div className="sd-fade-in">
       {flash && <div style={styles.successBanner}>{flash}</div>}
-
-      <Section title={`Awaiting your approval (${pendingMine.length})`}>
-        {pendingMine.length === 0 && <div style={styles.emptyRow}>Nothing waiting on you right now.</div>}
-        {pendingMine.map((r) => <RequestRow key={r.id} req={r} onClick={() => open(r)} highlight />)}
-      </Section>
 
       <Section title="All resignation requests">
         {others.length === 0 && <div style={styles.emptyRow}>No other requests yet.</div>}

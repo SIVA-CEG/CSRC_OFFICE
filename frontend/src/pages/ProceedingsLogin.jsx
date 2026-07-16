@@ -6,9 +6,10 @@ import './ProceedingsLogin.css';
 // Same credentials work for both Endorsements and Projects portals.
 // The portal the user came from is tracked via `portalType` state.
 const MOCK_DB = [
-  { userId: 'ast1', password: '123', role: 'assistant',     name: 'Mr. R. Senthilkumar' },
-  { userId: 'sup1', password: '123', role: 'superintendent', name: 'Mr. T. Anbarasan' },
-  { userId: 'dir1', password: '123', role: 'director',      name: 'Dr. S. Balasivanandha Prabu' },
+  { userId: 'ast1', password: '123', role: 'assistant',       name: 'Mr. R. Senthilkumar' },
+  { userId: 'sup1', password: '123', role: 'superintendent',  name: 'Mr. T. Anbarasan' },
+  { userId: 'dd1',  password: '123', role: 'deputy_director', name: 'Dr. N. Rajesh' },
+  { userId: 'dir1', password: '123', role: 'director',        name: 'Dr. S. Balasivanandha Prabu' },
 ];
 
 // Portal config — easily extendable
@@ -152,7 +153,7 @@ export default function ProceedingsLogin({ portalType = 'endorsements' }) {
             textAlign: 'center', lineHeight: 1.6,
           }}>
             <strong>Dev credentials:</strong><br />
-            ast1 / 123 &nbsp;|&nbsp; sup1 / 123 &nbsp;|&nbsp; dir1 / 123
+            ast1 / 123 &nbsp;|&nbsp; sup1 / 123 &nbsp;|&nbsp; dd1 / 123 &nbsp;|&nbsp; dir1 / 123
           </div>
         </div>
       </div>

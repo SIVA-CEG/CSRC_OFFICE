@@ -98,15 +98,6 @@ export default function StaffDetails() {
         </div>
       </div>
 
-      {isApproverRole(actor.role) && totalPending > 0 && (
-        <div style={styles.notice} className="sd-fade-in">
-          <span style={{ fontSize: 18 }}>🔔</span>
-          <span>
-            You have <strong>{totalPending}</strong> item{totalPending > 1 ? 's' : ''} waiting on
-            your approval as {roleLabel(actor.role)}.
-          </span>
-        </div>
-      )}
 
       <div style={styles.statRow} className="sd-fade-in">
         <StatChip label="Total Staff" value={counts.all} color={theme.indigo} bg={theme.indigoLight} />

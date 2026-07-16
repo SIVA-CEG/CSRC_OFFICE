@@ -35,8 +35,8 @@ export default function SanctionSalary() {
         <h1 style={styles.title}>Sanction Salary</h1>
         <p style={styles.subtitle}>
           {isApproverRole(actor.role)
-            ? 'Review salary sanctions submitted for your approval.'
-            : 'Pick staff by salary type and designation, review the computed salary, and submit for approval — routes to Superintendent → Deputy Director → Director.'}
+            ? 'View all salary sanctions submitted by the Assistant.'
+            : 'Pick staff by salary type and designation, review the computed salary, and sanction directly.'}
         </p>
       </div>
 
@@ -177,7 +177,7 @@ const setInput = (staffId, key, value) => {
     <div className="sd-fade-in">
       {submitted && (
         <div style={styles.successBanner}>
-          ✓ Salary sanction submitted for {month} {year} ({salaryType}) — awaiting Superintendent approval.
+          ✓ Salary sanctioned for {month} {year} ({salaryType}).
         </div>
       )}
       {error && <div style={styles.errorBanner}>{error}</div>}
@@ -299,7 +299,7 @@ const setInput = (staffId, key, value) => {
           <strong>{selectedRows.length}</strong> staff selected · Total <strong>{formatCurrency(selectedTotal)}</strong>
         </div>
         <button className="sd-btn" style={styles.submitBtn} onClick={handleSubmit}>
-          Generate &amp; Submit for Approval →
+          Generate &amp; Sanction →
         </button>
       </div>
     </div>
@@ -365,10 +365,6 @@ function ApprovalQueue({ actor }) {
     <div className="sd-fade-in">
       {flash && <div style={styles.successBanner}>{flash}</div>}
 
-      <Section title={`Awaiting your approval (${pendingMine.length})`}>
-        {pendingMine.length === 0 && <div style={styles.emptyRow}>Nothing waiting on you right now.</div>}
-        {pendingMine.map((r) => <SanctionRow key={r.id} req={r} onClick={() => open(r)} highlight />)}
-      </Section>
 
       <Section title="All salary sanctions">
         {others.length === 0 && <div style={styles.emptyRow}>No other sanctions yet.</div>}

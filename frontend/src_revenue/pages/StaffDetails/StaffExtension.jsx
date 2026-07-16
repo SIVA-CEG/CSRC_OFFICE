@@ -31,8 +31,8 @@ export default function StaffExtension() {
         <h1 style={styles.title}>Staff Extension</h1>
         <p style={styles.subtitle}>
           {isApproverRole(actor.role)
-            ? 'Review extension requests submitted for your approval.'
-            : 'Pick a staff member to extend their tenure — routes to Superintendent → Deputy Director → Director.'}
+            ? 'View all extension requests submitted by the Assistant.'
+            : 'Pick a staff member to extend their tenure — applied immediately.'}
         </p>
       </div>
 
@@ -103,7 +103,7 @@ function ExtensionFlow({ actor }) {
   if (!selected) {
     return (
       <div className="sd-fade-in">
-        {submitted && <div style={styles.successBanner}>✓ Extension request submitted — awaiting Superintendent approval.</div>}
+        {submitted && <div style={styles.successBanner}>✓ Extension submitted and applied.</div>}
         <div style={styles.searchWrap}>
           <span style={styles.searchIcon}>🔍</span>
           <input
@@ -163,7 +163,7 @@ function ExtensionFlow({ actor }) {
       </div>
 
       <button className="sd-btn" style={styles.submitBtn} onClick={handleSubmit}>
-        Submit Extension for Approval →
+        Submit Extension →
       </button>
     </div>
   );
@@ -202,10 +202,6 @@ function ApprovalQueue({ actor }) {
     <div className="sd-fade-in">
       {flash && <div style={styles.successBanner}>{flash}</div>}
 
-      <Section title={`Awaiting your approval (${pendingMine.length})`}>
-        {pendingMine.length === 0 && <div style={styles.emptyRow}>Nothing waiting on you right now.</div>}
-        {pendingMine.map((r) => <RequestRow key={r.id} req={r} onClick={() => open(r)} highlight />)}
-      </Section>
 
       <Section title="All extension requests">
         {others.length === 0 && <div style={styles.emptyRow}>No other requests yet.</div>}

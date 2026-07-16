@@ -32,8 +32,8 @@ export default function SanctionOT() {
         <h1 style={styles.title}>OT Sanctions</h1>
         <p style={styles.subtitle}>
           {isApproverRole(actor.role)
-            ? 'Review OT sanctions submitted for your approval.'
-            : 'Pick a month, review the OT totals computed from logged hours, and submit for approval — routes to Superintendent → Deputy Director → Director.'}
+            ? 'View all OT sanctions submitted by the Assistant.'
+            : 'Pick a month, review the OT totals computed from logged hours, and sanction directly.'}
         </p>
       </div>
       {isApproverRole(actor.role) ? <ApprovalQueue actor={actor} /> : <SanctionForm actor={actor} />}
@@ -86,7 +86,7 @@ function SanctionForm({ actor }) {
   return (
     <div className="sd-fade-in">
       {submitted && (
-        <div style={styles.successBanner}>✓ OT sanction submitted for {month} {year} — awaiting Superintendent approval.</div>
+        <div style={styles.successBanner}>✓ OT sanctioned for {month} {year}.</div>
       )}
       {error && <div style={styles.errorBanner}>{error}</div>}
 
@@ -153,7 +153,7 @@ function SanctionForm({ actor }) {
 
       <div style={styles.footerBar}>
         <div><strong>{selectedRows.length}</strong> staff selected · Total <strong>{formatCurrency(selectedTotal)}</strong></div>
-        <button className="sd-btn" style={styles.submitBtn} onClick={handleSubmit}>Generate &amp; Submit for Approval →</button>
+        <button className="sd-btn" style={styles.submitBtn} onClick={handleSubmit}>Generate &amp; Sanction →</button>
       </div>
     </div>
   );
@@ -195,11 +195,6 @@ function ApprovalQueue({ actor }) {
   return (
     <div className="sd-fade-in">
       {flash && <div style={styles.successBanner}>{flash}</div>}
-
-      <Section title={`Awaiting your approval (${pendingMine.length})`}>
-        {pendingMine.length === 0 && <div style={styles.emptyRow}>Nothing waiting on you right now.</div>}
-        {pendingMine.map((r) => <SanctionRow key={r.id} req={r} onClick={() => open(r)} highlight />)}
-      </Section>
 
       <Section title="All OT sanctions">
         {others.length === 0 && <div style={styles.emptyRow}>No other sanctions yet.</div>}

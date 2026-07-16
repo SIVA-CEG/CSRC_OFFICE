@@ -83,15 +83,6 @@ export default function StaffOT() {
         </div>
       </div>
 
-      {isApproverRole(actor.role) && pendingSanctions > 0 && (
-        <div style={styles.notice} className="sd-fade-in">
-          <span style={{ fontSize: 18 }}>🔔</span>
-          <span>
-            You have <strong>{pendingSanctions}</strong> OT sanction{pendingSanctions > 1 ? 's' : ''} waiting on
-            your approval as {ROLE_LABELS[actor.role] || actor.role}.
-          </span>
-        </div>
-      )}
 
       <div style={styles.statRow} className="sd-fade-in">
         <StatChip label="OT Batches" value={totals.batches} color={theme.indigo} bg={theme.indigoLight} />

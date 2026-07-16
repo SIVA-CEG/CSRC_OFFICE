@@ -181,7 +181,7 @@ import RevenueDashboard     from '../../src_revenue/pages/Dashboard/Dashboard';
 import StaffDetails         from '../../src_revenue/pages/StaffDetails/StaffDetails';
 import StaffSalary          from '../../src_revenue/pages/StaffSalary/StaffSalary';
 import StaffOT              from '../../src_revenue/pages/StaffOT/StaffOT';
-import PDF                  from '../../src_revenue/pages/PDF/PDF';
+import PDF                  from '../../src_revenue/pages/PDF/PDFOfficeApprovalPage';
 import DepartmentOverhead   from '../../src_revenue/pages/DepartmentOverhead/DepartmentOverhead';
 import CSRCExpenditure      from '../../src_revenue/pages/CSRCExpenditure/CSRCExpenditure';
 
@@ -200,6 +200,23 @@ import SanctionOT from '../../src_revenue/pages/StaffOT/SanctionOT';
 import OTReports from '../../src_revenue/pages/StaffOT/OTReports';
 import OTStructure from '../../src_revenue/pages/StaffOT/OTStructure';
 
+import CategoryHome       from '../../src_revenue/pages/CSRCExpenditure/CategoryHome';
+import AddEntry           from '../../src_revenue/pages/CSRCExpenditure/AddEntry';
+import ViewEntries        from '../../src_revenue/pages/CSRCExpenditure/ViewEntries';
+
+
+import LogisticsHome      from '../../src_revenue/pages/CSRCExpenditure/LogisticsHome';
+import ServiceRegisterHome from '../../src_revenue/pages/CSRCExpenditure/ServiceRegisterHome';
+import AddTrip            from '../../src_revenue/pages/CSRCExpenditure/AddTrip';
+import ViewTrips          from '../../src_revenue/pages/CSRCExpenditure/ViewTrips';
+
+import ServiceRegisterAddEntry from '../../src_revenue/pages/CSRCExpenditure/ServiceRegister/AddEntry';
+import ServiceRegisterViewEntries from '../../src_revenue/pages/CSRCExpenditure/ServiceRegister/ViewEntries';
+
+// add near other CSRC Expenditure imports:
+import AMCRegisterHome from '../../src_revenue/pages/CSRCExpenditure/AMCRegister/AMCRegisterHome';
+import AddAMC          from '../../src_revenue/pages/CSRCExpenditure/AMCRegister/AddAMC';
+import ViewAMC          from '../../src_revenue/pages/CSRCExpenditure/AMCRegister/ViewAMC';
 
 
 
@@ -416,7 +433,46 @@ export default function AppRouter() {
 <Route path="staff-ot/reports"     element={<OTReports />} />
       <Route path="pdf"                  element={<PDF />} />
       <Route path="department-overhead"  element={<DepartmentOverhead />} />
-      <Route path="csrc-expenditure"     element={<CSRCExpenditure />} />
+      {/* CSRC Expenditure — Stock Registers */}
+<Route path="csrc-expenditure" element={<CSRCExpenditure />} />
+
+<Route path="csrc-expenditure/non-consumables"
+       element={<CategoryHome category="non_consumables" />} />
+<Route path="csrc-expenditure/non-consumables/add"
+       element={<AddEntry category="non_consumables" />} />
+<Route path="csrc-expenditure/non-consumables/view"
+       element={<ViewEntries category="non_consumables" />} />
+
+<Route path="csrc-expenditure/consumables"
+       element={<CategoryHome category="consumables" />} />
+<Route path="csrc-expenditure/consumables/add"
+       element={<AddEntry category="consumables" />} />
+<Route path="csrc-expenditure/consumables/view"
+       element={<ViewEntries category="consumables" />} />
+
+{/* Logistics Register */}
+<Route
+  path="csrc-expenditure/logistics"
+  element={<LogisticsHome />}
+/>
+
+<Route path="csrc-expenditure/logistics/:vehicleId/add" element={<AddTrip />} />
+<Route path="csrc-expenditure/logistics/:vehicleId/view" element={<ViewTrips />} />
+
+{/* Service Register */}
+<Route
+  path="csrc-expenditure/service-register"
+  element={<ServiceRegisterHome />}
+/>
+
+<Route path="csrc-expenditure/service-register/add" element={<ServiceRegisterAddEntry />} />
+<Route path="csrc-expenditure/service-register/view" element={<ServiceRegisterViewEntries />} />
+
+{/* AMC Register */}
+<Route path="csrc-expenditure/amc-register" element={<AMCRegisterHome />} />
+<Route path="csrc-expenditure/amc-register/view" element={<ViewAMC />} />
+<Route path="csrc-expenditure/amc-register/:itemId/add" element={<AddAMC />} />
+
     </Route>
 
 

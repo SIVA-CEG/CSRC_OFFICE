@@ -15,18 +15,22 @@ import React, { useState, useEffect, useMemo } from 'react';
 // (officeStage, officeAssigneeId/Name, officeHistory) so nothing on the
 // faculty page needs to change.
 //
-// Role hierarchy (bottom → top): assistant → superintendent → director
+// Role hierarchy (bottom → top): assistant → superintendent → deputy_director → director
 //   • "Transfer with Approval"   → moves the request UP one tier
-//     (assistant → superintendent → director). At the Director tier this
-//     action becomes "Approve & Finalize" since there is no tier above.
+//     (assistant → superintendent → deputy director → director). At the
+//     Director tier this action becomes "Approve & Finalize" since there is
+//     no tier above.
 //   • "Transfer without Approval"→ lateral handoff at the SAME tier
 //     (assistant → assistant, superintendent → superintendent, etc.)
 //
-// Role/identity come from real login (ProceedingsLogin.jsx), same convention
-// as FreshSanction.jsx: `localStorage.getItem('userRole' | 'userName')`.
+// Role/identity come from real login (ProceedingsLogin.local.jsx, the
+// mock-DB login page) via `localStorage`. If this app later moves to the
+// backend-connected login page, that one writes to `sessionStorage`
+// instead — the reads in this file would need to switch to match, or
+// identity silently falls back to 'assistant' / 'Office'.
 // Tab layout mirrors FreshSanction.jsx as well:
-//   • assistant / superintendent → New Requests, Transferred, Completed
-//   • director                   → New Requests, Completed  (no "Transferred")
+//   • assistant / superintendent / deputy_director → New Requests, Transferred, Completed
+//   • director                                     → New Requests, Completed  (no "Transferred")
 //
 // DUMMY DATA: DUMMY_TRANSFERS / DUMMY_PROJECTS below are plain hardcoded
 // constants in this file. Whenever the shared localStorage keys are empty,
@@ -40,11 +44,50 @@ const STORAGE_TRANSFERS = 'csrc_project_transfers';
 const STORAGE_PROJECTS  = 'csrc_faculty_projects';
 
 // ── Real login identity (set by ProceedingsLogin.jsx on sign-in) ──────────
-const userRole = () => localStorage.getItem('userRole') || 'assistant';
+// localStorage — matches ProceedingsLogin.local.jsx (the mock-DB login
+// page). NOTE: if/when this app switches to the backend-connected login
+// page (which writes to sessionStorage, per-tab, so multiple roles can be
+// signed in across tabs simultaneously), these two reads below need to
+// change to sessionStorage.getItem(...) to match — the storage mechanism
+// on this page and on whichever login page is actually in use MUST agree,
+// or identity silently falls back to 'assistant' / 'Office'.
+
+// Normalizes whatever the backend sends ("Deputy Director", "deputy-director",
+// "DEPUTY_DIRECTOR", etc.) into the canonical snake_case keys used by
+// ROLE_ORDER below, so small formatting differences from the backend don't
+// silently fall back to 'assistant'.
+const ROLE_ALIASES = {
+  assistant: 'assistant',
+  ast: 'assistant',
+  superintendent: 'superintendent',
+  superintendant: 'superintendent', // common misspelling
+  sup: 'superintendent',
+  deputy_director: 'deputy_director',
+  deputydirector: 'deputy_director',
+  deputy: 'deputy_director',
+  dy_director: 'deputy_director',
+  dd: 'deputy_director',
+  director: 'director',
+  dir: 'director',
+};
+
+const normalizeRole = (raw) => {
+  if (!raw) return null;
+  const key = String(raw).trim().toLowerCase().replace(/[\s-]+/g, '_');
+  const resolved = ROLE_ALIASES[key];
+  if (!resolved) {
+    // eslint-disable-next-line no-console
+    console.warn(`[ProjectTransferRequests] Unrecognized role from sessionStorage: "${raw}" — falling back to "assistant". Check what the login API is actually sending.`);
+    return null;
+  }
+  return resolved;
+};
+
+const userRole = () => normalizeRole(localStorage.getItem('userRole')) || 'assistant';
 const userName = () => localStorage.getItem('userName') || 'Office';
 
 // ─── Office staff directory (stand-in for a real users table) ─────────────
-// ids match the dev credentials in ProceedingsLogin.jsx (ast1/sup1/dir1)
+// ids match the dev credentials in ProceedingsLogin.jsx (ast1/sup1/dd1/dir1)
 const OFFICE_STAFF = {
   assistant: [
     { id: 'ast1', name: 'Mr. R. Senthilkumar' },
@@ -54,13 +97,21 @@ const OFFICE_STAFF = {
     { id: 'sup1', name: 'Mr. T. Anbarasan' },
     { id: 'sup2', name: 'Mrs. S. Meenakshi' },
   ],
+  deputy_director: [
+    { id: 'dd1', name: 'Dr. N. Rajesh' },
+  ],
   director: [
     { id: 'dir1', name: 'Dr. S. Balasivanandha Prabu, Director, CSRC' },
   ],
 };
 
-const ROLE_ORDER = ['assistant', 'superintendent', 'director'];
-const ROLE_LABEL = { assistant: 'Assistant', superintendent: 'Superintendent', director: 'Director' };
+const ROLE_ORDER = ['assistant', 'superintendent', 'deputy_director', 'director'];
+const ROLE_LABEL = {
+  assistant: 'Assistant',
+  superintendent: 'Superintendent',
+  deputy_director: 'Deputy Director',
+  director: 'Director',
+};
 
 const nextRole = (role) => {
   const idx = ROLE_ORDER.indexOf(role);
@@ -108,8 +159,8 @@ const saveProjects = (projects) => {
 // ── Dummy seed data ─────────────────────────────────────────────────────
 // Only used to pre-populate localStorage the FIRST time this page runs and
 // finds nothing there yet — mirrors the DUMMY_* seed pattern in
-// FreshSanction.jsx so the three tiers (assistant/superintendent/director)
-// each have something to test against without needing the faculty page.
+// FreshSanction.jsx so each tier (assistant/superintendent/deputy_director/
+// director) has something to test against without needing the faculty page.
 const DUMMY_LETTER = (heading, body) => `
   <html><head><title>${heading}</title></head>
   <body style="font-family: Georgia, serif; padding: 40px; max-width: 700px; margin: auto;">
@@ -133,6 +184,9 @@ const DUMMY_PROJECTS = {
   ],
   fac_anand: [
     { id: 'proj_2003', fileNo: 'CSRC/PRJ/2025/0014', title: 'Efficient Edge Inference for IoT Devices', cost: '9,75,000', fundingAgency: 'MeitY', period: '2025-2028' },
+  ],
+  fac_meera: [
+    { id: 'proj_2004', fileNo: 'CSRC/PRJ/2024/0055', title: 'Blockchain-Based Land Records Verification', cost: '15,20,000', fundingAgency: 'MeitY', period: '2024-2027' },
   ],
 };
 
@@ -177,8 +231,8 @@ const DUMMY_TRANSFERS = [
       { id: 'oh_9002_1', at: '30-06-2026', fromRole: 'assistant', fromName: 'Mr. R. Senthilkumar', toRole: 'superintendent', toName: 'Mr. T. Anbarasan', type: 'approval', remarks: 'Documents verified, forwarding for review.' },
     ],
   },
-  // 3) Already forwarded all the way to Director — visible in Director's
-  //    "New Requests"
+  // 3) Already forwarded up to Deputy Director — visible in Deputy
+  //    Director's "New Requests"
   {
     id: 'tr_9003',
     projectId: 'proj_2003',
@@ -193,16 +247,41 @@ const DUMMY_TRANSFERS = [
     remarks: 'Cross-department collaboration lead change.',
     transferLetter: DUMMY_LETTER('Project Transfer Letter', 'Signed transfer letter for handover from Dr. R. Anand to Dr. S. Priya.'),
     respondedAt: '20-06-2026',
+    officeStage: 'deputy_director',
+    officeAssigneeId: 'dd1',
+    officeAssigneeName: 'Dr. N. Rajesh',
+    officeHistory: [
+      { id: 'oh_9003_0', at: '20-06-2026', fromRole: null, fromName: 'Faculty Acceptance', toRole: 'assistant', toName: 'New Requests', type: 'entry', remarks: '' },
+      { id: 'oh_9003_1', at: '22-06-2026', fromRole: 'assistant', fromName: 'Mr. R. Senthilkumar', toRole: 'superintendent', toName: 'Mr. T. Anbarasan', type: 'approval', remarks: '' },
+      { id: 'oh_9003_2', at: '24-06-2026', fromRole: 'superintendent', fromName: 'Mr. T. Anbarasan', toRole: 'deputy_director', toName: 'Dr. N. Rajesh', type: 'approval', remarks: 'Recommended for higher-level review.' },
+    ],
+  },
+  // 4) Forwarded all the way to Director — visible in Director's "New Requests"
+  {
+    id: 'tr_9005',
+    projectId: 'proj_2004',
+    fileNo: 'CSRC/PRJ/2024/0055',
+    title: 'Blockchain-Based Land Records Verification',
+    cost: '15,20,000',
+    fundingAgency: 'MeitY',
+    period: '2024-2027',
+    fromFacultyId: 'fac_meera', fromFacultyName: 'Dr. K. Meera', fromFacultyDept: 'Dept. of IST',
+    toFacultyId: 'fac_kumar',   toFacultyName: 'Dr. M. Kumar',   toFacultyDept: 'Dept. of CSE',
+    status: 'accepted_by_faculty',
+    remarks: 'Outgoing PI proceeding on sabbatical; handover to co-investigator.',
+    transferLetter: DUMMY_LETTER('Project Transfer Letter', 'Signed transfer letter for handover from Dr. K. Meera to Dr. M. Kumar.'),
+    respondedAt: '15-06-2026',
     officeStage: 'director',
     officeAssigneeId: 'dir1',
     officeAssigneeName: 'Dr. S. Balasivanandha Prabu, Director, CSRC',
     officeHistory: [
-      { id: 'oh_9003_0', at: '20-06-2026', fromRole: null, fromName: 'Faculty Acceptance', toRole: 'assistant', toName: 'New Requests', type: 'entry', remarks: '' },
-      { id: 'oh_9003_1', at: '22-06-2026', fromRole: 'assistant', fromName: 'Mr. R. Senthilkumar', toRole: 'superintendent', toName: 'Mr. T. Anbarasan', type: 'approval', remarks: '' },
-      { id: 'oh_9003_2', at: '24-06-2026', fromRole: 'superintendent', fromName: 'Mr. T. Anbarasan', toRole: 'director', toName: 'Dr. S. Balasivanandha Prabu, Director, CSRC', type: 'approval', remarks: 'Recommended for final approval.' },
+      { id: 'oh_9005_0', at: '15-06-2026', fromRole: null, fromName: 'Faculty Acceptance', toRole: 'assistant', toName: 'New Requests', type: 'entry', remarks: '' },
+      { id: 'oh_9005_1', at: '17-06-2026', fromRole: 'assistant', fromName: 'Mr. R. Senthilkumar', toRole: 'superintendent', toName: 'Mr. T. Anbarasan', type: 'approval', remarks: '' },
+      { id: 'oh_9005_2', at: '19-06-2026', fromRole: 'superintendent', fromName: 'Mr. T. Anbarasan', toRole: 'deputy_director', toName: 'Dr. N. Rajesh', type: 'approval', remarks: '' },
+      { id: 'oh_9005_3', at: '21-06-2026', fromRole: 'deputy_director', fromName: 'Dr. N. Rajesh', toRole: 'director', toName: 'Dr. S. Balasivanandha Prabu, Director, CSRC', type: 'approval', remarks: 'Recommended for final approval.' },
     ],
   },
-  // 4) Fully completed — visible under "Completed" for every role
+  // 5) Fully completed — visible under "Completed" for every role
   {
     id: 'tr_9004',
     projectId: 'proj_2099',
@@ -224,8 +303,9 @@ const DUMMY_TRANSFERS = [
     officeHistory: [
       { id: 'oh_9004_0', at: '02-06-2026', fromRole: null, fromName: 'Faculty Acceptance', toRole: 'assistant', toName: 'New Requests', type: 'entry', remarks: '' },
       { id: 'oh_9004_1', at: '04-06-2026', fromRole: 'assistant', fromName: 'Mr. R. Senthilkumar', toRole: 'superintendent', toName: 'Mr. T. Anbarasan', type: 'approval', remarks: '' },
-      { id: 'oh_9004_2', at: '07-06-2026', fromRole: 'superintendent', fromName: 'Mr. T. Anbarasan', toRole: 'director', toName: 'Dr. S. Balasivanandha Prabu, Director, CSRC', type: 'approval', remarks: '' },
-      { id: 'oh_9004_3', at: '10-06-2026', fromRole: 'director', fromName: 'Dr. S. Balasivanandha Prabu, Director, CSRC', toRole: null, toName: null, type: 'finalize', remarks: 'Approved. Transfer complete.' },
+      { id: 'oh_9004_2', at: '06-06-2026', fromRole: 'superintendent', fromName: 'Mr. T. Anbarasan', toRole: 'deputy_director', toName: 'Dr. N. Rajesh', type: 'approval', remarks: '' },
+      { id: 'oh_9004_3', at: '08-06-2026', fromRole: 'deputy_director', fromName: 'Dr. N. Rajesh', toRole: 'director', toName: 'Dr. S. Balasivanandha Prabu, Director, CSRC', type: 'approval', remarks: '' },
+      { id: 'oh_9004_4', at: '10-06-2026', fromRole: 'director', fromName: 'Dr. S. Balasivanandha Prabu, Director, CSRC', toRole: null, toName: null, type: 'finalize', remarks: 'Approved. Transfer complete.' },
     ],
   },
 ];
@@ -286,13 +366,14 @@ const StatusBadge = ({ t }) => {
 };
 
 // ─── Office pipeline timeline ──────────────────────────────────────────────
+const TIMELINE_LABELS = ['Faculty Accepted', 'Assistant', 'Superintendent', 'Deputy Director', 'Director', 'Completed'];
+
 const OfficeTimeline = ({ t }) => {
-  const labels = ['Faculty Accepted', 'Assistant', 'Superintendent', 'Director', 'Completed'];
+  const labels = TIMELINE_LABELS;
   const isRejected = t.status === 'rejected_by_csrc';
 
   let reachedIdx;
-  if (t.status === 'approved_by_csrc') reachedIdx = 4;
-  else if (isRejected) reachedIdx = ROLE_ORDER.indexOf(t.officeStage || 'assistant') + 1;
+  if (t.status === 'approved_by_csrc') reachedIdx = labels.length - 1;
   else reachedIdx = ROLE_ORDER.indexOf(t.officeStage || 'assistant') + 1;
 
   return (
@@ -518,8 +599,8 @@ const TrackModal = ({ transfer, onClose }) => (
 
 // ─── Main component ─────────────────────────────────────────────────────
 // Tab set depends on role, same convention as FreshSanction.jsx:
-//   assistant / superintendent → New Requests, Transferred, Completed
-//   director                   → New Requests, Completed
+//   assistant / superintendent / deputy_director → New Requests, Transferred, Completed
+//   director                                     → New Requests, Completed
 const TABS_BY_ROLE = {
   assistant: [
     { key: 'new',         label: 'New Requests' },
@@ -531,10 +612,22 @@ const TABS_BY_ROLE = {
     { key: 'transferred', label: 'Transferred' },
     { key: 'completed',   label: 'Completed' },
   ],
+  deputy_director: [
+    { key: 'new',         label: 'New Requests' },
+    { key: 'transferred', label: 'Transferred' },
+    { key: 'completed',   label: 'Completed' },
+  ],
   director: [
     { key: 'new',       label: 'New Requests' },
     { key: 'completed', label: 'Completed' },
   ],
+};
+
+const ROLE_ICON = {
+  assistant: '🟢',
+  superintendent: '🔵',
+  deputy_director: '🟣',
+  director: '🔴',
 };
 
 const ProjectTransferRequests = ({ onNavigate }) => {
@@ -779,7 +872,7 @@ const ProjectTransferRequests = ({ onNavigate }) => {
       {/* Logged-in identity strip (read-only, from real login) */}
       <div style={styles.identityBar}>
         <span style={styles.identityChip}>
-          {safeRole === 'director' ? '🔴' : safeRole === 'superintendent' ? '🔵' : '🟢'}{' '}
+          {ROLE_ICON[safeRole] || '🟢'}{' '}
           {userName()} <span style={styles.identityRole}>({ROLE_LABEL[safeRole]})</span>
         </span>
       </div>

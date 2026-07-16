@@ -17,7 +17,7 @@ const CONFIG = {
   title: 'CSRC Revenue',
   subtitle: 'Sign in to CSRC Revenue Portal',
   description: 'Manage revenue receipts, collections, and financial inflows across sponsored projects.',
-  features: ['Revenue Receipts', 'Collection Tracking', 'Four-Tier Approval Workflow'],
+  features: ['Revenue Receipts', 'Collection Tracking', 'Assistant Direct Entry · Full Visibility for Reviewers'],
   dashboardPath: '/revenue',
 };
 

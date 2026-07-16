@@ -1,16 +1,16 @@
 // src_revenue/utils/staffWorkflow.js
 // ─────────────────────────────────────────────────────────────────────────
 // Lightweight mock backend for the Staff Details module.
-// Persists to sessionStorage (per-tab, cleared when the tab/browser closes —
-// swapped over from localStorage so nothing lingers across sessions) so the
-// four-tier approval workflow —
-//   assistant → superintendent → deputy_director → director
-// — survives refreshes within a session and is shared across role logins
-// on this tab. Swap the read()/write() internals for real API calls once
-// the backend is ready; every exported function signature can stay the same.
+//
+// UPDATED: Assistant submissions (appointment / extension / resignation)
+// are now applied immediately — status 'approved' at creation, and the
+// staff record change (addStaff / extend / resign) happens right away
+// inside submitRequest(). Superintendent / Deputy Director / Director
+// logins remain read-only viewers via the same pages; approveRequest() is
+// kept for backward compatibility but is never reached in normal use.
 // ─────────────────────────────────────────────────────────────────────────
 
-const STAFF_KEY = 'csrc_revenue_staff_v2';
+const STAFF_KEY = 'csrc_revenue_staff_v3';
 const REQUESTS_KEY = 'csrc_revenue_requests_v1';
 
 export const ROLES = ['assistant', 'superintendent', 'deputy_director', 'director'];
@@ -60,140 +60,280 @@ function write(key, value) {
 /* ---------------------------------------------------------------------- */
 const SEED_STAFF = [
   {
-    id: 'stf_001',
+    id: 'stf_006',
     department: 'Centre for Sponsored Research and Consultancy',
-    employeeCode: '64548',
-    appellation: 'Tmt',
-    gender: 'Female',
-    firstName: 'Cholarani',
-    lastName: 'P',
-    designation: 'Superintendent',
-    mobile: '8056000000',
-    staffType: 'Regular',
-    tenureFrom: '',
-    tenureTo: '2035-04-30',
-    email: 'cholarani0404@tn.gov.in',
-    dob: '1975-04-04',
-    doj: '2009-04-15',
-    allotmentYear: '2009',
-    orderNumber: '031/PR33/2009',
-    orderDate: '2009-05-11',
-    salaryType: 'Consolidated Pay',
-    bankName: 'State Bank of India',
-    bankAccountNumber: '30456789012',
-    ifscCode: 'SBIN0001234',
-    status: 'active',
-    extensionHistory: [],
-    resignation: null,
-    documents: {},
-  },
-  {
-    id: 'stf_002',
-    department: 'Centre for Sponsored Research and Consultancy',
-    employeeCode: '68743',
-    appellation: 'Tmt',
-    gender: 'Female',
-    firstName: 'Bhavani',
-    lastName: 'M',
-    designation: 'Assistant',
-    mobile: '9884000000',
-    staffType: 'Regular',
-    tenureFrom: '',
-    tenureTo: '2045-02-28',
-    email: 'bhavani2402@tn.gov.in',
-    dob: '1984-02-24',
-    doj: '2013-09-03',
-    allotmentYear: '2013',
-    orderNumber: '001/PR33/2013',
-    orderDate: '2013-09-02',
-    salaryType: 'Consolidated Pay',
-    bankName: 'Indian Bank',
-    bankAccountNumber: '685412309876',
-    ifscCode: 'IDIB000C154',
-    status: 'active',
-    extensionHistory: [],
-    resignation: null,
-    documents: {},
-  },
-  {
-    id: 'stf_003',
-    department: 'Centre for Sponsored Research and Consultancy',
-    employeeCode: '800700',
-    appellation: 'Tmt',
-    gender: 'Female',
-    firstName: 'Shobana Banu',
-    lastName: 'P.K.',
-    designation: 'Application Programmer',
-    mobile: '9630000000',
-    staffType: 'Temporary',
-    tenureFrom: '2024-09-05',
-    tenureTo: '2025-02-28',
-    email: 'pkshobi@gmail.com',
-    dob: '1991-06-25',
-    doj: '2015-09-02',
-    allotmentYear: '2015',
-    orderNumber: '2425IN0124/CSRC',
-    orderDate: '2024-09-05',
-    salaryType: 'Daily Wages',
-    bankName: 'Canara Bank',
-    bankAccountNumber: '1123456789012',
-    ifscCode: 'CNRB0001987',
-    status: 'active',
-    extensionHistory: [],
-    resignation: null,
-    documents: {},
-  },
-  {
-    id: 'stf_004',
-    department: 'Centre for Sponsored Research and Consultancy',
-    employeeCode: '800676',
-    appellation: 'Tmt',
-    gender: 'Female',
-    firstName: 'Sorna Jenefa',
-    lastName: 'J',
-    designation: 'Project Associate I',
-    mobile: '8221000000',
-    staffType: 'Temporary',
-    tenureFrom: '2024-07-08',
-    tenureTo: '2025-03-01',
-    email: 'jenectdt@gmail.com',
-    dob: '1996-07-23',
-    doj: '2023-07-03',
-    allotmentYear: '2023',
-    orderNumber: '2425IN0080/CSRC',
-    orderDate: '2024-07-08',
-    salaryType: 'Daily Wages',
-    bankName: 'City Union Bank',
-    bankAccountNumber: '500123456789',
-    ifscCode: 'CIUB0000045',
-    status: 'active',
-    extensionHistory: [],
-    resignation: null,
-    documents: {},
-  },
-  {
-    id: 'stf_005',
-    department: 'Centre for Sponsored Research and Consultancy',
-    employeeCode: '800674',
+    employeeCode: '2',
     appellation: 'Thiru',
     gender: 'Male',
-    firstName: 'Sridhar',
-    lastName: 'M',
-    designation: 'Peon',
-    mobile: '9551000000',
+    firstName: 'Prabhu',
+    lastName: 'S',
+    designation: 'Office Assistant',
+    mobile: '9000000002',
     staffType: 'Temporary',
-    tenureFrom: '2024-11-07',
-    tenureTo: '2025-04-30',
-    email: 'angeline08@gmail.com',
-    dob: '1981-07-01',
-    doj: '2002-06-01',
-    allotmentYear: '2002',
-    orderNumber: '351/DW/PR30/2024',
-    orderDate: '2024-10-24',
-    salaryType: 'Daily Wages with Rate Factor',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'prabhu.s.csrc@gmail.com',
+    dob: '1990-01-15',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/002/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
     bankName: 'State Bank of India',
-    bankAccountNumber: '30987654321',
-    ifscCode: 'SBIN0004567',
+    bankAccountNumber: '3000000000002',
+    ifscCode: 'SBIN0000002',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_007',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '3',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Gangadurai',
+    lastName: 'E',
+    designation: 'Office Assistant',
+    mobile: '9000000003',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'gangadurai.e.csrc@gmail.com',
+    dob: '1988-03-20',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/003/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'Indian Bank',
+    bankAccountNumber: '3000000000003',
+    ifscCode: 'IDIB000C003',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_008',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '4',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Magesh Kumar',
+    lastName: 'N',
+    designation: 'Office Assistant',
+    mobile: '9000000004',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'mageshkumar.n.csrc@gmail.com',
+    dob: '1992-05-11',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/004/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'Canara Bank',
+    bankAccountNumber: '3000000000004',
+    ifscCode: 'CNRB0000004',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_009',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '7',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Venkatesha',
+    lastName: 'R',
+    designation: 'Office Assistant',
+    mobile: '9000000007',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'venkatesha.r.csrc@gmail.com',
+    dob: '1985-07-09',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/007/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'City Union Bank',
+    bankAccountNumber: '3000000000007',
+    ifscCode: 'CIUB0000007',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_010',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '8',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Paranthaman',
+    lastName: 'K',
+    designation: 'Office Assistant',
+    mobile: '9000000008',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'paranthaman.k.csrc@gmail.com',
+    dob: '1983-09-30',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/008/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'State Bank of India',
+    bankAccountNumber: '3000000000008',
+    ifscCode: 'SBIN0000008',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_011',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '10',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Vinoth Kumar',
+    lastName: 'V',
+    designation: 'Office Assistant',
+    mobile: '9000000010',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'vinothkumar.v.csrc@gmail.com',
+    dob: '1994-02-18',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/010/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'Indian Bank',
+    bankAccountNumber: '3000000000010',
+    ifscCode: 'IDIB000C010',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_012',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '11',
+    appellation: 'Selvi',
+    gender: 'Female',
+    firstName: 'Agalya',
+    lastName: 'M',
+    designation: 'Office Assistant',
+    mobile: '9000000011',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'agalya.m.csrc@gmail.com',
+    dob: '1997-11-02',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/011/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'Canara Bank',
+    bankAccountNumber: '3000000000011',
+    ifscCode: 'CNRB0000011',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_013',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '18',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Syed Irfan',
+    lastName: 'S.I',
+    designation: 'Office Assistant',
+    mobile: '9000000018',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'syedirfan.si.csrc@gmail.com',
+    dob: '1989-04-25',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/018/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'City Union Bank',
+    bankAccountNumber: '3000000000018',
+    ifscCode: 'CIUB0000018',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_014',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '20',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Thomas Edwin',
+    lastName: 'T',
+    designation: 'Office Assistant',
+    mobile: '9000000020',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'thomasedwin.t.csrc@gmail.com',
+    dob: '1986-08-14',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/020/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'State Bank of India',
+    bankAccountNumber: '3000000000020',
+    ifscCode: 'SBIN0000020',
+    status: 'active',
+    extensionHistory: [],
+    resignation: null,
+    documents: {},
+  },
+  {
+    id: 'stf_015',
+    department: 'Centre for Sponsored Research and Consultancy',
+    employeeCode: '21',
+    appellation: 'Thiru',
+    gender: 'Male',
+    firstName: 'Murali',
+    lastName: 'D',
+    designation: 'Office Assistant',
+    mobile: '9000000021',
+    staffType: 'Temporary',
+    tenureFrom: '2025-01-01',
+    tenureTo: '2026-12-31',
+    email: 'murali.d.csrc@gmail.com',
+    dob: '1991-12-06',
+    doj: '2024-01-01',
+    allotmentYear: '2024',
+    orderNumber: 'DUMMY/OA/021/2024',
+    orderDate: '2024-01-01',
+    salaryType: 'Daily Wages',
+    bankName: 'Indian Bank',
+    bankAccountNumber: '3000000000021',
+    ifscCode: 'IDIB000C021',
     status: 'active',
     extensionHistory: [],
     resignation: null,
@@ -260,7 +400,7 @@ export function getStatusCounts() {
 }
 
 /* ---------------------------------------------------------------------- */
-/* requests / four-tier approval workflow                                 */
+/* requests — Assistant submits, applied immediately                      */
 /* ---------------------------------------------------------------------- */
 export function getRequests() {
   return read(REQUESTS_KEY, []);
@@ -276,8 +416,9 @@ export function getPendingForRole(role, type) {
   );
 }
 
-// Count of pending items waiting on this role, across all 3 request types.
-// Used to badge the Extension / Resignation / New Appointment cards.
+// Count of pending items waiting on this role — will always be 0 now,
+// since submitRequest() no longer leaves anything pending. Kept so the
+// badge code elsewhere doesn't need to change.
 export function getPendingCountForRole(role, type) {
   return getPendingForRole(role, type).length;
 }
@@ -290,33 +431,6 @@ export function getRequestsByType(type) {
 
 export function getRequestById(id) {
   return getRequests().find((r) => r.id === id) || null;
-}
-
-// actor = { role, name }
-export function submitRequest(type, data, documents, actor) {
-  const requests = getRequests();
-  const req = {
-    id: `REQ-${Date.now()}`,
-    type, // 'appointment' | 'extension' | 'resignation'
-    staffId: data.staffId || null,
-    data,
-    documents,
-    status: `pending_${APPROVAL_CHAIN[0]}`,
-    currentStepIndex: 0,
-    history: [
-      {
-        role: actor.role,
-        name: actor.name,
-        action: 'submitted',
-        date: new Date().toISOString(),
-        comment: 'Submitted for approval',
-      },
-    ],
-    createdBy: { ...actor, date: new Date().toISOString() },
-  };
-  requests.unshift(req);
-  saveRequests(requests);
-  return req;
 }
 
 function applyApprovedRequest(req) {
@@ -349,7 +463,38 @@ function applyApprovedRequest(req) {
   }
 }
 
-// actor = { role, name }; editedData optional partial overrides for req.data
+// actor = { role, name }
+// UPDATED: request is created already 'approved' and its effect on the
+// staff record is applied immediately — the Assistant needs no sign-off.
+export function submitRequest(type, data, documents, actor) {
+  const requests = getRequests();
+  const req = {
+    id: `REQ-${Date.now()}`,
+    type, // 'appointment' | 'extension' | 'resignation'
+    staffId: data.staffId || null,
+    data,
+    documents,
+    status: 'approved',
+    currentStepIndex: APPROVAL_CHAIN.length,
+    history: [
+      {
+        role: actor.role,
+        name: actor.name,
+        action: 'submitted',
+        date: new Date().toISOString(),
+        comment: 'Submitted and applied directly by Assistant',
+      },
+    ],
+    createdBy: { ...actor, date: new Date().toISOString() },
+  };
+  applyApprovedRequest(req);
+  requests.unshift(req);
+  saveRequests(requests);
+  return req;
+}
+
+// Kept for backward compatibility — unreachable in normal use since
+// submitRequest() now applies everything immediately.
 export function approveRequest(id, actor, editedData, comment) {
   const requests = getRequests();
   const idx = requests.findIndex((r) => r.id === id);
