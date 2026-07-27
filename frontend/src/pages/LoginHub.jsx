@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginHub.css';
+import csrcLogo from '../assets/csrc-logo.png';
 
 const modules = [
   {
@@ -27,6 +28,14 @@ const modules = [
     route: '/revenue-login',
     wip: false,
   },
+  {
+  id: 'consultancy',
+  title: 'CSRC CONSULTANCIES',
+  icon: '🌐',
+  desc: 'Acceptance Forms, Invoices & Payment Approvals',
+  route: '/consultancy-login',
+  wip: false,
+},
   {
     id: 'accounts',
     title: 'ACCOUNTS LOGIN',
@@ -57,8 +66,12 @@ export default function LoginHub() {
         {/* Header */}
         <div className="hub-header">
           <div className="hub-logo-ring">
-            <span className="hub-logo-icon">🎓</span>
-          </div>
+  <img
+    src={csrcLogo}
+    alt="Anna University"
+    className="hub-logo-image"
+  />
+</div>
           <div className="hub-title-block">
             <h1 className="hub-title">CSRC OFFICE</h1>
             <p className="hub-subtitle">Center for Sponsored Research and Consultancies — Integrated Management Portal</p>

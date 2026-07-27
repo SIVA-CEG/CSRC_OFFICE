@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ProceedingsLogin.css'; // reusing the same visual system — swap to './RevenueLogin.css' later if you want a distinct look
+import './RevenueLogin.css'; // reusing the same visual system — swap to './RevenueLogin.css' later if you want a distinct look
 
 // ── Mock DB ───────────────────────────────────────────────────────────────────
 // CSRC Revenue has a four-tier hierarchy (one level more than Proceedings/Projects):
@@ -91,7 +91,7 @@ export default function RevenueLogin() {
             <div className="pl-field">
               <label htmlFor="userId">User ID</label>
               <div className="pl-input-wrap">
-                <span className="pl-input-icon">👤</span>
+                <span className="pl-input-icon"></span>
                 <input
                   id="userId"
                   name="userId"
@@ -106,7 +106,7 @@ export default function RevenueLogin() {
             <div className="pl-field">
               <label htmlFor="password">Password</label>
               <div className="pl-input-wrap">
-                <span className="pl-input-icon">🔒</span>
+                <span className="pl-input-icon"></span>
                 <input
                   id="password"
                   name="password"

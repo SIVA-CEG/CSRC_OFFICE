@@ -220,6 +220,38 @@ import ViewAMC          from '../../src_revenue/pages/CSRCExpenditure/AMCRegiste
 
 
 
+
+
+
+
+
+
+import ConsultancyLogin       from '../pages/ConsultancyLogin';
+import ConsultancyLayout      from '../../src_consultancy/components/Layout/Layout';
+import ConsultancyDashboard   from '../../src_consultancy/pages/Dashboard';
+
+import AcceptanceFormsList        from '../../src_consultancy/pages/AcceptanceForms/AcceptanceFormsList';
+import AcceptanceFormsTransferred from '../../src_consultancy/pages/AcceptanceForms/AcceptanceFormsTransferred';
+import AcceptanceFormsCompleted   from '../../src_consultancy/pages/AcceptanceForms/AcceptanceFormsCompleted';
+
+import ProformaInvoiceList        from '../../src_consultancy/pages/ProformaInvoice/ProformaInvoiceList';
+import ProformaInvoiceTransferred from '../../src_consultancy/pages/ProformaInvoice/ProformaInvoiceTransferred';
+import ProformaInvoiceCompleted   from '../../src_consultancy/pages/ProformaInvoice/ProformaInvoiceCompleted';
+
+import PermissionsList        from '../../src_consultancy/pages/Permissions/PermissionsList';
+import PermissionsTransferred from '../../src_consultancy/pages/Permissions/PermissionsTransferred';
+import PermissionsCompleted   from '../../src_consultancy/pages/Permissions/PermissionsCompleted';
+
+/* ── SANCTION PROCEEDINGS (Department / Centre) ── */
+import DepartmentProceedingsList        from '../../src_consultancy/pages/SanctionProceedings/DepartmentProceedingsList';
+import DepartmentProceedingsTransferred from '../../src_consultancy/pages/SanctionProceedings/DepartmentProceedingsTransferred';
+import DepartmentProceedingsCompleted   from '../../src_consultancy/pages/SanctionProceedings/DepartmentProceedingsCompleted';
+import CentreProceedingsList            from '../../src_consultancy/pages/SanctionProceedings/CentreProceedingsList';
+import CentreProceedingsTransferred     from '../../src_consultancy/pages/SanctionProceedings/CentreProceedingsTransferred';
+import CentreProceedingsCompleted       from '../../src_consultancy/pages/SanctionProceedings/CentreProceedingsCompleted';
+
+
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -229,6 +261,7 @@ export default function AppRouter() {
         <Route path="/tapal-login"       element={<TapalLogin />} />
         <Route path="/proceedings-login" element={<ProceedingsLogin />} />
         <Route path="/revenue-login" element={<RevenueLogin />} />
+        <Route path="/consultancy-login" element={<ConsultancyLogin />} />
         <Route path="/dashboard"         element={<Dashboard />} />
         <Route path="/profile" element={<ProfilePage />} />
 
@@ -473,7 +506,35 @@ export default function AppRouter() {
 <Route path="csrc-expenditure/amc-register/view" element={<ViewAMC />} />
 <Route path="csrc-expenditure/amc-register/:itemId/add" element={<AddAMC />} />
 
+
     </Route>
+
+
+    <Route path="/consultancy-login" element={<ConsultancyLogin />} />
+
+<Route path="/consultancy-office" element={<ConsultancyLayout />}>
+  <Route index element={<ConsultancyDashboard />} />
+
+  <Route path="acceptance-forms/list"        element={<AcceptanceFormsList />} />
+  <Route path="acceptance-forms/transferred" element={<AcceptanceFormsTransferred />} />
+  <Route path="acceptance-forms/completed"   element={<AcceptanceFormsCompleted />} />
+
+  <Route path="proforma-invoices/list"        element={<ProformaInvoiceList />} />
+  <Route path="proforma-invoices/transferred" element={<ProformaInvoiceTransferred />} />
+  <Route path="proforma-invoices/completed"   element={<ProformaInvoiceCompleted />} />
+
+  <Route path="permissions/list"        element={<PermissionsList />} />
+  <Route path="permissions/transferred" element={<PermissionsTransferred />} />
+  <Route path="permissions/completed"   element={<PermissionsCompleted />} />
+
+  <Route path="proceedings-department/list"        element={<DepartmentProceedingsList />} />
+  <Route path="proceedings-department/transferred" element={<DepartmentProceedingsTransferred />} />
+  <Route path="proceedings-department/completed"   element={<DepartmentProceedingsCompleted />} />
+
+  <Route path="proceedings-centre/list"        element={<CentreProceedingsList />} />
+  <Route path="proceedings-centre/transferred" element={<CentreProceedingsTransferred />} />
+  <Route path="proceedings-centre/completed"   element={<CentreProceedingsCompleted />} />
+</Route>
 
 
         <Route path="*" element={<Navigate to="/" replace />} />
