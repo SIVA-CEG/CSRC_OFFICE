@@ -1,7 +1,7 @@
 .hub-root {
   min-height: 100vh;
-  background-image: 
-    linear-gradient(rgba(20,0,5,0.5), rgba(20,0,5,0.5)),
+  background-image:
+    linear-gradient(rgba(20,0,5,0.55), rgba(20,0,5,0.6)),
     url('../assets/anna_university1.jpg');
   background-size: cover;
   background-position: center;
@@ -14,6 +14,7 @@
   overflow: hidden;
   padding: 40px 20px;
 }
+
 .hub-bg-shape {
   position: absolute;
   border-radius: 50%;
@@ -24,7 +25,7 @@
 .shape1 {
   width: 700px;
   height: 700px;
-  background: radial-gradient(circle, rgba(192,0,30,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(192,0,30,0.10) 0%, transparent 70%);
   top: -200px;
   right: -200px;
 }
@@ -32,7 +33,7 @@
 .shape2 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(192,0,30,0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(192,0,30,0.08) 0%, transparent 70%);
   bottom: -150px;
   left: -150px;
 }
@@ -40,7 +41,7 @@
 .shape3 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -50,7 +51,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 960px;
+  max-width: 1040px;
 }
 
 /* Header */
@@ -66,33 +67,38 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c0001e, #8b0000);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(192,0,30,0.3);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
   flex-shrink: 0;
+  background: #fff;
 }
 
-.hub-logo-icon {
-  font-size: 36px;
+.hub-logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hub-title {
   font-family: 'Playfair Display', serif;
   font-size: clamp(28px, 4vw, 42px);
   font-weight: 700;
-  color: #c0001e;
+  color: #ff4d5e;
   letter-spacing: 2px;
   line-height: 1.1;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.35);
 }
 
 .hub-subtitle {
   font-size: 14px;
-  color: #ffffff;
+  color: #f4f4f6;
   margin-top: 6px;
   font-weight: 400;
   letter-spacing: 0.3px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
 }
 
 /* Divider */
@@ -109,36 +115,44 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
 }
 
 .hub-divider span {
   font-size: 13px;
-  font-weight: 600;
-  color: #9ca3af;
-  letter-spacing: 2px;
+  font-weight: 700;
+  color: #f1c9ce;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* Cards */
+/* Cards — flex-wrap + centered so 5 cards never leave one stranded alone */
 .hub-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 24px;
   margin-bottom: 48px;
 }
 
 .hub-card {
   position: relative;
+  flex: 1 1 210px;
+  max-width: 230px;
   border-radius: 20px;
-  padding: 36px 24px 28px;
+  padding: 34px 22px 26px;
   cursor: pointer;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1.5px solid #ffffff;
-  box-shadow: 0 4px 16px rgba(40, 39, 39, 0.06);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.3s ease,
+              border-color 0.3s ease;
   animation: fadeSlideUp 0.6s ease both;
   display: flex;
   flex-direction: column;
@@ -147,32 +161,34 @@
   gap: 10px;
 }
 
-.hub-card:nth-child(1) { animation-delay: 0.1s; }
-.hub-card:nth-child(2) { animation-delay: 0.2s; }
-.hub-card:nth-child(3) { animation-delay: 0.3s; }
-.hub-card:nth-child(4) { animation-delay: 0.4s; }
+.hub-card:nth-child(1) { animation-delay: 0.06s; }
+.hub-card:nth-child(2) { animation-delay: 0.12s; }
+.hub-card:nth-child(3) { animation-delay: 0.18s; }
+.hub-card:nth-child(4) { animation-delay: 0.24s; }
+.hub-card:nth-child(5) { animation-delay: 0.30s; }
 
-.hub-card--active:hover {
-  transform: translateY(-8px);
-  border-color: #c0001e;
-  box-shadow: 0 16px 48px rgba(192,0,30,0.18);
+/* The key fix: hover moves the card to a near-opaque, crisply-lit surface
+   instead of just nudging the border color, so it visibly steps forward
+   from the busy background photo. */
+.hub-card--active:hover,
+.hub-card--active:focus-visible {
+  transform: translateY(-10px) scale(1.035);
+  background: rgba(255, 255, 255, 0.97);
+  border-color: var(--accent, #c0001e);
+  box-shadow:
+    0 24px 48px -12px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+    0 0 32px -4px var(--accent-glow, rgba(192,0,30,0.45));
+}
+
+.hub-card--active:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 
 .hub-card--wip {
   cursor: not-allowed;
   opacity: 0.75;
-}
-
-.hub-card-glow {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(192,0,30,0.0), rgba(192,0,30,0.0));
-  transition: all 0.4s ease;
-  pointer-events: none;
-}
-
-.hub-card--active:hover .hub-card-glow {
-  background: linear-gradient(135deg, rgba(192,0,30,0.04), rgba(192,0,30,0.01));
 }
 
 .hub-card-strip {
@@ -181,47 +197,66 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #c0001e, #e8002a);
+  background: linear-gradient(90deg, var(--accent, #c0001e), var(--accent-light, #e8002a));
   transform: scaleX(0);
   transition: transform 0.3s ease;
   transform-origin: left;
 }
 
-.hub-card--active:hover .hub-card-strip {
+.hub-card--active:hover .hub-card-strip,
+.hub-card--active:focus-visible .hub-card-strip {
   transform: scaleX(1);
 }
 
+/* Icon sits in its own accent-tinted badge, rather than floating bare,
+   so each portal reads as a distinct destination at a glance. */
 .hub-card-icon {
-  font-size: 48px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
   line-height: 1;
-  margin-bottom: 4px;
-  transition: transform 0.3s ease;
+  margin-bottom: 2px;
+  background: var(--accent-tint, rgba(192,0,30,0.12));
+  transition: transform 0.3s ease, background 0.3s ease;
 }
 
-.hub-card--active:hover .hub-card-icon {
-  transform: scale(1.1) rotate(-5deg);
+.hub-card--active:hover .hub-card-icon,
+.hub-card--active:focus-visible .hub-card-icon {
+  transform: scale(1.08) rotate(-4deg);
+  background: var(--accent-tint-strong, rgba(192,0,30,0.18));
 }
 
 .hub-card-title {
-  font-size: 16px;
+  font-size: 15.5px;
   font-weight: 800;
-  color: #0000ff;
-  letter-spacing: 1.5px;
+  color: #1e2433;
+  letter-spacing: 1.3px;
   text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.hub-card--active:hover .hub-card-title,
+.hub-card--active:focus-visible .hub-card-title {
+  color: var(--accent, #c0001e);
 }
 
 .hub-card-desc {
-  font-size: 14px;
-  color: #000000;
+  font-size: 13.5px;
+  color: #3f4657;
   line-height: 1.5;
+  min-height: 42px;
 }
 
 .hub-card-badge {
-  margin-top: 8px;
+  margin-top: 6px;
   padding: 8px 18px;
   border-radius: 100px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -234,22 +269,24 @@
 }
 
 .active-badge {
-  background: linear-gradient(135deg, #c0001e, #e8002a);
+  background: var(--accent-gradient, linear-gradient(135deg, #c0001e, #e8002a));
   color: white;
-  box-shadow: 0 4px 12px rgba(192,0,30,0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
   transition: all 0.3s ease;
 }
 
-.hub-card--active:hover .active-badge {
-  box-shadow: 0 6px 20px rgba(192,0,30,0.45);
-  transform: scale(1.05);
+.hub-card--active:hover .active-badge,
+.hub-card--active:focus-visible .active-badge {
+  box-shadow: 0 8px 22px -4px var(--accent-glow, rgba(192,0,30,0.5));
+  transform: scale(1.06);
 }
 
 .active-badge .arrow {
   transition: transform 0.3s ease;
 }
 
-.hub-card--active:hover .active-badge .arrow {
+.hub-card--active:hover .active-badge .arrow,
+.hub-card--active:focus-visible .active-badge .arrow {
   transform: translateX(4px);
 }
 
@@ -257,8 +294,9 @@
 .hub-footer {
   text-align: center;
   font-size: 12px;
-  color: #d1d5db;
+  color: #e3e0e0;
   letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 
 /* Animations */
@@ -272,23 +310,14 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hub-card, .hub-card-icon, .hub-card-strip, .active-badge, .active-badge .arrow {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 @media (max-width: 600px) {
   .hub-header { flex-direction: column; text-align: center; }
-  .hub-cards { grid-template-columns: 1fr 1fr; }
-}
-
-.hub-logo-ring {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden; /* Makes the image circular */
-}
-
-.hub-logo-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* or contain */
+  .hub-card { flex: 1 1 42%; max-width: none; }
 }

@@ -4,6 +4,11 @@ import "./AssignModalST.css";
 const STAFF_LIST = [
   {
     id: 1,
+    name: "Mr. R. Senthilkumar",
+    designation: "Assistant",
+  },
+  {
+    id: 1,
     name: "Mr. T. Anbarasan",
     designation: "Assistant",
   },

@@ -6,19 +6,45 @@ import { useNavigate, useLocation } from "react-router-dom";
 const NAV_ITEMS = [
   { path: "/tapal", label: "Tapal Home", icon: "🏠" },
   { path: "/tapal/projects", label: "Projects", icon: "🗂️" },
-  { path: "/tapal/projects/endorsement", label: "Endorsement Tapals", icon: "📋", indent: true },
-  { path: "/tapal/projects/sanction", label: "Sanction Tapals", icon: "✅", indent: true },
-  { path: "/tapal/projects/project-transfer", label: "Project Transfer Tapals", icon: "🔁", indent: true },
+  {
+    path: "/tapal/projects/endorsement",
+    label: "Endorsement Tapals",
+    icon: "📋",
+    indent: true,
+  },
+  {
+    path: "/tapal/projects/sanction",
+    label: "Sanction Tapals",
+    icon: "✅",
+    indent: true,
+  },
+  {
+    path: "/tapal/projects/project-transfer",
+    label: "Project Transfer Tapals",
+    icon: "🔁",
+    indent: true,
+  },
   { path: "/tapal/projects/bills", label: "Bills", icon: "🧾", indent: true },
-  { path: "/tapal/projects/requests", label: "Request Tapals", icon: "📨", indent: true },
-  { path: "/tapal/projects/staff-approval", label: "Staff Approval Tapals", icon: "🧑‍💼", indent: true },
+  {
+    path: "/tapal/projects/requests",
+    label: "Request Tapals",
+    icon: "📨",
+    indent: true,
+  },
+  {
+    path: "/tapal/projects/staff-approval",
+    label: "Staff Approval Tapals",
+    icon: "🧑‍💼",
+    indent: true,
+  },
 ];
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + "/");
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
 
   return (
     <aside className="sidebar">

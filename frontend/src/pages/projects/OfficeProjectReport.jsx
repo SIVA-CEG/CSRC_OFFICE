@@ -298,9 +298,9 @@ export default function OfficeProjectReport({
   statusNote,
 }) {
   const roles = [
-    { key: "assistant",     label: "Assistant" },
+    { key: "assistant", label: "Assistant" },
     { key: "superintendent", label: "Superintendent" },
-    { key: "director",      label: "Director" },
+    { key: "director", label: "Director" },
   ];
 
   return (
@@ -311,7 +311,9 @@ export default function OfficeProjectReport({
       {/* ── Letterhead ── */}
       <div style={S.letterhead}>
         <div style={S.univName}>Anna University</div>
-        <div style={S.deptName}>Centre for Sponsored Research &amp; Consultancy</div>
+        <div style={S.deptName}>
+          Centre for Sponsored Research &amp; Consultancy
+        </div>
         <span style={S.reportTag}>{reportLabel}</span>
       </div>
 
@@ -328,7 +330,13 @@ export default function OfficeProjectReport({
       {meta.length > 0 && (
         <div style={S.metaGrid}>
           {meta
-            .filter(m => m && m.value !== undefined && m.value !== null && m.value !== "")
+            .filter(
+              (m) =>
+                m &&
+                m.value !== undefined &&
+                m.value !== null &&
+                m.value !== "",
+            )
             .map((m, i) => (
               <div key={i}>
                 <span style={S.metaLabel}>{m.label}</span>
@@ -350,12 +358,14 @@ export default function OfficeProjectReport({
               <thead>
                 <tr>
                   {(sec.columns || []).map((col, ci) => (
-                    <th key={ci} style={S.th}>{col}</th>
+                    <th key={ci} style={S.th}>
+                      {col}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {(!sec.rows || sec.rows.length === 0) ? (
+                {!sec.rows || sec.rows.length === 0 ? (
                   <tr>
                     <td
                       colSpan={sec.columns?.length || 1}
@@ -364,15 +374,17 @@ export default function OfficeProjectReport({
                       No entries
                     </td>
                   </tr>
-                ) : sec.rows.map((row, ri) => (
-                  <tr key={ri}>
-                    {row.map((cell, ci) => (
-                      <td key={ci} style={S.td(ri, sec.rows.length)}>
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                ) : (
+                  sec.rows.map((row, ri) => (
+                    <tr key={ri}>
+                      {row.map((cell, ci) => (
+                        <td key={ci} style={S.td(ri, sec.rows.length)}>
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -380,26 +392,52 @@ export default function OfficeProjectReport({
       ))}
 
       {/* ── Notes / Remarks ── */}
-      {notes.filter(n => n && n.text).map((n, i) => (
-        <div key={i} style={S.noteBox}>
-          <span style={S.noteLabel}>{n.label}:</span>
-          {n.text}
-        </div>
-      ))}
+      {notes
+        .filter((n) => n && n.text)
+        .map((n, i) => (
+          <div key={i} style={S.noteBox}>
+            <span style={S.noteLabel}>{n.label}:</span>
+            {n.text}
+          </div>
+        ))}
 
       <div style={S.divider} />
 
       {/* ── Signatures or status pill ── */}
       {showSignatures ? (
         <div style={S.signRow}>
-          {roles.map(r => {
-            const signed = !!signatures[r.key];
+          {roles.map((r) => {
+            const sign = signatures[r.key];
+
             return (
-              <div key={r.key} style={S.signBox(signed)}>
-                <div style={S.signMark}>{signed ? "✔" : "—"}</div>
+              <div key={r.key} style={S.signBox(!!sign)}>
+                {sign?.signature && (
+                  <img
+                    src={`http://localhost:5100/${sign.signature}`}
+                    alt="signature"
+                    style={{
+                      width: "150px",
+                      height: "60px",
+                      objectFit: "contain",
+                      margin: "0 auto 8px",
+                      display: "block",
+                    }}
+                  />
+                )}
+
                 <div style={S.signRole}>{r.label}</div>
-                <div style={S.signStatus(signed)}>
-                  {signed ? "Signed" : "Pending"}
+
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: "12px",
+                  }}
+                >
+                  {sign?.name || ""}
+                </div>
+
+                <div style={S.signStatus(!!sign)}>
+                  {!!sign ? "Signed" : "Pending"}
                 </div>
               </div>
             );
@@ -416,13 +454,13 @@ export default function OfficeProjectReport({
 
       {/* ── Footer ── */}
       <div style={S.footer}>
-        {statusNote || (
-          isCompleted
+        {statusNote ||
+          (isCompleted
             ? "This request has completed the full approval cycle."
-            : "Approval cycle in progress."
-        )}
+            : "Approval cycle in progress.")}
         <br />
-        Layout is a placeholder and will be replaced by the final generated report.
+        Layout is a placeholder and will be replaced by the final generated
+        report.
       </div>
     </div>
   );
@@ -435,34 +473,43 @@ export function OfficeReportModal({ title, refLabel, onClose, children }) {
   return (
     <div
       style={{
-        position: "fixed", inset: 0, zIndex: 100000,
+        position: "fixed",
+        inset: 0,
+        zIndex: 100000,
         background: "rgba(15,23,42,0.55)",
-        display: "flex", alignItems: "flex-start", justifyContent: "center",
-        padding: "24px 16px", overflowY: "auto",
-      }}
-      onClick={e => e.target === e.currentTarget && onClose()}
-    >
-      <div style={{
-        width: "min(880px, 96vw)",
-        background: "#f1f5f9",
-        borderRadius: "18px",
-        overflow: "hidden",
         display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 40px 100px rgba(0,0,0,0.35)",
-        fontFamily: "'Segoe UI', system-ui, sans-serif",
-        maxHeight: "calc(100vh - 48px)",
-      }}>
-        {/* Modal header */}
-        <div style={{
-          padding: "14px 20px",
-          background: "#0f172a",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        padding: "24px 16px",
+        overflowY: "auto",
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        style={{
+          width: "min(880px, 96vw)",
+          background: "#f1f5f9",
+          borderRadius: "18px",
+          overflow: "hidden",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px",
-          flexShrink: 0,
-        }}>
+          flexDirection: "column",
+          boxShadow: "0 40px 100px rgba(0,0,0,0.35)",
+          fontFamily: "'Segoe UI', system-ui, sans-serif",
+          maxHeight: "calc(100vh - 48px)",
+        }}
+      >
+        {/* Modal header */}
+        <div
+          style={{
+            padding: "14px 20px",
+            background: "#0f172a",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
+            flexShrink: 0,
+          }}
+        >
           <span style={{ color: "rgba(255,255,255,0.85)", fontSize: "13px" }}>
             <strong style={{ color: "#fff" }}>{title}</strong>
             {refLabel ? ` — ${refLabel}` : ""}
@@ -470,9 +517,14 @@ export function OfficeReportModal({ title, refLabel, onClose, children }) {
           <button
             onClick={onClose}
             style={{
-              background: "#ef4444", border: "none", color: "#fff",
-              borderRadius: "8px", padding: "7px 14px",
-              cursor: "pointer", fontWeight: 700, fontSize: "12px",
+              background: "#ef4444",
+              border: "none",
+              color: "#fff",
+              borderRadius: "8px",
+              padding: "7px 14px",
+              cursor: "pointer",
+              fontWeight: 700,
+              fontSize: "12px",
             }}
           >
             ✕ Close
@@ -495,38 +547,62 @@ export function TransferTimeline({ item }) {
 
   if (history.length === 0) {
     return (
-      <div style={{
-        color: "#94a3b8", fontSize: "13px", textAlign: "center",
-        padding: "28px 0", background: "#f8fafc", borderRadius: "10px",
-        border: "1px dashed #cbd5e1",
-      }}>
+      <div
+        style={{
+          color: "#94a3b8",
+          fontSize: "13px",
+          textAlign: "center",
+          padding: "28px 0",
+          background: "#f8fafc",
+          borderRadius: "10px",
+          border: "1px dashed #cbd5e1",
+        }}
+      >
         No transfer history yet. This item is still with the assistant.
       </div>
     );
   }
 
   const dot = (approved) => ({
-    width: "24px", height: "24px", borderRadius: "50%",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontSize: "12px", fontWeight: "bold", flexShrink: 0,
+    width: "24px",
+    height: "24px",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "12px",
+    fontWeight: "bold",
+    flexShrink: 0,
     background: approved ? "#dcfce7" : "#dbeafe",
     color: approved ? "#16a34a" : "#2563eb",
     border: `2px solid ${approved ? "#16a34a" : "#2563eb"}`,
   });
 
   const roleBadge = (role) => ({
-    fontSize: "10px", padding: "1px 7px", borderRadius: "999px", fontWeight: 600,
+    fontSize: "10px",
+    padding: "1px 7px",
+    borderRadius: "999px",
+    fontWeight: 600,
     background:
-      role === "superintendent" ? "#dbeafe" :
-      role === "director"       ? "#fce7f3" : "#dcfce7",
+      role === "superintendent"
+        ? "#dbeafe"
+        : role === "director"
+          ? "#fce7f3"
+          : "#dcfce7",
     color:
-      role === "superintendent" ? "#1d4ed8" :
-      role === "director"       ? "#be185d" : "#15803d",
+      role === "superintendent"
+        ? "#1d4ed8"
+        : role === "director"
+          ? "#be185d"
+          : "#15803d",
   });
 
   const statusBadge = (approved) => ({
-    marginTop: "4px", fontSize: "10px", padding: "2px 9px",
-    borderRadius: "999px", display: "inline-block",
+    marginTop: "4px",
+    fontSize: "10px",
+    padding: "2px 9px",
+    borderRadius: "999px",
+    display: "inline-block",
     background: approved ? "#f0fdf4" : "#eff6ff",
     color: approved ? "#16a34a" : "#2563eb",
     border: `1px solid ${approved ? "#bbf7d0" : "#bfdbfe"}`,
@@ -535,28 +611,76 @@ export function TransferTimeline({ item }) {
   return (
     <div style={{ padding: "8px 0" }}>
       {history.map((entry, i) => {
-        const toName   = typeof entry.to   === "object" ? entry.to?.name   : entry.to;
-        const toRole   = typeof entry.to   === "object" ? entry.to?.role   : null;
-        const fromName = typeof entry.from === "object" ? entry.from?.name : entry.from;
+        const toName = typeof entry.to === "object" ? entry.to?.name : entry.to;
+        const toRole = typeof entry.to === "object" ? entry.to?.role : null;
+        const fromName =
+          typeof entry.from === "object" ? entry.from?.name : entry.from;
 
         return (
-          <div key={i} style={{ display: "flex", gap: "12px", marginBottom: "14px" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "28px" }}>
-              <div style={dot(entry.approved)}>{entry.approved ? "✔" : "↪"}</div>
+          <div
+            key={i}
+            style={{ display: "flex", gap: "12px", marginBottom: "14px" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                minWidth: "28px",
+              }}
+            >
+              <div style={dot(entry.approved)}>
+                {entry.approved ? "✔" : "↪"}
+              </div>
               {i < history.length - 1 && (
-                <div style={{ width: "2px", flex: 1, background: "#e2e8f0", marginTop: "4px", minHeight: "14px" }} />
+                <div
+                  style={{
+                    width: "2px",
+                    flex: 1,
+                    background: "#e2e8f0",
+                    marginTop: "4px",
+                    minHeight: "14px",
+                  }}
+                />
               )}
             </div>
             <div style={{ flex: 1, paddingBottom: "4px" }}>
-              <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "2px" }}>{entry.date}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "12px", color: "#64748b" }}>{fromName}</span>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "#94a3b8",
+                  marginBottom: "2px",
+                }}
+              >
+                {entry.date}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <span style={{ fontSize: "12px", color: "#64748b" }}>
+                  {fromName}
+                </span>
                 <span style={{ fontSize: "13px", color: "#94a3b8" }}>→</span>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>{toName}</span>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: "#1e293b",
+                  }}
+                >
+                  {toName}
+                </span>
                 {toRole && <span style={roleBadge(toRole)}>{toRole}</span>}
               </div>
               <div style={statusBadge(entry.approved)}>
-                {entry.approved ? "✔ Approved & Forwarded" : "↪ Forwarded (Pending Approval)"}
+                {entry.approved
+                  ? "✔ Approved & Forwarded"
+                  : "↪ Forwarded (Pending Approval)"}
               </div>
             </div>
           </div>
@@ -566,13 +690,31 @@ export function TransferTimeline({ item }) {
       {/* Terminal node */}
       {item.currentHolder ? (
         <div style={{ display: "flex", gap: "12px" }}>
-          <div style={{
-            width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "12px", background: "#fef9c3", color: "#ca8a04",
-            border: "2px solid #ca8a04",
-          }}>⏳</div>
-          <div style={{ fontSize: "12px", color: "#92400e", fontWeight: 500, paddingTop: "4px" }}>
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "12px",
+              background: "#fef9c3",
+              color: "#ca8a04",
+              border: "2px solid #ca8a04",
+            }}
+          >
+            ⏳
+          </div>
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#92400e",
+              fontWeight: 500,
+              paddingTop: "4px",
+            }}
+          >
             Waiting for action from{" "}
             <strong>{item.currentHolder?.name || "Next Approver"}</strong>
             {item.currentHolder?.role && ` (${item.currentHolder.role})`}
@@ -580,13 +722,31 @@ export function TransferTimeline({ item }) {
         </div>
       ) : history.length > 0 ? (
         <div style={{ display: "flex", gap: "12px" }}>
-          <div style={{
-            width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "12px", background: "#dcfce7", color: "#16a34a",
-            border: "2px solid #16a34a",
-          }}>✔</div>
-          <div style={{ fontSize: "12px", color: "#15803d", fontWeight: 500, paddingTop: "4px" }}>
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "12px",
+              background: "#dcfce7",
+              color: "#16a34a",
+              border: "2px solid #16a34a",
+            }}
+          >
+            ✔
+          </div>
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#15803d",
+              fontWeight: 500,
+              paddingTop: "4px",
+            }}
+          >
             Process Completed — Fully Approved
           </div>
         </div>
@@ -602,60 +762,104 @@ export function TrackModal({ item, idLabel, title, onClose }) {
   const holderRole = item?.currentHolder?.role;
   const stageColors = {
     superintendent: { bg: "#dbeafe", color: "#1d4ed8" },
-    director:       { bg: "#fce7f3", color: "#be185d" },
-    assistant:      { bg: "#dcfce7", color: "#15803d" },
+    director: { bg: "#fce7f3", color: "#be185d" },
+    assistant: { bg: "#dcfce7", color: "#15803d" },
   };
   const sc = stageColors[holderRole] || { bg: "#f3f4f6", color: "#374151" };
 
   return (
     <div
       style={{
-        position: "fixed", inset: 0, zIndex: 100000,
+        position: "fixed",
+        inset: 0,
+        zIndex: 100000,
         background: "rgba(0,0,0,0.45)",
-        display: "flex", alignItems: "center", justifyContent: "center",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         padding: "16px",
       }}
-      onClick={e => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div style={{
-        background: "#fff", borderRadius: "16px",
-        width: "min(480px, 95vw)", maxHeight: "85vh",
-        overflow: "hidden", display: "flex", flexDirection: "column",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
-        fontFamily: "'Segoe UI', system-ui, sans-serif",
-      }}>
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: "16px",
+          width: "min(480px, 95vw)",
+          maxHeight: "85vh",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+          fontFamily: "'Segoe UI', system-ui, sans-serif",
+        }}
+      >
         {/* Header */}
-        <div style={{
-          padding: "16px 20px", borderBottom: "1px solid #e2e8f0",
-          display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-        }}>
+        <div
+          style={{
+            padding: "16px 20px",
+            borderBottom: "1px solid #e2e8f0",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
           <div>
-            <div style={{
-              fontSize: "11px", fontWeight: 700, color: "#94a3b8",
-              textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px",
-            }}>
+            <div
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "#94a3b8",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                marginBottom: "4px",
+              }}
+            >
               TRANSFER TRACKING — {idLabel}
             </div>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: "#1e293b", lineHeight: 1.3 }}>
+            <div
+              style={{
+                fontSize: "14px",
+                fontWeight: 700,
+                color: "#1e293b",
+                lineHeight: 1.3,
+              }}
+            >
               {title}
             </div>
             {item?.currentHolder && (
               <div style={{ marginTop: "8px" }}>
-                <span style={{
-                  fontSize: "12px", fontWeight: 600, padding: "3px 10px",
-                  borderRadius: "999px", background: sc.bg, color: sc.color,
-                }}>
-                  {holderRole === "superintendent" ? "🔵" : holderRole === "director" ? "🔴" : "🟢"}
-                  {" "}Currently with {item.currentHolder?.name} ({holderRole})
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    padding: "3px 10px",
+                    borderRadius: "999px",
+                    background: sc.bg,
+                    color: sc.color,
+                  }}
+                >
+                  {holderRole === "superintendent"
+                    ? "🔵"
+                    : holderRole === "director"
+                      ? "🔴"
+                      : "🟢"}{" "}
+                  Currently with {item.currentHolder?.name} ({holderRole})
                 </span>
               </div>
             )}
             {!item?.currentHolder && item?.transferHistory?.length > 0 && (
               <div style={{ marginTop: "8px" }}>
-                <span style={{
-                  fontSize: "12px", fontWeight: 600, padding: "3px 10px",
-                  borderRadius: "999px", background: "#dcfce7", color: "#15803d",
-                }}>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    padding: "3px 10px",
+                    borderRadius: "999px",
+                    background: "#dcfce7",
+                    color: "#15803d",
+                  }}
+                >
                   ✔ Completed
                 </span>
               </div>
@@ -664,9 +868,14 @@ export function TrackModal({ item, idLabel, title, onClose }) {
           <button
             onClick={onClose}
             style={{
-              background: "none", border: "1px solid #e2e8f0", cursor: "pointer",
-              fontSize: "14px", color: "#64748b", borderRadius: "8px",
-              padding: "4px 10px", fontWeight: 700,
+              background: "none",
+              border: "1px solid #e2e8f0",
+              cursor: "pointer",
+              fontSize: "14px",
+              color: "#64748b",
+              borderRadius: "8px",
+              padding: "4px 10px",
+              fontWeight: 700,
             }}
           >
             ✕

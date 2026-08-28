@@ -243,12 +243,25 @@ import PermissionsTransferred from '../../src_consultancy/pages/Permissions/Perm
 import PermissionsCompleted   from '../../src_consultancy/pages/Permissions/PermissionsCompleted';
 
 /* ── SANCTION PROCEEDINGS (Department / Centre) ── */
-import DepartmentProceedingsList        from '../../src_consultancy/pages/SanctionProceedings/DepartmentProceedingsList';
-import DepartmentProceedingsTransferred from '../../src_consultancy/pages/SanctionProceedings/DepartmentProceedingsTransferred';
-import DepartmentProceedingsCompleted   from '../../src_consultancy/pages/SanctionProceedings/DepartmentProceedingsCompleted';
-import CentreProceedingsList            from '../../src_consultancy/pages/SanctionProceedings/CentreProceedingsList';
-import CentreProceedingsTransferred     from '../../src_consultancy/pages/SanctionProceedings/CentreProceedingsTransferred';
-import CentreProceedingsCompleted       from '../../src_consultancy/pages/SanctionProceedings/CentreProceedingsCompleted';
+import DepartmentGenerateProceedingsList        from '../../src_consultancy/pages/SanctionProceedings/Department/DepartmentGenerateProceedingsList';
+import DepartmentGenerateProceedingsTransferred from '../../src_consultancy/pages/SanctionProceedings/Department/DepartmentGenerateProceedingsTransferred';
+import DepartmentGenerateProceedingsCompleted   from '../../src_consultancy/pages/SanctionProceedings/Department/DepartmentGenerateProceedingsCompleted';
+import DepartmentSanctionBillList               from '../../src_consultancy/pages/SanctionProceedings/Department/DepartmentSanctionBillList';
+import DepartmentSanctionBillTransferred        from '../../src_consultancy/pages/SanctionProceedings/Department/DepartmentSanctionBillTransferred';
+import DepartmentSanctionBillCompleted          from '../../src_consultancy/pages/SanctionProceedings/Department/DepartmentSanctionBillCompleted';
+
+import CentreGenerateProceedingsList            from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreGenerateProceedingsList';
+import CentreGenerateProceedingsTransferred     from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreGenerateProceedingsTransferred';
+import CentreGenerateProceedingsCompleted       from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreGenerateProceedingsCompleted';
+import CentreSanctionBillList                   from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreSanctionBillList';
+import CentreSanctionBillTransferred            from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreSanctionBillTransferred';
+import CentreSanctionBillCompleted              from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreSanctionBillCompleted';
+import CentreGeneratePCRList                    from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreGeneratePCRList';
+import CentreGeneratePCRTransferred             from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreGeneratePCRTransferred';
+import CentreGeneratePCRCompleted               from '../../src_consultancy/pages/SanctionProceedings/Centre/CentreGeneratePCRCompleted';
+import CentrePCRProceedingsList                 from '../../src_consultancy/pages/SanctionProceedings/Centre/CentrePCRProceedingsList';
+import CentrePCRProceedingsTransferred          from '../../src_consultancy/pages/SanctionProceedings/Centre/CentrePCRProceedingsTransferred';
+import CentrePCRProceedingsCompleted            from '../../src_consultancy/pages/SanctionProceedings/Centre/CentrePCRProceedingsCompleted';
 
 
 
@@ -527,13 +540,31 @@ export default function AppRouter() {
   <Route path="permissions/transferred" element={<PermissionsTransferred />} />
   <Route path="permissions/completed"   element={<PermissionsCompleted />} />
 
-  <Route path="proceedings-department/list"        element={<DepartmentProceedingsList />} />
-  <Route path="proceedings-department/transferred" element={<DepartmentProceedingsTransferred />} />
-  <Route path="proceedings-department/completed"   element={<DepartmentProceedingsCompleted />} />
+{/* Department — Generate Proceedings */}
+  <Route path="proceedings-department/generate/list"        element={<DepartmentGenerateProceedingsList />} />
+  <Route path="proceedings-department/generate/transferred" element={<DepartmentGenerateProceedingsTransferred />} />
+  <Route path="proceedings-department/generate/completed"   element={<DepartmentGenerateProceedingsCompleted />} />
+  {/* Department — Sanction Proceedings & Bill */}
+  <Route path="proceedings-department/sanction-bill/list"        element={<DepartmentSanctionBillList />} />
+  <Route path="proceedings-department/sanction-bill/transferred" element={<DepartmentSanctionBillTransferred />} />
+  <Route path="proceedings-department/sanction-bill/completed"   element={<DepartmentSanctionBillCompleted />} />
 
-  <Route path="proceedings-centre/list"        element={<CentreProceedingsList />} />
-  <Route path="proceedings-centre/transferred" element={<CentreProceedingsTransferred />} />
-  <Route path="proceedings-centre/completed"   element={<CentreProceedingsCompleted />} />
+  {/* Centre — Generate Proceedings */}
+  <Route path="proceedings-centre/generate/list"        element={<CentreGenerateProceedingsList />} />
+  <Route path="proceedings-centre/generate/transferred" element={<CentreGenerateProceedingsTransferred />} />
+  <Route path="proceedings-centre/generate/completed"   element={<CentreGenerateProceedingsCompleted />} />
+  {/* Centre — Sanction Proceedings & Bill */}
+  <Route path="proceedings-centre/sanction-bill/list"        element={<CentreSanctionBillList />} />
+  <Route path="proceedings-centre/sanction-bill/transferred" element={<CentreSanctionBillTransferred />} />
+  <Route path="proceedings-centre/sanction-bill/completed"   element={<CentreSanctionBillCompleted />} />
+  {/* Centre — Generate PCR Proceedings */}
+  <Route path="proceedings-centre/generate-pcr/list"        element={<CentreGeneratePCRList />} />
+  <Route path="proceedings-centre/generate-pcr/transferred" element={<CentreGeneratePCRTransferred />} />
+  <Route path="proceedings-centre/generate-pcr/completed"   element={<CentreGeneratePCRCompleted />} />
+  {/* Centre — PCR Proceedings */}
+  <Route path="proceedings-centre/pcr-proceedings/list"        element={<CentrePCRProceedingsList />} />
+  <Route path="proceedings-centre/pcr-proceedings/transferred" element={<CentrePCRProceedingsTransferred />} />
+  <Route path="proceedings-centre/pcr-proceedings/completed"   element={<CentrePCRProceedingsCompleted />} />
 </Route>
 
 

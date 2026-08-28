@@ -1,7 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./RequestTapal.css";
+import { useEffect } from "react";
 import AssignModalSA from "./AssignModalSA";
+import {
+  getPendingAppointments,
+  getAssignedAppointments,
+  getCompletedAppointments,
+  getAppointmentById,
+  assignAppointment,
+  getPendingFacultyExtensions,
+  getAssignedFacultyExtensions,
+  getCompletedFacultyExtensions,
+  getFacultyExtensionById,
+  assignFacultyExtension,
+} from "../api/tapalApi";
 import TrackModalSA from "./TrackModalSA";
 import StaffDetailModalSA from "./StaffDetailModalSA";
 import StaffIndividualReportModalSA from "./StaffIndividualReportModalSA";
@@ -12,7 +25,8 @@ const REQUEST_TYPES = [
     key: "appointment",
     label: "New Appointment Requests",
     icon: "🧑‍💼",
-    description: "Fresh staff appointment orders submitted by faculty, pending office assignment",
+    description:
+      "Fresh staff appointment orders submitted by faculty, pending office assignment",
     color: "#4f46e5",
     bg: "linear-gradient(135deg,#e0e7ff,#f5f3ff)",
     border: "#c7d2fe",
@@ -21,7 +35,8 @@ const REQUEST_TYPES = [
     key: "extension",
     label: "Staff Extension Requests",
     icon: "🔁",
-    description: "Staff tenure extension requests submitted by faculty, pending office assignment",
+    description:
+      "Staff tenure extension requests submitted by faculty, pending office assignment",
     color: "#a78bfa",
     bg: "linear-gradient(135deg,#f3e8ff,#faf5ff)",
     border: "#e9d5ff",
@@ -74,7 +89,83 @@ export default function StaffApprovalTapal() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [assignItem, setAssignItem] = useState(null);
-  const [requests, setRequests] = useState(DUMMY_REQUESTS);
+  const [requests, setRequests] = useState([]);
+
+  useEffect(() => {
+    async function loadRequests() {
+      try {
+        const [
+          pendingApt,
+          assignedApt,
+          completedApt,
+          pendingExt,
+          assignedExt,
+          completedExt,
+        ] = await Promise.all([
+          getPendingAppointments(),
+          getAssignedAppointments(),
+          getCompletedAppointments(),
+          getPendingFacultyExtensions(),
+          getAssignedFacultyExtensions(),
+          getCompletedFacultyExtensions(),
+        ]);
+
+        const mapApt = (item, status) => ({
+          id: item.id,
+          requestType: "APPOINTMENT",
+          staffName: item.staff_name || "",
+          designation: item.designation || "",
+          projectTitle: item.project_title || "",
+          piName: item.pi_name || "",
+          orderNo: item.appointment_order_no || "",
+          date: item.created_at
+            ? new Date(item.created_at).toLocaleDateString("en-GB")
+            : "",
+          status,
+          assignedTo: item.assigned_to || null,
+        });
+
+        const mapExt = (item, status) => ({
+          id: item.id,
+          requestType: "EXTENSION",
+          staffName: item.staff_name || "",
+          designation: item.designation || "",
+          projectTitle: item.project_title || "",
+          piName: item.pi_name || "",
+          orderNo: item.extension_order_no || "",
+          date: item.created_at
+            ? new Date(item.created_at).toLocaleDateString("en-GB")
+            : "",
+          status,
+          assignedTo: item.assigned_to || null,
+        });
+
+        setRequests([
+          ...(Array.isArray(pendingApt)
+            ? pendingApt.map((i) => mapApt(i, "PENDING"))
+            : []),
+          ...(Array.isArray(assignedApt)
+            ? assignedApt.map((i) => mapApt(i, "ASSIGNED"))
+            : []),
+          ...(Array.isArray(completedApt)
+            ? completedApt.map((i) => mapApt(i, "COMPLETED"))
+            : []),
+          ...(Array.isArray(pendingExt)
+            ? pendingExt.map((i) => mapExt(i, "PENDING"))
+            : []),
+          ...(Array.isArray(assignedExt)
+            ? assignedExt.map((i) => mapExt(i, "ASSIGNED"))
+            : []),
+          ...(Array.isArray(completedExt)
+            ? completedExt.map((i) => mapExt(i, "COMPLETED"))
+            : []),
+        ]);
+      } catch (err) {
+        console.error("Failed to load staff requests", err);
+      }
+    }
+    loadRequests();
+  }, []);
 
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("pending");
@@ -84,30 +175,35 @@ export default function StaffApprovalTapal() {
   const [viewItem, setViewItem] = useState(null);
   const [overallReportOpen, setOverallReportOpen] = useState(false);
 
-  const handleAssign = (id, staff, remarks) => {
-    const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
+  const handleAssign = async (id, staff, remarks, requestType) => {
+    try {
+      if (requestType === "EXTENSION") {
+        await assignFacultyExtension(id, staff.name, remarks);
+      } else {
+        await assignAppointment(id, staff.name, remarks);
+      }
+    } catch (err) {
+      console.error("Failed to save assignment", err);
+      alert(
+        err?.message ||
+          "Failed to save assignment. The request has not been assigned — please try again.",
+      );
+      return; // don't touch local state / close modal on failure
+    }
 
+    const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
     setRequests((prev) =>
       prev.map((item) =>
-        item.id === id
+        item.id === id && item.requestType === requestType
           ? {
               ...item,
               status: "ASSIGNED",
               assignedTo: staff.name,
               assignedDate: today,
               remarks,
-              transferHistory: [
-                ...(item.transferHistory || []),
-                {
-                  from: "Staff Approval Tapal",
-                  to: staff.name,
-                  date: today,
-                  remarks,
-                },
-              ],
             }
-          : item
-      )
+          : item,
+      ),
     );
 
     setAssignItem(null);
@@ -120,8 +216,8 @@ export default function StaffApprovalTapal() {
       prev.map((item) =>
         item.id === id
           ? { ...item, status: "COMPLETED", completedDate: today }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -218,11 +314,27 @@ export default function StaffApprovalTapal() {
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
-                <div style={{ fontSize: 42, marginBottom: 14 }}>{type.icon}</div>
-                <div style={{ fontSize: 20, fontWeight: 900, color: type.color, marginBottom: 6 }}>
+                <div style={{ fontSize: 42, marginBottom: 14 }}>
+                  {type.icon}
+                </div>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 900,
+                    color: type.color,
+                    marginBottom: 6,
+                  }}
+                >
                   {type.label}
                 </div>
-                <div style={{ fontSize: 14, color: "#4b5563", fontWeight: 600, lineHeight: 1.5 }}>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: "#4b5563",
+                    fontWeight: 600,
+                    lineHeight: 1.5,
+                  }}
+                >
                   {type.description}
                 </div>
                 <div
@@ -255,7 +367,10 @@ export default function StaffApprovalTapal() {
               </div>
 
               {activeTab === "completed" && (
-                <button className="btn btn-primary" onClick={() => setOverallReportOpen(true)}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setOverallReportOpen(true)}
+                >
                   Overall Report
                 </button>
               )}
@@ -281,7 +396,7 @@ export default function StaffApprovalTapal() {
                     .filter((r) =>
                       selected === "appointment"
                         ? r.requestType === "APPOINTMENT"
-                        : r.requestType === "EXTENSION"
+                        : r.requestType === "EXTENSION",
                     )
                     .map((row, index) => (
                       <tr key={row.id}>
@@ -294,33 +409,93 @@ export default function StaffApprovalTapal() {
                         <td>{row.date}</td>
                         <td>{row.status}</td>
                         <td>
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <button className="btn btn-outline btn-sm" onClick={() => setViewItem(row)}>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 8,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <button
+                              className="btn btn-outline btn-sm"
+                              onClick={async () => {
+                                try {
+                                  if (row.requestType === "EXTENSION") {
+                                    const r = await getFacultyExtensionById(
+                                      row.id,
+                                    );
+                                    setViewItem({
+                                      id: r.id,
+                                      requestType: "EXTENSION",
+                                      staffName: r.staff_name || "",
+                                      designation: r.designation || "",
+                                      projectTitle: r.project_title || "",
+                                      piName: r.pi_name || "",
+                                      orderNo: r.extension_order_no || "",
+                                      date: r.created_at
+                                        ? new Date(
+                                            r.created_at,
+                                          ).toLocaleDateString("en-GB")
+                                        : "",
+                                      status: r.status || "",
+                                      assignedTo: r.assigned_to || "",
+                                    });
+                                  } else {
+                                    const r = await getAppointmentById(row.id);
+                                    setViewItem({
+                                      id: r.id,
+                                      requestType: "APPOINTMENT",
+                                      staffName: r.staff_name || "",
+                                      designation: r.designation || "",
+                                      projectTitle: r.project_title || "",
+                                      piName: r.pi_name || "",
+                                      orderNo: r.appointment_order_no || "",
+                                      date: r.created_at
+                                        ? new Date(
+                                            r.created_at,
+                                          ).toLocaleDateString("en-GB")
+                                        : "",
+                                      status: r.status || "",
+                                      assignedTo: r.assigned_to || "",
+                                    });
+                                  }
+                                } catch (err) {
+                                  console.error(
+                                    "Failed to load staff request details",
+                                    err,
+                                  );
+                                  setViewItem(row);
+                                }
+                              }}
+                            >
                               View
                             </button>
 
                             {activeTab === "pending" && (
-                              <button className="btn btn-primary btn-sm" onClick={() => setAssignItem(row)}>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => setAssignItem(row)}
+                              >
                                 Assign
                               </button>
                             )}
 
                             {activeTab === "assigned" && (
                               <>
-                                <button className="btn btn-outline btn-sm" onClick={() => setTrackItem(row)}>
-                                  Track
-                                </button>
                                 <button
-                                  className="btn btn-success btn-sm"
-                                  onClick={() => handleComplete(row.id)}
+                                  className="btn btn-outline btn-sm"
+                                  onClick={() => setTrackItem(row)}
                                 >
-                                  Complete
+                                  Track
                                 </button>
                               </>
                             )}
 
                             {activeTab === "completed" && (
-                              <button className="btn btn-warning btn-sm" onClick={() => setReportItem(row)}>
+                              <button
+                                className="btn btn-warning btn-sm"
+                                onClick={() => setReportItem(row)}
+                              >
                                 Report
                               </button>
                             )}
@@ -335,19 +510,36 @@ export default function StaffApprovalTapal() {
         )}
 
         {assignItem && (
-          <AssignModalSA item={assignItem} onClose={() => setAssignItem(null)} onAssign={handleAssign} />
+          <AssignModalSA
+            item={assignItem}
+            onClose={() => setAssignItem(null)}
+            onAssign={handleAssign}
+          />
         )}
 
-        {trackItem && <TrackModalSA item={trackItem} onClose={() => setTrackItem(null)} />}
+        {trackItem && (
+          <TrackModalSA item={trackItem} onClose={() => setTrackItem(null)} />
+        )}
 
         {reportItem && (
-          <StaffIndividualReportModalSA item={reportItem} onClose={() => setReportItem(null)} />
+          <StaffIndividualReportModalSA
+            item={reportItem}
+            onClose={() => setReportItem(null)}
+          />
         )}
 
-        {viewItem && <StaffDetailModalSA item={viewItem} onClose={() => setViewItem(null)} />}
+        {viewItem && (
+          <StaffDetailModalSA
+            item={viewItem}
+            onClose={() => setViewItem(null)}
+          />
+        )}
 
         {overallReportOpen && (
-          <StaffOverallReportModalSA requests={requests} onClose={() => setOverallReportOpen(false)} />
+          <StaffOverallReportModalSA
+            requests={requests}
+            onClose={() => setOverallReportOpen(false)}
+          />
         )}
       </div>
     </div>

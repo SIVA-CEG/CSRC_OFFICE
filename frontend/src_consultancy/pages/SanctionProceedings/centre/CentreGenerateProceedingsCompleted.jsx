@@ -1,9 +1,9 @@
-// PATH: frontend/src_consultancy/pages/SanctionProceedings/CentreProceedingsCompleted.jsx
+// PATH: frontend/src_consultancy/pages/SanctionProceedings/Centre/CentreGenerateProceedingsCompleted.jsx
 
 import React, { useMemo, useState } from 'react';
-import FilterBar from '../../components/FilterBar';
-import SectionTrackTable from '../../components/SectionTrackTable';
-import { loadQueue, getCompletedRows } from '../../data/consultancyWorkflow';
+import FilterBar from '../../../components/FilterBar';
+import SectionTrackTable from '../../../components/SectionTrackTable';
+import { loadQueue, getCompletedRows } from '../../../data/consultancyWorkflow';
 
 const COLUMNS = [
   { key: 'id', label: 'ACF ID' },
@@ -12,11 +12,11 @@ const COLUMNS = [
   { key: 'tapalDate', label: 'Tapal Date' },
 ];
 
-const CentreProceedingsCompleted = () => {
+const CentreGenerateProceedingsCompleted = () => {
   const [queue] = useState(() => loadQueue());
   const [filters, setFilters] = useState({});
 
-  const allRows = getCompletedRows(queue, 'proceedings-centre');
+  const allRows = getCompletedRows(queue, 'proceedings-centre-generate');
   const rows = useMemo(() => allRows.filter((r) =>
     !filters.q || `${r.id} ${r.consultantName}`.toLowerCase().includes(filters.q.toLowerCase())
   ), [allRows, filters]);
@@ -25,7 +25,7 @@ const CentreProceedingsCompleted = () => {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Centre Proceedings — Completed</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Centre Generate Proceedings — Completed</h1>
       <p style={{ fontSize: 13.5, color: '#6b7280', margin: '0 0 18px' }}>Fully approved by the Director.</p>
       <FilterBar filters={filters} onChange={setFilters} />
       <SectionTrackTable columns={COLUMNS} rows={rows} onView={handleView} />
@@ -33,4 +33,4 @@ const CentreProceedingsCompleted = () => {
   );
 };
 
-export default CentreProceedingsCompleted;
+export default CentreGenerateProceedingsCompleted;

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from "react";
-import { piAdvanceToOfficeShape } from "./OfficeAdvanceSanctionsPage";
 
 // ── Seed Data ─────────────────────────────────────────────────────────────────
 const FRESH_SEED = [
@@ -9,7 +8,11 @@ const FRESH_SEED = [
     title: "Advanced Material Science",
     cost: "50,00,000",
     fundingAgency: "SERB",
-    pi: { name: "Dr. A. Kumar", department: "Mechanical Engineering", campus: "CEG Campus" },
+    pi: {
+      name: "Dr. A. Kumar",
+      department: "Mechanical Engineering",
+      campus: "CEG Campus",
+    },
     period: "01-01-2026 to 31-12-2028",
     installments: [{ installmentNo: "1st Installment", amount: "20,00,000" }],
     appliedOn: "01-06-2026",
@@ -26,7 +29,11 @@ const FRESH_SEED = [
     title: "AI in Healthcare",
     cost: "25,00,000",
     fundingAgency: "DST",
-    pi: { name: "Dr. B. Singh", department: "Information Technology", campus: "MIT Campus" },
+    pi: {
+      name: "Dr. B. Singh",
+      department: "Information Technology",
+      campus: "MIT Campus",
+    },
     period: "01-02-2026 to 31-01-2029",
     installments: [{ installmentNo: "1st Installment", amount: "10,00,000" }],
     appliedOn: "03-06-2026",
@@ -45,7 +52,11 @@ const RENEWAL_SEED = [
     refNo: "CRG/2026/001",
     title: "Advanced Material Science",
     fundingAgency: "SERB",
-    pi: { name: "Dr. A. Kumar", department: "Mechanical Engineering", campus: "CEG Campus" },
+    pi: {
+      name: "Dr. A. Kumar",
+      department: "Mechanical Engineering",
+      campus: "CEG Campus",
+    },
     currentInstallment: 2,
     installments: [
       {
@@ -86,7 +97,6 @@ const RENEWAL_SEED = [
 const REAP_SEED = [
   {
     id: "REAP-2026-001",
-    claimType: "without",
     submittedOn: "10-06-2026",
     agency: "SERB",
     projectName: "Development of Ti(C,N) based cermets",
@@ -97,12 +107,15 @@ const REAP_SEED = [
     headType: "recurring",
     reapRows: [
       { from: "Consumables", to: "Travel", amount: "20000" },
-      { from: "Contingency", to: "Manpower", amount: "15000" },
+      { from: "Contingency", to: "Manpower", amount: "15100" },
     ],
     heads: {
-      nonRecurring: [{ label: "Equipment 1", amount: 450000 }],
+      nonRecurring: [{ label: "Equipment 1", amount: 451000 }],
       recurring: [
-        { label: "Manpower", subItems: [{ name: "JRF Salary", amount: 370080 }] },
+        {
+          label: "Manpower",
+          subItems: [{ name: "JRF Salary", amount: 370080 }],
+        },
         { label: "Consumables", amount: 80000 },
         { label: "Travel", amount: 40000 },
         { label: "Contingency", amount: 59920 },
@@ -114,47 +127,11 @@ const REAP_SEED = [
     currentHolder: null,
     signatures: {},
   },
-
-  {
-    id: "REAP-2026-002",
-    claimType: "with",
-    submittedOn: "12-06-2026",
-    agency: "DST",
-    projectName: "Technology Enabling Centre",
-    pi: "Dr. R. Kumar",
-    department: "Technology Enabling Centre, ACT Campus",
-    procNo: "TEC/2026/045",
-    currentInstallmentNo: "IV Instalment",
-    status: "PENDING",
-    remarks: "",
-    transferHistory: [],
-    currentHolder: null,
-    signatures: {},
-  },
-
-  {
-    id: "REAP-2026-003",
-    claimType: "with",
-    submittedOn: "15-06-2026",
-    agency: "SERB",
-    projectName: "AI Enabled Smart Agriculture",
-    pi: "Dr. V. Rajesh",
-    department: "Agricultural Engineering, CEG Campus",
-    procNo: "SERB/2026/112",
-    currentInstallmentNo: "III Instalment",
-    status: "PENDING",
-    remarks: "",
-    transferHistory: [],
-    currentHolder: null,
-    signatures: {},
-  },
 ];
 
 const EXT_SEED = [
   {
     id: "EXT-2026-001",
-    extensionType: "without",
-
     submittedOn: "08-06-2026",
     projectId: "P001",
     projectTitle: "Development of Ti(C,N) based cermets",
@@ -175,173 +152,14 @@ const EXT_SEED = [
     currentHolder: null,
     signatures: {},
   },
-
-  {
-    id: "EXT-2026-002",
-    extensionType: "with",
-
-    submittedOn: "12-06-2026",
-    projectId: "P002",
-    projectTitle: "Technology Enabling Centre",
-    pi: "Dr. R. Kumar",
-    department: "Technology Enabling Centre, ACT Campus",
-    agency: "DST",
-    procNo: "TEC/2026/045",
-    sanctionedDate: "01-04-2023",
-    originalEndDate: "31-03-2026",
-    duration: "36 Months",
-    revisedEndDate: "31-03-2028",
-    extensionPeriod: "+24 Months",
-
-    grantAmount: "2200000",
-    grantAmountWords: "Twenty Two Lakh Only",
-    bankAccount: "123456789012",
-    ifscCode: "UBIN0567890",
-    bankBranch: "Anna University Branch",
-
-    hasLetter: true,
-    status: "PENDING",
-    remarks: "",
-    transferHistory: [],
-    currentHolder: null,
-    signatures: {},
-  },
-
-  {
-    id: "EXT-2026-003",
-    extensionType: "with",
-
-    submittedOn: "15-06-2026",
-    projectId: "P003",
-    projectTitle: "AI Enabled Smart Agriculture",
-    pi: "Dr. V. Rajesh",
-    department: "Agricultural Engineering, CEG Campus",
-    agency: "SERB",
-    procNo: "SERB/2026/112",
-    sanctionedDate: "01-01-2024",
-    originalEndDate: "31-12-2026",
-    duration: "36 Months",
-    revisedEndDate: "31-12-2027",
-    extensionPeriod: "+12 Months",
-
-    grantAmount: "1500000",
-    grantAmountWords: "Fifteen Lakh Only",
-    bankAccount: "987654321098",
-    ifscCode: "SBIN0006756",
-    bankBranch: "State Bank of India - Anna University",
-
-    hasLetter: true,
-    status: "PENDING",
-    remarks: "",
-    transferHistory: [],
-    currentHolder: null,
-    signatures: {},
-  },
 ];
-
-
-const ADV_SEED = [
-  {
-    id: "ADV-2026-001",
-    procNo: "ADV/CSRC/2026/001",
-    submittedOn: "10-06-2026",
-    projectTitle: "Development of Ti(C,N) based cermets modified by Si3N4, B4C and Cr3C2 for metal cutting application",
-    fileNo: "2433/CSRC-2/2020",
-    piName: "Dr. S. Balasivanandha Prabu",
-    piDesig: "Professor",
-    piDept: "Department of Mechanical Engineering",
-    piCampus: "CEG Campus",
-    agency: "SERB",
-    csrcProcNo: "2433/CSRC-2/2020",
-    csrcProcDate: "10-12-2020",
-    headKey: "consumables",
-    allotment: 400000,
-    incurred: 120000,
-    amount: "25000",
-    purpose: "Conduct of departmental seminar on advanced materials",
-    beneficiaryName: "Dr. S. Balasivanandha Prabu",
-    settlementDate: "30-09-2026",
-    letterSubject: "Request for release of advance towards seminar expenses",
-    letterRef: "",
-    letterBody: "I am currently organizing a departmental seminar under the above project for which an advance is required to meet the expenses.",
-    signedFile: null,
-    status: "PENDING",
-    remarks: "",
-    transferHistory: [],
-    currentHolder: null,
-    signatures: {},
-  },
-
-  {
-    id: "ADV-2026-002",
-    procNo: "ADV/CSRC/2026/002",
-    submittedOn: "12-06-2026",
-    projectTitle: "Technology Enabling Centre",
-    fileNo: "TEC/2026/045",
-    piName: "Dr. R. Kumar",
-    piDesig: "Coordinator",
-    piDept: "Technology Enabling Centre",
-    piCampus: "ACT Campus",
-    agency: "DST",
-    csrcProcNo: "TEC/2026/045",
-    csrcProcDate: "01-04-2023",
-    headKey: "travel",
-    allotment: 150000,
-    incurred: 22000,
-    amount: "18000",
-    purpose: "Field visit to collaborating industry partner site",
-    beneficiaryName: "Dr. R. Kumar",
-    settlementDate: "15-08-2026",
-    letterSubject: "Request for advance towards field visit travel expenses",
-    letterRef: "TEC/2026/045, dated 01-04-2023",
-    letterBody: "I am required to undertake a field visit under the above project to inspect equipment at the collaborating site.",
-    signedFile: null,
-    status: "PENDING",
-    remarks: "",
-    transferHistory: [],
-    currentHolder: null,
-    signatures: {},
-  },
-
-  {
-    id: "ADV-2026-003",
-    procNo: "ADV/CSRC/2026/003",
-    submittedOn: "15-06-2026",
-    projectTitle: "AI Enabled Smart Agriculture",
-    fileNo: "SERB/2026/112",
-    piName: "Dr. V. Rajesh",
-    piDesig: "Associate Professor",
-    piDept: "Agricultural Engineering",
-    piCampus: "CEG Campus",
-    agency: "SERB",
-    csrcProcNo: "SERB/2026/112",
-    csrcProcDate: "01-01-2024",
-    headKey: "manpower",
-    allotment: 1200000,
-    incurred: 350000,
-    amount: "40000",
-    purpose: "Stipend advance for project JRF pending PFMS release",
-    beneficiaryName: "JRF - Project Staff",
-    settlementDate: "",
-    letterSubject: "Request for advance towards manpower stipend disbursal",
-    letterRef: "",
-    letterBody: "The stipend for the project JRF is due and the PFMS release for this quarter is delayed. An advance is requested to avoid disruption.",
-    signedFile: null,
-    status: "PENDING",
-    remarks: "",
-    transferHistory: [],
-    currentHolder: null,
-    signatures: {},
-  },
-];
-
 
 // ── Staff List ─────────────────────────────────────────────────────────────────
 export const PROJECT_STAFF = [
   { id: 1, name: "Mr. R. Senthilkumar", role: "assistant" },
-  { id: 2, name: "Mrs. K. Priya",       role: "assistant" },
-  { id: 3, name: "Mr. T. Anbarasan",    role: "superintendent" },
-  { id: 4, name: "Mrs. S. Meenakshi",   role: "superintendent" },
+  { id: 2, name: "Mrs. K. Priya", role: "assistant" },
+  { id: 3, name: "Mr. T. Anbarasan", role: "superintendent" },
+  { id: 4, name: "Mrs. S. Meenakshi", role: "superintendent" },
   { id: 5, name: "Dr. S. Balasivanandha Prabu", role: "director" },
 ];
 
@@ -351,55 +169,38 @@ const ProjectContext = createContext(null);
 export function ProjectProvider({ children }) {
   // Active (not yet transferred) items visible to assistant
   const [renewalActive, setRenewalActive] = useState(RENEWAL_SEED);
-  const [reapActive,    setReapActive]    = useState(REAP_SEED);
-  const [extActive,     setExtActive]     = useState(EXT_SEED);
+  const [reapActive, setReapActive] = useState(REAP_SEED);
+  const [extActive, setExtActive] = useState(EXT_SEED);
 
   // Transferred items (visible in Transferred tabs, role-filtered)
-  const [freshTransferred,   setFreshTransferred]   = useState([]);
+  const [freshTransferred, setFreshTransferred] = useState([]);
   const [renewalTransferred, setRenewalTransferred] = useState([]);
-  const [reapTransferred,    setReapTransferred]    = useState([]);
-  const [extTransferred,     setExtTransferred]     = useState([]);
+  const [reapTransferred, setReapTransferred] = useState([]);
+  const [extTransferred, setExtTransferred] = useState([]);
 
   // Completed items
-  const [freshCompleted,   setFreshCompleted]   = useState([]);
+  const [freshCompleted, setFreshCompleted] = useState([]);
   const [renewalCompleted, setRenewalCompleted] = useState([]);
-  const [reapCompleted,    setReapCompleted]    = useState([]);
-  const [extCompleted,     setExtCompleted]     = useState([]);
-
-  // Advance Sanction — active list bridges in PI-submitted requests from
-  // localStorage (written by AdvanceSanctionsPage.jsx), same pattern as freshActive below.
-const [advActive, setAdvActive] = useState(() => {
-  try {
-    const raw = JSON.parse(localStorage.getItem("csrc_advance_sanction_requests") || "[]");
-    const submitted = raw.filter(r => r.status === "submitted").map(piAdvanceToOfficeShape);
-    if (submitted.length) return submitted;
-  } catch (_) {}
-  return ADV_SEED;   // ← was: return [];
-});
-  const [advTransferred, setAdvTransferred] = useState([]);
-  const [advCompleted,   setAdvCompleted]   = useState([]);
+  const [reapCompleted, setReapCompleted] = useState([]);
+  const [extCompleted, setExtCompleted] = useState([]);
 
   const [freshActive, setFreshActive] = useState(() => {
-  try {
-    const stored = localStorage.getItem('csrc_fresh_active');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.length > 0) return parsed;
-    }
-  } catch (_) {}
-  return FRESH_SEED;
-});
+    try {
+      const stored = sessionStorage.getItem("csrc_fresh_active");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return FRESH_SEED;
+  });
 
   // ── Generic helpers ────────────────────────────────────────────────────────
-  const makeTransferFns = (
-    setActive, setTransferred, setCompleted
-  ) => ({
+  const makeTransferFns = (setActive, setTransferred, setCompleted) => ({
     // Assistant/Superintendent transfers an item
     transfer: (item, toStaff) => {
-      const today = new Date()
-        .toLocaleDateString("en-GB")
-        .replace(/\//g, "-");
-      const fromRole = localStorage.getItem("userRole") || "assistant";
+      const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
+      const fromRole = sessionStorage.getItem("userRole") || "assistant";
       const updated = {
         ...item,
         status: "TRANSFERRED",
@@ -410,37 +211,33 @@ const [advActive, setAdvActive] = useState(() => {
         currentHolder: toStaff,
       };
       // Remove from active list
-      setActive(prev => prev.filter(i => i.id !== item.id));
+      setActive((prev) => prev.filter((i) => i.id !== item.id));
       // Add/update in transferred list
-      setTransferred(prev => {
-        const exists = prev.find(i => i.id === updated.id);
-        if (exists) return prev.map(i => i.id === updated.id ? updated : i);
+      setTransferred((prev) => {
+        const exists = prev.find((i) => i.id === updated.id);
+        if (exists) return prev.map((i) => (i.id === updated.id ? updated : i));
         return [...prev, updated];
       });
     },
 
     // Director completes/approves an item
     complete: (item) => {
-      const today = new Date()
-        .toLocaleDateString("en-GB")
-        .replace(/\//g, "-");
+      const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
       const completed = { ...item, status: "COMPLETED", completedOn: today };
-      setTransferred(prev => prev.filter(i => i.id !== item.id));
-      setCompleted(prev => [...prev, completed]);
+      setTransferred((prev) => prev.filter((i) => i.id !== item.id));
+      setCompleted((prev) => [...prev, completed]);
     },
 
     // Update an item in transferred (for edits by superintendent/director)
     updateTransferred: (updated) => {
-      setTransferred(prev =>
-        prev.map(i => i.id === updated.id ? updated : i)
+      setTransferred((prev) =>
+        prev.map((i) => (i.id === updated.id ? updated : i)),
       );
     },
 
     // Superintendent re-transfers to director
     forwardToDirector: (item, toStaff) => {
-      const today = new Date()
-        .toLocaleDateString("en-GB")
-        .replace(/\//g, "-");
+      const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
       const fromRole = "superintendent";
       const updated = {
         ...item,
@@ -450,50 +247,73 @@ const [advActive, setAdvActive] = useState(() => {
         ],
         currentHolder: toStaff,
       };
-      setTransferred(prev =>
-        prev.map(i => i.id === updated.id ? updated : i)
+      setTransferred((prev) =>
+        prev.map((i) => (i.id === updated.id ? updated : i)),
       );
     },
   });
 
-  const freshFns   = makeTransferFns(setFreshActive,   setFreshTransferred,   setFreshCompleted);
-  const renewalFns = makeTransferFns(setRenewalActive, setRenewalTransferred, setRenewalCompleted);
-  const reapFns    = makeTransferFns(setReapActive,    setReapTransferred,    setReapCompleted);
-  const extFns     = makeTransferFns(setExtActive,     setExtTransferred,     setExtCompleted);
-  const advFns     = makeTransferFns(setAdvActive,     setAdvTransferred,     setAdvCompleted);
+  const freshFns = makeTransferFns(
+    setFreshActive,
+    setFreshTransferred,
+    setFreshCompleted,
+  );
+  const renewalFns = makeTransferFns(
+    setRenewalActive,
+    setRenewalTransferred,
+    setRenewalCompleted,
+  );
+  const reapFns = makeTransferFns(
+    setReapActive,
+    setReapTransferred,
+    setReapCompleted,
+  );
+  const extFns = makeTransferFns(
+    setExtActive,
+    setExtTransferred,
+    setExtCompleted,
+  );
 
   return (
-    <ProjectContext.Provider value={{
-      // Fresh Sanction
-      freshActive,   setFreshActive,
-      freshTransferred,
-      freshCompleted,
-      ...Object.fromEntries(Object.entries(freshFns).map(([k,v]) => [`fresh_${k}`, v])),
+    <ProjectContext.Provider
+      value={{
+        // Fresh Sanction
+        freshActive,
+        setFreshActive,
+        freshTransferred,
+        freshCompleted,
+        ...Object.fromEntries(
+          Object.entries(freshFns).map(([k, v]) => [`fresh_${k}`, v]),
+        ),
 
-      // Renewal Sanction
-      renewalActive,   setRenewalActive,
-      renewalTransferred,
-      renewalCompleted,
-      ...Object.fromEntries(Object.entries(renewalFns).map(([k,v]) => [`renewal_${k}`, v])),
+        // Renewal Sanction
+        renewalActive,
+        setRenewalActive,
+        renewalTransferred,
+        renewalCompleted,
+        ...Object.fromEntries(
+          Object.entries(renewalFns).map(([k, v]) => [`renewal_${k}`, v]),
+        ),
 
-      // Reappropriation
-      reapActive,   setReapActive,
-      reapTransferred,
-      reapCompleted,
-      ...Object.fromEntries(Object.entries(reapFns).map(([k,v]) => [`reap_${k}`, v])),
+        // Reappropriation
+        reapActive,
+        setReapActive,
+        reapTransferred,
+        reapCompleted,
+        ...Object.fromEntries(
+          Object.entries(reapFns).map(([k, v]) => [`reap_${k}`, v]),
+        ),
 
-      // Extension
-      extActive,   setExtActive,
-      extTransferred,
-      extCompleted,
-      ...Object.fromEntries(Object.entries(extFns).map(([k,v]) => [`ext_${k}`, v])),
-
-      // Advance Sanction
-      advActive,   setAdvActive,
-      advTransferred,
-      advCompleted,
-      ...Object.fromEntries(Object.entries(advFns).map(([k,v]) => [`adv_${k}`, v])),
-    }}>
+        // Extension
+        extActive,
+        setExtActive,
+        extTransferred,
+        extCompleted,
+        ...Object.fromEntries(
+          Object.entries(extFns).map(([k, v]) => [`ext_${k}`, v]),
+        ),
+      }}
+    >
       {children}
     </ProjectContext.Provider>
   );
@@ -501,6 +321,7 @@ const [advActive, setAdvActive] = useState(() => {
 
 export function useProjectContext() {
   const ctx = useContext(ProjectContext);
-  if (!ctx) throw new Error("useProjectContext must be used within ProjectProvider");
+  if (!ctx)
+    throw new Error("useProjectContext must be used within ProjectProvider");
   return ctx;
 }

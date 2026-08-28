@@ -1,13 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TapalLogin.css';
+
+// Base URL for the backend API. Reads from frontend/.env (VITE_API_URL),
+// falling back to localhost:5000 if that file is missing.
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function TapalLogin() {
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError('');
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    navigate('/tapal/home');
+    if (!form.username || !form.password) {
+      setError('Please enter both username and password.');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Matches routes/adminAuth.js: POST /tapal-login, mounted at /api/admin
+      // in server.js. Only succeeds for admin_users rows with role='tapal'.
+      const res = await fetch(`${API_BASE_URL}/api/auth/tapal-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: form.username,
+          password: form.password,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Invalid username or password.');
+        setLoading(false);
+        return;
+      }
+
+      // Same sessionStorage pattern used by ProceedingsLogin, kept separate
+      // under its own keys so a tapal login and a proceedings login can
+      // coexist without overwriting each other in the same tab.
+      sessionStorage.setItem('tapalUserRole', data.user.role);
+      sessionStorage.setItem('tapalUserName', data.user.name);
+      sessionStorage.setItem('tapal_user', JSON.stringify(data.user));
+
+      navigate('/tapal/home');
+    } catch (err) {
+      setError('Server error. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,7 +92,14 @@ export default function TapalLogin() {
             <label>Username</label>
             <div className="tapal-input-wrap">
               <span className="tapal-input-icon">👤</span>
-              <input type="text" placeholder="Enter your username" required />
+              <input
+                type="text"
+                name="username"
+                placeholder="Enter your username"
+                value={form.username}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
@@ -53,12 +107,25 @@ export default function TapalLogin() {
             <label>Password</label>
             <div className="tapal-input-wrap">
               <span className="tapal-input-icon">🔒</span>
-              <input type="password" placeholder="Enter your password" required />
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
-          <button type="submit" className="tapal-login-btn">
-            Enter Portal →
+          {error && (
+            <div style={{ color: '#dc2626', fontSize: '13px', marginTop: '-6px' }}>
+              {error}
+            </div>
+          )}
+
+          <button type="submit" className="tapal-login-btn" disabled={loading}>
+            {loading ? 'Signing in…' : 'Enter Portal →'}
           </button>
         </form>
 

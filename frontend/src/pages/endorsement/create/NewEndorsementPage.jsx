@@ -5,172 +5,476 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useNavigate } from "react-router-dom";
 
-
-// ─── DATA ──────────────────────────────────────────────
-/*const CAMPUS_DATA = {
-  "CEG Campus": {
-    "Mechanical Engineering": ["Dr. A. Ramesh", "Dr. B. Kumar", "Dr. C. Sundaram"],
-    "Civil Engineering":      ["Dr. S. Kanmani", "Dr. R. Priya", "Dr. M. Nathan"],
-    "Chemistry":              ["Dr. S. Ananda Kumar", "Dr. T. Lakshmi", "Dr. V. Raj"],
-    "Physics":                ["Dr. D. Durgalakshmi", "Dr. K. Arjun", "Dr. L. Meena"],
-    "Computer Science":       ["Dr. P. Suresh", "Dr. Q. Devi", "Dr. R. Bala"],
-  },
-  "ACT Campus": {
-    "Chemical Engineering": ["Dr. E. Mani", "Dr. F. Selvi"],
-    "Biotechnology":        ["Dr. G. Rajan", "Dr. H. Geetha"],
-  },
-  "SAP Campus": {
-    "Architecture": ["Dr. I. Nair", "Dr. J. Mohan"],
-    "Planning":     ["Dr. K. Prem", "Dr. L. Anbu"],
-  },
-};*/
-
 // Comprehensive Master list gathered from official database entries
 const FUNDING_AGENCIES = [
-  "AICTE", "ANRF", "Anusandhan National Research Foundation", "ARG", 
-  "Aeronautics Research and Development Board", "Australia-India Cyber and Critical Technology Partnership Grant Round 4",
-  "Biotechnology Industry Research Assistance Council (BIRAC)", "Central Council for Research in Unani Medicine (CCRUM)", 
-  "Central Power Research Institute", "Centre for Medical Electronics", "Centre for Research, Anna University", 
-  "Chennai Metropolitan Water Supply and Sewerage Board", "Chief Minister Research Grant (CMRG)", "CHIP to Startups", 
-  "CMR", "CMRG", "Council of Scientific and Industrial Research", "CSIR", "CSIR-ASPIRE", "CVRDE", "DBT", 
-  "DBT Network Project", "DBT-BIRAC", "DBT, Government of India", "Defence Research and Development Organisation", 
-  "Defence R&D Organisation", "Department of Biotechnology", "Department of Environment, Government of Tamil Nadu", 
-  "Department of Science and Technology", "Department of Science and Technology (DST)", "Department of Science and Technology (TIDE)", 
-  "Department of Science and Technology (WTC)", "Department of Science and Technology, New Delhi", 
-  "Department of Science and Technology, New Delhi (STW)", "Department of Telecommunications - Bharat 5G Labs", 
-  "Department of Telecommunications - USOF", "Dhaksha Unmanned Systems Pvt. Ltd.", "DHR", 
-  "Directorate General of Civil Aviation (DGCA)", "Directorate of Futuristic Technology Management, DRDO", 
-  "Directorate of Technical Education (DoTE)", "DRDL", "DRDO", "DST", "DST DAAD", "DST VAIBHAV Fellowship", 
-  "DST-FICCI", "DST-JSPS Joint Research Project", "EDALL Systems", "FSSAI", "Good Food Institute", "Google", 
-  "Government of India Ministry of Electronics and Information Technology", "MeitY R&D II Group", 
-  "Higher Education Financing Agency", "HEFA", "ICMR", "ICSSR", "IGSTC", "IIT Kanpur", "IKS", "IKS BGS Samvahan Karyakram", 
-  "IKS Division of MoE, New Delhi", "INAE", "INCOIS", "Indian Council of Agricultural Research", 
-  "Indian Council of Medical Research", "Indian Council of Medical Research (ICMR)", 
-  "Indian Council of Social Science Research (ICSSR)", "Indian Institute of Science", "Indian Space Research Organisation", 
-  "Indo-German Science & Technology Centre", "Indo-German Science & Technology Centre (IGSTC)", 
-  "Indo-U.S. Science and Technology Forum", "INSA", "Integrated Child Development Services", 
-  "Inter-University Accelerator Centre", "ISRO", "IUAC", "L&T", "Madras Fertilizers Limited (MFL)", 
-  "Masaero Innovations", "MathWorks", "MeitY", "Microsoft Academic Partnership Grant 2024", 
-  "Ministry of AYUSH, Government of India", "Ministry of Communications", "Ministry of Earth Sciences", 
-  "Ministry of Education (MoE)", "Ministry of Electronics and Information Technology", 
-  "Ministry of Electronics and Information Technology (MeitY)", "Ministry of Environment, Forest and Climate Change", 
-  "Ministry of Food Processing Industries", "Ministry of Jal Shakti", "Ministry of Mines", "Ministry of New and Renewable Energy", 
-  "Ministry of New and Renewable Energy (MNRE)", "Ministry of Panchayati Raj", "Ministry of Textiles", 
-  "Ministry of Water Resources", "MNRE", "MoFPI", "NABARD", "National Bank for Agriculture and Rural Development", 
-  "National Human Rights Commission", "National Institute of Urban Affairs (NIUA)", "National Medicinal Plants Board", 
-  "National Remote Sensing Centre (NRSC)", "National Technical Textile Mission", "NCERT", "NIOS, Ministry of Education", 
-  "NLC India Limited", "Norwegian Council of Research", "Office of Principal Accountant General (Audit-II), Odisha", 
-  "Petroleum Conservation and Research Association (PCRA)", "Power Grid Centre of Excellence in Cyber Security", 
-  "Principal Accountant General (Audit-II), Odisha", "Science and Engineering Research Board", 
-  "Science and Engineering Research Board, New Delhi", "Science and Engineering Research Board, New Delhi (Power)", 
-  "SERB", "SERB Overseas Visiting Doctoral Fellowship", "SERB POWER", "SERB-SURE", "Space Application Centre, Ahmedabad", 
-  "SPARC", "SPARC-UKIERI", "SREE PVF", "State Development Policy Council (SDPC)", "SURE", "Suzuki Innovation Centre", 
-  "Tamil Nadu Forest Department", "Tamil Nadu Forest Department - State Forest Research Institute", 
-  "Tamil Nadu Innovation Initiatives", "Tamil Nadu Innovation Initiatives (TANII)", "Tamil Nadu State Council for Higher Education", 
-  "Tamil Nadu State Council for Science and Technology", "Tamil Nadu State Land Use Research Board (TNSLURB)", 
-  "Tamil Nadu State Wetland Authority", "Tamil Virtual Academy", "Tamil Nadu Agricultural University", 
-  "Tamil Nadu Power Distribution Corporation Limited", "TANGEDCO", "TANII", "TANII State Planning Commission", 
-  "Technology Development Projects (TDP)", "TEXMiN", "TIH Foundation for IoT & IoE", "TIH-IoT", "TNPCB", "TNRPF", 
-  "TNSCST", "TNSCT", "UGC", "UGC-DAE CSR", "UK Aid", "UKIERI", "United Nations Children's Fund (UNICEF)", 
-  "University of Bath", "Welkinrim Technologies Pvt. Ltd., Chennai", "Wellcome Trust-India Alliance", "WISER", 
-  "Xagrotor Tek Private Limited"
+  "AICTE",
+  "ANRF",
+  "Anusandhan National Research Foundation",
+  "ARG",
+  "Aeronautics Research and Development Board",
+  "Australia-India Cyber and Critical Technology Partnership Grant Round 4",
+  "Biotechnology Industry Research Assistance Council (BIRAC)",
+  "Central Council for Research in Unani Medicine (CCRUM)",
+  "Central Power Research Institute",
+  "Centre for Medical Electronics",
+  "Centre for Research, Anna University",
+  "Chennai Metropolitan Water Supply and Sewerage Board",
+  "Chief Minister Research Grant (CMRG)",
+  "CHIP to Startups",
+  "CMR",
+  "CMRG",
+  "Council of Scientific and Industrial Research",
+  "CSIR",
+  "CSIR-ASPIRE",
+  "CVRDE",
+  "DBT",
+  "DBT Network Project",
+  "DBT-BIRAC",
+  "DBT, Government of India",
+  "Defence Research and Development Organisation",
+  "Defence R&D Organisation",
+  "Department of Biotechnology",
+  "Department of Environment, Government of Tamil Nadu",
+  "Department of Science and Technology",
+  "Department of Science and Technology (DST)",
+  "Department of Science and Technology (TIDE)",
+  "Department of Science and Technology (WTC)",
+  "Department of Science and Technology, New Delhi",
+  "Department of Science and Technology, New Delhi (STW)",
+  "Department of Telecommunications - Bharat 5G Labs",
+  "Department of Telecommunications - USOF",
+  "Dhaksha Unmanned Systems Pvt. Ltd.",
+  "DHR",
+  "Directorate General of Civil Aviation (DGCA)",
+  "Directorate of Futuristic Technology Management, DRDO",
+  "Directorate of Technical Education (DoTE)",
+  "DRDL",
+  "DRDO",
+  "DST",
+  "DST DAAD",
+  "DST VAIBHAV Fellowship",
+  "DST-FICCI",
+  "DST-JSPS Joint Research Project",
+  "EDALL Systems",
+  "FSSAI",
+  "Good Food Institute",
+  "Google",
+  "Government of India Ministry of Electronics and Information Technology",
+  "MeitY R&D II Group",
+  "Higher Education Financing Agency",
+  "HEFA",
+  "ICMR",
+  "ICSSR",
+  "IGSTC",
+  "IIT Kanpur",
+  "IKS",
+  "IKS BGS Samvahan Karyakram",
+  "IKS Division of MoE, New Delhi",
+  "INAE",
+  "INCOIS",
+  "Indian Council of Agricultural Research",
+  "Indian Council of Medical Research",
+  "Indian Council of Medical Research (ICMR)",
+  "Indian Council of Social Science Research (ICSSR)",
+  "Indian Institute of Science",
+  "Indian Space Research Organisation",
+  "Indo-German Science & Technology Centre",
+  "Indo-German Science & Technology Centre (IGSTC)",
+  "Indo-U.S. Science and Technology Forum",
+  "INSA",
+  "Integrated Child Development Services",
+  "Inter-University Accelerator Centre",
+  "ISRO",
+  "IUAC",
+  "L&T",
+  "Madras Fertilizers Limited (MFL)",
+  "Masaero Innovations",
+  "MathWorks",
+  "MeitY",
+  "Microsoft Academic Partnership Grant 2024",
+  "Ministry of AYUSH, Government of India",
+  "Ministry of Communications",
+  "Ministry of Earth Sciences",
+  "Ministry of Education (MoE)",
+  "Ministry of Electronics and Information Technology",
+  "Ministry of Electronics and Information Technology (MeitY)",
+  "Ministry of Environment, Forest and Climate Change",
+  "Ministry of Food Processing Industries",
+  "Ministry of Jal Shakti",
+  "Ministry of Mines",
+  "Ministry of New and Renewable Energy",
+  "Ministry of New and Renewable Energy (MNRE)",
+  "Ministry of Panchayati Raj",
+  "Ministry of Textiles",
+  "Ministry of Water Resources",
+  "MNRE",
+  "MoFPI",
+  "NABARD",
+  "National Bank for Agriculture and Rural Development",
+  "National Human Rights Commission",
+  "National Institute of Urban Affairs (NIUA)",
+  "National Medicinal Plants Board",
+  "National Remote Sensing Centre (NRSC)",
+  "National Technical Textile Mission",
+  "NCERT",
+  "NIOS, Ministry of Education",
+  "NLC India Limited",
+  "Norwegian Council of Research",
+  "Office of Principal Accountant General (Audit-II), Odisha",
+  "Petroleum Conservation and Research Association (PCRA)",
+  "Power Grid Centre of Excellence in Cyber Security",
+  "Principal Accountant General (Audit-II), Odisha",
+  "Science and Engineering Research Board",
+  "Science and Engineering Research Board, New Delhi",
+  "Science and Engineering Research Board, New Delhi (Power)",
+  "SERB",
+  "SERB Overseas Visiting Doctoral Fellowship",
+  "SERB POWER",
+  "SERB-SURE",
+  "Space Application Centre, Ahmedabad",
+  "SPARC",
+  "SPARC-UKIERI",
+  "SREE PVF",
+  "State Development Policy Council (SDPC)",
+  "SURE",
+  "Suzuki Innovation Centre",
+  "Tamil Nadu Forest Department",
+  "Tamil Nadu Forest Department - State Forest Research Institute",
+  "Tamil Nadu Innovation Initiatives",
+  "Tamil Nadu Innovation Initiatives (TANII)",
+  "Tamil Nadu State Council for Higher Education",
+  "Tamil Nadu State Council for Science and Technology",
+  "Tamil Nadu State Land Use Research Board (TNSLURB)",
+  "Tamil Nadu State Wetland Authority",
+  "Tamil Virtual Academy",
+  "Tamil Nadu Agricultural University",
+  "Tamil Nadu Power Distribution Corporation Limited",
+  "TANGEDCO",
+  "TANII",
+  "TANII State Planning Commission",
+  "Technology Development Projects (TDP)",
+  "TEXMiN",
+  "TIH Foundation for IoT & IoE",
+  "TIH-IoT",
+  "TNPCB",
+  "TNRPF",
+  "TNSCST",
+  "TNSCT",
+  "UGC",
+  "UGC-DAE CSR",
+  "UK Aid",
+  "UKIERI",
+  "United Nations Children's Fund (UNICEF)",
+  "University of Bath",
+  "Welkinrim Technologies Pvt. Ltd., Chennai",
+  "Wellcome Trust-India Alliance",
+  "WISER",
+  "Xagrotor Tek Private Limited",
 ].sort();
 
 // Comprehensive Master list gathered from official layout printouts
 const PROJECT_SCHEMES = [
-  "2+2 proposal", "2D hub", "6G Research Proposal", "A Special Call for Research Grants for Women Scientists", 
-  "Academia Industry Collaborative proposal", "Academic/R&D organization", "Advanced Hydrogen and Fuel Cell Programme", 
-  "Advanced research Grant", "AERODYNAMICS", "Aeronautics Research & Development Board", 
-  "Aeronautics Research & Development Board - Extramural Research Grant", "AI", "ALML Applications in Earth Sciences", 
-  "AMT", "Announcement of Opportunity (AO) for utilizing Chandrayaan-2 Orbiter Payloads data for Scientific Analysis", 
-  "ANRF MISSION AI for Science and Engineering (AI-SE)", "ARG* AERONAUTCIS RESEARCH & DEVELOPMENT BOARD", 
-  "ASEAN-INDIAN Collaborative R&D Scheme", "ATAL", "AU-CFR-SEED RESEARCH GRANT", 
-  "Australia-India Cyber and Critical Technology Partnership Grant Round 4", "AYURGYAN", 
-  "Biomedical Device and Technology Development", "C2S", "C3iHub Call for Cohort III R&D Proposals", 
-  "Call for Ignition Grants", "Call for Investigator-Initiated Research Proposals for \"ICMR SMALL Extramural Grants\" (\"ICMR ANVESHAN Extramural Grants\") - 2026", 
-  "Call for Mission Mode Project Proposals", "Call for project proposals for Innovative R&D in emerging areas of Information Technology (IT)", 
-  "Capacity Building in Geospatial Science and Technology", "CAR", "Central Sector Scheme AYURSWASTHYA YAJONA", 
-  "Central Sector Scheme On Conservation, Development and Sustainable Management of Medicinal Plants", 
-  "Chief Minister Research Grant (CMRG)", "Chief Minister Research Grant {CMRG}", "Chips to Startup", 
-  "Climate Change Programme", "Climate compatible growth-FRF", "climate resilient agriculture", "CMRG", "CoE", 
-  "CoE Cyber Space", "Cognitive Science Research Initiative", "Collaborative Research Scheme", "Colloborative Research Proposal", 
-  "Convergence Centres of Excellence", "CORE RESEARCH GRANT", "CORE RESEARCH GRANT {CRG}", "Covid 19", "CRG", "CSR", 
-  "Cyber Security Research and Development Group", "DBT Amrit scheme", "DBT BIRAC Joint Call for Proposals on Bio-AI for establishing मूल अंकुर hubs under BioE3 Policy for Biomanufacturing", 
-  "DBT BIRAC Joint Call for Proposals on Functional Foods for Fostering High Performance Biomanufacturing under BioE3 Policy", 
-  "DBT-BIRAC Joint Call for Proposals on ‘Precision Biotherapeutics-Cell and Gene Therapy’ for Fostering High Performance Biomanufacturing under BioE3 Policy", 
-  "Deep Ocean Mission", "Device Development Programme", "Directed Research", "DST SERB SURE Scheme", "DST SYST", 
-  "DST-RSF Joint Call", "DST-SURE", "ECR", "ECRA", "EMEQ", "Empowerment and Equity Opportunities for Excellence in Science", 
-  "Empowerment and Equity Opportunities for Excellence in science(EMEQ)", "EMPOWERMENT AND EQUITY OPPORTUNITIES FOR EXCELLENCE IN SCIENCE", 
-  "Engineering Science", "ENHANCEMENT OF THE GRAM PANCHAYAT SPATIAL DEVELOPMENT PLANS", "Expression of Interest Scheme 2025-2026", 
-  "Extramural Research Grant", "Extramural Research", "FIRE", "Geospatial Technology and Solutions", "google impact challenge", 
-  "Grand Challenge Scheme", "grand challenges India", "Grant Assistance from R&D Fund of Nabard", "Grant-in-aid Scheme / Grants in Aid Scheme", 
-  "HEFA", "HRD", "HRDG", "ICMR-Call for Application: Small Extramural Grants – 2025", 
-  "ICMR-DHR INTERNATIONAL FELLOWSHIP PROGRAMME FOR INDIAN BIOMEDICAL SCIENTISTS ((SHORT TERM)", "ICSSR Research Grant", 
-  "IKS BGS SAMVAHAN KARYAKRAM", "IKS IKS BGS SAMVAHAN KARYAKRAM", "Impact of climate change on the probability and intensity of extreme weather events over Indian region", 
-  "Inclusivity Research Grant", "India - Phillipines Joint Research Project", "India Sri Lanka Joint Call for Research Proposal", 
-  "India-Austria Joint Project", "INDIA-EU COOPERATION ON RESEARCH & INNOVATION", "India-Japan Cooperative Science Programme", 
-  "Indian Knowledge Systems Scheme", "Indo - Norwegian Cooperation Programme", "Indo- Sri Lanka Joint Research Programme", 
-  "Indo-Canadian DBT-IC IMPACTS", "Indo-French", "Indo-German WISER", "INDO-RUSSIA TECHNOLOGY DEVELOPMENT", "INDO-SWEDISH", 
-  "INDO-TAIWAN S&T CO-OPERATION PROGRAMME", "Information Security Education and Awareness (ISEA) Project Phase-III", 
-  "Initiated Research Proposal for Small Extramural Grants", "Innovation Fund Denmark", "Innovation Scheme", 
-  "Integrated Technology Interventions for Sustainable Environment", "Intermediate Extramural Grant", "International Travel Support", 
-  "Intramural Research Scheme", "Investigator-Initiated Research Proposals for Intermediate Extramural Grants", "IRPHA", 
-  "ISRO-VSSC Grant Scheme", "IUAC", "Livestock and Animal Biotechnology& Aquaculture Genome Editing-based Therapeutics for Targeted Therapy of Human Diseases", 
-  "Human Genetic Diseases", "Major Research Project", "Major Research Project 2025", "Materials for Energy Storage {MES}", 
-  "MATLAB & Simulink", "MATRICS", "Mehar Baba Challenge II", "Mehar Baba Competition", "Mid Career Award", "Mineral Exploration", 
-  "Minor Research Project", "Mission for Advancement in High-impact Areas (MAHA)", "mnre", "Multi-Institutional Proposal", 
-  "National Centre for Coastal Research", "National Council of Science and Technology Communication", "National Geospatial Programme", 
-  "National Green Hydrogen Mission (NGHM)", "National Innovations in Climate Resilient Agriculture", "National QUantum Mission", 
-  "National Science and Technology Management Information System (NSTMIS)", "National Supercomputing Mission", "NavIC-GAGAN", 
-  "nest", "NI", "nices", "Nil", "nill", "NISAR Utilization Programme", "NPDF", "NPNST", "NRSC, Hyderabad Project", "nsf", 
-  "Optimal Water Use in Industrial Sectors", "Other", "Overseas Visiting Doctoral Fellowship", "PAMC_ocean sciences of REACHOUT scheme", 
-  "POSHAN Abhiyaan", "POWER", "POWER - Research Grant", "Power Fellowship", "Prime Minister Early Career Research Grant", 
-  "Project Related Grant", "Promoting Academic Research Conversion to Enterprise (PACE)", "Promotion of research attitude in young and aspiring students", 
-  "Punyashloka Devi Ahilyabai Holkar Special Call for Women-Led Research on Women-Led Development", 
-  "R&D Component of Science and Technology Programme of Ministry of Mines", "R&D Programme of MoWR", "R&D Scheme for Green Hydrogen", 
-  "Ramanujan Fellowship", "Remort Pilot Training Organization ( RPTO )", "Renewable Energy Research and Techonogy Development (RE-RTD)", 
-  "RENEWABLE ENERGY RESEARCH AND TECHNOLOGY DEVELOPMENT PROGRAMME", "repsond basket 2024 / RESPOND BASKET 2024 / respond basket 2024", 
-  "Research & Development Project Proposals", "Research and Development", "Research Excellence Scheme", "Research Grant for in-service faculty members", 
-  "Research Grant in Biomedical Research", "Research Project", "Research Project Proposals on Family and Family Systems in India (2025-26)", 
-  "RESEARCH PROMOTION SCHEME", "Research Proposal", "research scheme on power / RESEARCH SCHEME ON POWER (RSOP)", 
-  "Research Scientist Scheme", "RESPOND", "RESPOND BASKET", "RESPOND BASKET 2021", "respond basket 2023 / RESPONSE BASKET 2023", 
-  "Respond Research Grant", "RFRS", "RPS", "RSQR", "SAAR", "Scheme for Development of Particularly Vulnerable Tribal Groups", 
-  "Scheme for Transformational and Advanced Research in Sciences (STARS)", "SCHEME SUPPORTS SUSTAINABLE AGRICULTURE", 
-  "science and technology", "Science and Technology for Women", "Science and Technology of Yoga and Meditation (SATYAM)", 
-  "Science and Technology Project Scheme", "Science Technology and Innovation (STI) Hubs for Development of Scheduled Caste (SC) and Scheduled Tribe (ST) Communities", 
-  "Science Technology Innovation Hub for SC & ST", "SCSP", "SEED", "SEED-TIDE", "Seminar/Symposia", "SERB POWER Research Grant", 
-  "serb sure", "SERB-INAE Online and Digital Gaming Research Initiative", "SERB-POWER Grant Scheme", "SERB-POWER Research grant", 
-  "SERB-SURE", "SERB-SURE SCHEME", "Short Term Call on COVID 19", "Short Term Research Grant", "SHRI", "Social Science Discipline", 
-  "SPARC", "Special call for Collaborative Research Projects on Vision Viksit Bharat@2047", "Special Call for Proposals", 
-  "Sponsored Research & Development Scheme", "Sponsored Research and Development", "Sponsored Research Scheme", "SRG", 
-  "Sree Ramakrishna Paramahamsa Research Grant for Agriculture Research 2022", "Sree Ramakrishna Paramahamsa Research Grant for Translational Biomedical Research 2021", 
-  "SRF", "STAR", "State Energy Efficiency Research and Outreach Program Scheme", "State Innovation Fund", "State Planing Commission", 
-  "State University Research Excellence {SURE}", "STI Hub for SC Community", "Student Project Scheme", "Student Project Sheme", 
-  "SUPRA", "Suzuki Next Bharat Fellowship Program", "Swarnajayanti Fellowship Scheme", 
-  "Symposia Grant Scheme for Organising Scientific Events (Symposia /Seminars /Conferences /workshops, etc. within India", 
-  "TARE", "Tamil Nadu Innovation Initiatives", "Tamil Nadu Innovation Initiatives (TANII) 2024-25 first round", 
-  "Tamil Nadu Innovation Initiatives (TANII) 2024-2025 second round", "TANII", "TARE", "Tata Innovation Fellowship Program", 
-  "TDF", "TDP", "Teachers Associateship for Research Excellence (TARE)", "Team Science Grant", "Technology Development Programme", 
-  "Telecom Technology Development Fund - TTDF", "TIH - IoT Technology Development Program (7)-2024 Marine IoT", 
-  "TIH-IoT CHANAKYA Faculty & Chair Professor Fellowship Program 2023 (1)", "TNSCT", 
-  "TNSDA State energy efficiency research & Outreach programme", "Transforming Technology Solution through Advanced Materials and Critical Minerals", 
-  "UFUP", "UKIERI - 4", "URSC", "Utilization of In house and DAE Mega Science Facilities", "VAIBHAV Fellowship", 
-  "Vibrant Advocacy for Advancement and Nurturing of Indian Languages (VAANI)-2025-26", "Vision Viksit Bharat @2047 Project", 
-  "Visiting Scientist Fellowship", "Waste Management Technology", "Water Technology Cell", "WISE KIRAN", 
-  "WISE KIRAN Women in Space and Allied Sciences Leadership Program (WiSLP)", "WISE SCPE", "WISE-SCOPE", "Women Scientist Scheme - A", 
-  "Women Technology Park", "Women's Instinct for Developing and Ushering in Scientific Heights & Innovation", "WTC", "WTI", 
-  "Year of Awareness on Science and Health (YASH)", "Young Scientist Scheme", 
-  "{ Critical and Emerging Technology: Quantum Technologies and Artificial Intelligence for Transforming Lives}"
+  "2+2 proposal",
+  "2D hub",
+  "6G Research Proposal",
+  "A Special Call for Research Grants for Women Scientists",
+  "Academia Industry Collaborative proposal",
+  "Academic/R&D organization",
+  "Advanced Hydrogen and Fuel Cell Programme",
+  "Advanced research Grant",
+  "AERODYNAMICS",
+  "Aeronautics Research & Development Board",
+  "Aeronautics Research & Development Board - Extramural Research Grant",
+  "AI",
+  "ALML Applications in Earth Sciences",
+  "AMT",
+  "Announcement of Opportunity (AO) for utilizing Chandrayaan-2 Orbiter Payloads data for Scientific Analysis",
+  "ANRF MISSION AI for Science and Engineering (AI-SE)",
+  "ARG* AERONAUTCIS RESEARCH & DEVELOPMENT BOARD",
+  "ASEAN-INDIAN Collaborative R&D Scheme",
+  "ATAL",
+  "AU-CFR-SEED RESEARCH GRANT",
+  "Australia-India Cyber and Critical Technology Partnership Grant Round 4",
+  "AYURGYAN",
+  "Biomedical Device and Technology Development",
+  "C2S",
+  "C3iHub Call for Cohort III R&D Proposals",
+  "Call for Ignition Grants",
+  'Call for Investigator-Initiated Research Proposals for "ICMR SMALL Extramural Grants" ("ICMR ANVESHAN Extramural Grants") - 2026',
+  "Call for Mission Mode Project Proposals",
+  "Call for project proposals for Innovative R&D in emerging areas of Information Technology (IT)",
+  "Capacity Building in Geospatial Science and Technology",
+  "CAR",
+  "Central Sector Scheme AYURSWASTHYA YAJONA",
+  "Central Sector Scheme On Conservation, Development and Sustainable Management of Medicinal Plants",
+  "Chief Minister Research Grant (CMRG)",
+  "Chief Minister Research Grant {CMRG}",
+  "Chips to Startup",
+  "Climate Change Programme",
+  "Climate compatible growth-FRF",
+  "climate resilient agriculture",
+  "CMRG",
+  "CoE",
+  "CoE Cyber Space",
+  "Cognitive Science Research Initiative",
+  "Collaborative Research Scheme",
+  "Colloborative Research Proposal",
+  "Convergence Centres of Excellence",
+  "CORE RESEARCH GRANT",
+  "CORE RESEARCH GRANT {CRG}",
+  "Covid 19",
+  "CRG",
+  "CSR",
+  "Cyber Security Research and Development Group",
+  "DBT Amrit scheme",
+  "DBT BIRAC Joint Call for Proposals on Bio-AI for establishing मूल अंकुर hubs under BioE3 Policy for Biomanufacturing",
+  "DBT BIRAC Joint Call for Proposals on Functional Foods for Fostering High Performance Biomanufacturing under BioE3 Policy",
+  "DBT-BIRAC Joint Call for Proposals on 'Precision Biotherapeutics-Cell and Gene Therapy' for Fostering High Performance Biomanufacturing under BioE3 Policy",
+  "Deep Ocean Mission",
+  "Device Development Programme",
+  "Directed Research",
+  "DST SERB SURE Scheme",
+  "DST SYST",
+  "DST-RSF Joint Call",
+  "DST-SURE",
+  "ECR",
+  "ECRA",
+  "EMEQ",
+  "Empowerment and Equity Opportunities for Excellence in Science",
+  "Empowerment and Equity Opportunities for Excellence in science(EMEQ)",
+  "EMPOWERMENT AND EQUITY OPPORTUNITIES FOR EXCELLENCE IN SCIENCE",
+  "Engineering Science",
+  "ENHANCEMENT OF THE GRAM PANCHAYAT SPATIAL DEVELOPMENT PLANS",
+  "Expression of Interest Scheme 2025-2026",
+  "Extramural Research Grant",
+  "Extramural Research",
+  "FIRE",
+  "Geospatial Technology and Solutions",
+  "google impact challenge",
+  "Grand Challenge Scheme",
+  "grand challenges India",
+  "Grant Assistance from R&D Fund of Nabard",
+  "Grant-in-aid Scheme / Grants in Aid Scheme",
+  "HEFA",
+  "HRD",
+  "HRDG",
+  "ICMR-Call for Application: Small Extramural Grants – 2025",
+  "ICMR-DHR INTERNATIONAL FELLOWSHIP PROGRAMME FOR INDIAN BIOMEDICAL SCIENTISTS ((SHORT TERM)",
+  "ICSSR Research Grant",
+  "IKS BGS SAMVAHAN KARYAKRAM",
+  "IKS IKS BGS SAMVAHAN KARYAKRAM",
+  "Impact of climate change on the probability and intensity of extreme weather events over Indian region",
+  "Inclusivity Research Grant",
+  "India - Phillipines Joint Research Project",
+  "India Sri Lanka Joint Call for Research Proposal",
+  "India-Austria Joint Project",
+  "INDIA-EU COOPERATION ON RESEARCH & INNOVATION",
+  "India-Japan Cooperative Science Programme",
+  "Indian Knowledge Systems Scheme",
+  "Indo - Norwegian Cooperation Programme",
+  "Indo- Sri Lanka Joint Research Programme",
+  "Indo-Canadian DBT-IC IMPACTS",
+  "Indo-French",
+  "Indo-German WISER",
+  "INDO-RUSSIA TECHNOLOGY DEVELOPMENT",
+  "INDO-SWEDISH",
+  "INDO-TAIWAN S&T CO-OPERATION PROGRAMME",
+  "Information Security Education and Awareness (ISEA) Project Phase-III",
+  "Initiated Research Proposal for Small Extramural Grants",
+  "Innovation Fund Denmark",
+  "Innovation Scheme",
+  "Integrated Technology Interventions for Sustainable Environment",
+  "Intermediate Extramural Grant",
+  "International Travel Support",
+  "Intramural Research Scheme",
+  "Investigator-Initiated Research Proposals for Intermediate Extramural Grants",
+  "IRPHA",
+  "ISRO-VSSC Grant Scheme",
+  "IUAC",
+  "Livestock and Animal Biotechnology& Aquaculture Genome Editing-based Therapeutics for Targeted Therapy of Human Diseases",
+  "Human Genetic Diseases",
+  "Major Research Project",
+  "Major Research Project 2025",
+  "Materials for Energy Storage {MES}",
+  "MATLAB & Simulink",
+  "MATRICS",
+  "Mehar Baba Challenge II",
+  "Mehar Baba Competition",
+  "Mid Career Award",
+  "Mineral Exploration",
+  "Minor Research Project",
+  "Mission for Advancement in High-impact Areas (MAHA)",
+  "mnre",
+  "Multi-Institutional Proposal",
+  "National Centre for Coastal Research",
+  "National Council of Science and Technology Communication",
+  "National Geospatial Programme",
+  "National Green Hydrogen Mission (NGHM)",
+  "National Innovations in Climate Resilient Agriculture",
+  "National QUantum Mission",
+  "National Science and Technology Management Information System (NSTMIS)",
+  "National Supercomputing Mission",
+  "NavIC-GAGAN",
+  "nest",
+  "NI",
+  "nices",
+  "Nil",
+  "nill",
+  "NISAR Utilization Programme",
+  "NPDF",
+  "NPNST",
+  "NRSC, Hyderabad Project",
+  "nsf",
+  "Optimal Water Use in Industrial Sectors",
+  "Other",
+  "Overseas Visiting Doctoral Fellowship",
+  "PAMC_ocean sciences of REACHOUT scheme",
+  "POSHAN Abhiyaan",
+  "POWER",
+  "POWER - Research Grant",
+  "Power Fellowship",
+  "Prime Minister Early Career Research Grant",
+  "Project Related Grant",
+  "Promoting Academic Research Conversion to Enterprise (PACE)",
+  "Promotion of research attitude in young and aspiring students",
+  "Punyashloka Devi Ahilyabai Holkar Special Call for Women-Led Research on Women-Led Development",
+  "R&D Component of Science and Technology Programme of Ministry of Mines",
+  "R&D Programme of MoWR",
+  "R&D Scheme for Green Hydrogen",
+  "Ramanujan Fellowship",
+  "Remort Pilot Training Organization ( RPTO )",
+  "Renewable Energy Research and Techonogy Development (RE-RTD)",
+  "RENEWABLE ENERGY RESEARCH AND TECHNOLOGY DEVELOPMENT PROGRAMME",
+  "repsond basket 2024 / RESPOND BASKET 2024 / respond basket 2024",
+  "Research & Development Project Proposals",
+  "Research and Development",
+  "Research Excellence Scheme",
+  "Research Grant for in-service faculty members",
+  "Research Grant in Biomedical Research",
+  "Research Project",
+  "Research Project Proposals on Family and Family Systems in India (2025-26)",
+  "RESEARCH PROMOTION SCHEME",
+  "Research Proposal",
+  "research scheme on power / RESEARCH SCHEME ON POWER (RSOP)",
+  "Research Scientist Scheme",
+  "RESPOND",
+  "RESPOND BASKET",
+  "RESPOND BASKET 2021",
+  "respond basket 2023 / RESPONSE BASKET 2023",
+  "Respond Research Grant",
+  "RFRS",
+  "RPS",
+  "RSQR",
+  "SAAR",
+  "Scheme for Development of Particularly Vulnerable Tribal Groups",
+  "Scheme for Transformational and Advanced Research in Sciences (STARS)",
+  "SCHEME SUPPORTS SUSTAINABLE AGRICULTURE",
+  "science and technology",
+  "Science and Technology for Women",
+  "Science and Technology of Yoga and Meditation (SATYAM)",
+  "Science and Technology Project Scheme",
+  "Science Technology and Innovation (STI) Hubs for Development of Scheduled Caste (SC) and Scheduled Tribe (ST) Communities",
+  "Science Technology Innovation Hub for SC & ST",
+  "SCSP",
+  "SEED",
+  "SEED-TIDE",
+  "Seminar/Symposia",
+  "SERB POWER Research Grant",
+  "serb sure",
+  "SERB-INAE Online and Digital Gaming Research Initiative",
+  "SERB-POWER Grant Scheme",
+  "SERB-POWER Research grant",
+  "SERB-SURE",
+  "SERB-SURE SCHEME",
+  "Short Term Call on COVID 19",
+  "Short Term Research Grant",
+  "SHRI",
+  "Social Science Discipline",
+  "SPARC",
+  "Special call for Collaborative Research Projects on Vision Viksit Bharat@2047",
+  "Special Call for Proposals",
+  "Sponsored Research & Development Scheme",
+  "Sponsored Research and Development",
+  "Sponsored Research Scheme",
+  "SRG",
+  "Sree Ramakrishna Paramahamsa Research Grant for Agriculture Research 2022",
+  "Sree Ramakrishna Paramahamsa Research Grant for Translational Biomedical Research 2021",
+  "SRF",
+  "STAR",
+  "State Energy Efficiency Research and Outreach Program Scheme",
+  "State Innovation Fund",
+  "State Planing Commission",
+  "State University Research Excellence {SURE}",
+  "STI Hub for SC Community",
+  "Student Project Scheme",
+  "Student Project Sheme",
+  "SUPRA",
+  "Suzuki Next Bharat Fellowship Program",
+  "Swarnajayanti Fellowship Scheme",
+  "Symposia Grant Scheme for Organising Scientific Events (Symposia /Seminars /Conferences /workshops, etc. within India",
+  "TARE",
+  "Tamil Nadu Innovation Initiatives",
+  "Tamil Nadu Innovation Initiatives (TANII) 2024-25 first round",
+  "Tamil Nadu Innovation Initiatives (TANII) 2024-2025 second round",
+  "TANII",
+  "TARE",
+  "Tata Innovation Fellowship Program",
+  "TDF",
+  "TDP",
+  "Teachers Associateship for Research Excellence (TARE)",
+  "Team Science Grant",
+  "Technology Development Programme",
+  "Telecom Technology Development Fund - TTDF",
+  "TIH - IoT Technology Development Program (7)-2024 Marine IoT",
+  "TIH-IoT CHANAKYA Faculty & Chair Professor Fellowship Program 2023 (1)",
+  "TNSCT",
+  "TNSDA State energy efficiency research & Outreach programme",
+  "Transforming Technology Solution through Advanced Materials and Critical Minerals",
+  "UFUP",
+  "UKIERI - 4",
+  "URSC",
+  "Utilization of In house and DAE Mega Science Facilities",
+  "VAIBHAV Fellowship",
+  "Vibrant Advocacy for Advancement and Nurturing of Indian Languages (VAANI)-2025-26",
+  "Vision Viksit Bharat @2047 Project",
+  "Visiting Scientist Fellowship",
+  "Waste Management Technology",
+  "Water Technology Cell",
+  "WISE KIRAN",
+  "WISE KIRAN Women in Space and Allied Sciences Leadership Program (WiSLP)",
+  "WISE SCPE",
+  "WISE-SCOPE",
+  "Women Scientist Scheme - A",
+  "Women Technology Park",
+  "Women's Instinct for Developing and Ushering in Scientific Heights & Innovation",
+  "WTC",
+  "WTI",
+  "Year of Awareness on Science and Health (YASH)",
+  "Young Scientist Scheme",
+  "{ Critical and Emerging Technology: Quantum Technologies and Artificial Intelligence for Transforming Lives}",
 ].sort();
 
 const ENDORSEMENT_FORMATS = ["CSRC", "DST", "CMRG", "ANRF", "New Format"];
 
 const CO_PI_ROLES = [
-  "COPI", "PI", "MENT", "NOMI", "INDU", "STUD", "GUDE",
-  "SUB-CON", "OI", "PART", "PC", "KI", "PRO-ADV", "RES-SCH", "DST Inspir", "tst",
+  "COPI",
+  "PI",
+  "MENT",
+  "NOMI",
+  "INDU",
+  "STUD",
+  "GUDE",
+  "SUB-CON",
+  "OI",
+  "PART",
+  "PC",
+  "KI",
+  "PRO-ADV",
+  "RES-SCH",
+  "DST Inspir",
+  "tst",
 ];
 
-//const initialCoPi   = { campus: "", department: "", faculty: "", dob: "", service: "", superannuation: "", role: "COPI" };
 const initialExtInv = { name: "", designation: "", institute: "" };
 
 function formatCurrency(val) {
@@ -178,9 +482,10 @@ function formatCurrency(val) {
   return n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
 
-export default function NewEndorsementPage({onNavigate}) {
-    const navigate = useNavigate();
-  // ── Form state ──────────────────────────────────────────────────────────────
+export default function NewEndorsementPage({ onNavigate }) {
+  const navigate = useNavigate();
+
+  // ── Form state ──────────────────────────────────────────────────────────
   const [form, setForm] = useState({
     fundingAgency: "",
     projectScheme: "",
@@ -197,67 +502,26 @@ export default function NewEndorsementPage({onNavigate}) {
     endorsementRequired: "yes",
     endorsementFormat: null,
     piName: "",
-piDesignation: "",
-piDept: "",
-piCampus: "",
-piDob: "",
-piService: "",
-piSuperannuation: "",
-piRole: "PI",
+    piDesignation: "",
+    piDept: "",
+    piCampus: "",
+    piDob: "",
+    piService: "",
+    piSuperannuation: "",
+    piRole: "PI",
   });
 
   const [coPIs, setCoPIs] = useState([
-    {
-      campus: "",
-
-      department: "",
-
-      facultyId: "",
-
-      role: "",
-    },
+    { campus: "", department: "", facultyId: "", role: "" },
   ]);
+
   const addCoPiRow = () => {
     setCoPIs([
       ...coPIs,
-
-      {
-        campus: "",
-
-        department: "",
-
-        facultyId: "",
-
-        role: "",
-      },
+      { campus: "", department: "", facultyId: "", role: "" },
     ]);
   };
 
-  /*const updateCoPi = (
-    index,
-
-    field,
-
-    value,
-  ) => {
-    const updated = [...coPIs];
-
-    updated[index][field] = value;
-
-    // RESET DEPENDENT FIELDS
-
-    if (field === "campus") {
-      updated[index].department = "";
-
-      updated[index].facultyId = "";
-    }
-
-    if (field === "department") {
-      updated[index].facultyId = "";
-    }
-
-    setCoPIs(updated);
-  };*/
   const [extInvs, setExtInvs] = useState([{ ...initialExtInv }]);
   const [files, setFiles] = useState({
     proposal: null,
@@ -266,67 +530,99 @@ piRole: "PI",
     endorsementFile: null,
     overhead: null,
   });
-  //const activeFormat = form.endorsementFormat || "CSRC";
-  
-  const reportRef = useRef();
-  
-  const [campuses, setCampuses] = useState([]);
 
+  const reportRef = useRef();
+
+  // ── Co-PI faculty dropdown data (faculty_profile backed) ──────────────────
+  const [campuses, setCampuses] = useState([]);
   const [departments, setDepartments] = useState([]);
- //const [, setGeneratedReport] = useState(null);
   const [faculties, setFaculties] = useState([]);
+
   useEffect(() => {
     fetchCampuses();
   }, []);
-  const fetchCampuses = async () => {
-    const res = await axios.get("http://localhost:5000/api/faculty/campuses");
 
+  const fetchCampuses = async () => {
+    const res = await axios.get("http://localhost:5100/api/faculty/campuses");
     setCampuses(res.data);
   };
 
   const fetchDepartments = async (campus) => {
     const res = await axios.get(
-      `http://localhost:5000/api/faculty/departments/${campus}`,
+      `http://localhost:5100/api/faculty/departments/${campus}`,
     );
-
     setDepartments(res.data);
   };
 
-  const fetchFaculties = async (
-    campus,
-
-    department,
-  ) => {
+  const fetchFaculties = async (campus, department) => {
     const res = await axios.get(
-      `http://localhost:5000/api/faculty/list/${campus}/${department}`,
+      `http://localhost:5100/api/faculty/list/${campus}/${department}`,
     );
-
     setFaculties(res.data);
   };
+
+  // ── PI faculty dropdown data (also faculty_profile backed, same endpoints) ──
+  const [piCampusList, setPiCampusList] = useState([]);
+  const [piDeptList, setPiDeptList] = useState([]);
+  const [piFacultyList, setPiFacultyList] = useState([]);
+  const [piFacultyId, setPiFacultyId] = useState("");
+
+  useEffect(() => {
+    fetchPiCampuses();
+  }, []);
+
+  const fetchPiCampuses = async () => {
+    const res = await axios.get("http://localhost:5100/api/faculty/campuses");
+
+    console.log("CAMPUSES:", res.data);
+
+    setPiCampusList(res.data);
+  };
+
+  const fetchPiDepartments = async (campus) => {
+    const res = await axios.get(
+      `http://localhost:5100/api/faculty/departments/${campus}`,
+    );
+
+    console.log("DEPARTMENTS:", res.data);
+
+    setPiDeptList(res.data);
+  };
+
+  const fetchPiFaculties = async (campus, department) => {
+    const res = await axios.get(
+      `http://localhost:5100/api/faculty/list/${campus}/${department}`,
+    );
+
+    console.log("FACULTIES:", res.data);
+
+    setPiFacultyList(res.data);
+  };
+
   const [profile, setProfile] = useState(null);
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-
+    const user = JSON.parse(sessionStorage.getItem("user"));
     if (user) {
       fetchProfile(user.id);
     }
   }, []);
+
   const fetchProfile = async (userId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/profile/${userId}`,
+        `http://localhost:5100/api/profile/${userId}`,
       );
-
       setProfile(res.data);
     } catch (err) {
       console.log(err);
     }
   };
+
   // Animation on load
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // ── Derived Financial Values ────────────────────────────────────────────────
+  // ── Derived Financial Values ────────────────────────────────────────────
   const nrAmount = parseFloat(form.nonRecurring) || 0;
   const rAmount = parseFloat(form.recurring) || 0;
   const baseAmount = nrAmount + rAmount;
@@ -337,37 +633,15 @@ piRole: "PI",
   const gstAmt = form.gst === "yes" ? subTotal * 0.18 : 0;
   const grandTotal = subTotal + gstAmt;
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
+  // ── Helpers ─────────────────────────────────────────────────────────────
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const updateCoPI = (
-    index,
-
-    field,
-
-    value,
-  ) => {
+  const updateCoPI = (index, field, value) => {
     const updated = [...coPIs];
-
     updated[index][field] = value;
-
     setCoPIs(updated);
   };
-  /*const addCoPI = () => {
-    setCoPIs([
-      ...coPIs,
 
-      {
-        campus: "",
-
-        department: "",
-
-        facultyId: "",
-
-        role: "",
-      },
-    ]);
-  };*/
   const delCoPiRow = () => setCoPIs((p) => (p.length > 1 ? p.slice(0, -1) : p));
 
   const updateExtInv = (i, k, v) =>
@@ -383,78 +657,52 @@ piRole: "PI",
   const handleFile = (k, e) =>
     setFiles((f) => ({ ...f, [k]: e.target.files[0] || null }));
 
-  
+  // ── Print / PDF ─────────────────────────────────────────────────────────
+  const generateReportPdf = async (shouldDownload = false) => {
+    const element = reportRef.current;
+    if (!element) return;
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-  // ── Print / PDF ─────────────────────────────────────────────────────────────
-const generateReportPdf = async (shouldDownload = false) => {
-  console.log("FUNCTION STARTED");
-  const element = reportRef.current;
-console.log("ELEMENT:");
-console.log(element);
-  if (!element) return;
-  console.log(reportRef.current);
-  console.log(reportRef.current.innerHTML);
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  console.log("BEFORE HTML2CANVAS");
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-  });
-console.log("AFTER HTML2CANVAS");
-  const imgData = canvas.toDataURL("image/png");
-console.log("CREATING PDF");
-  const pdf = new jsPDF("p", "mm", "a4");
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
 
-  const pdfWidth = 210;
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  const pdfHeight = 297;
-
-  const imgWidth = pdfWidth;
-
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  let heightLeft = imgHeight;
-
-  let position = 0;
-
-  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-
-  heightLeft -= pdfHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-
-    pdf.addPage();
+    let heightLeft = imgHeight;
+    let position = 0;
 
     pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-
     heightLeft -= pdfHeight;
-  }
 
-  // CREATE BLOB FIRST
-  // CREATE PDF BLOB
-  const pdfBlob = pdf.output("blob");
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
 
-  // CREATE FILE
-  const reportFile = new File(
-    [pdfBlob],
-    `${form.endorsementFormat}-Report.pdf`,
-    {
-      type: "application/pdf",
-    },
-  );
-  // DOWNLOAD AFTER EVERYTHING
-  if (shouldDownload) {
-    pdf.save(`${form.endorsementFormat}-Report.pdf`);
-  }
-  console.log("RETURNING REPORT FILE");
-  console.log(reportFile);
-  return reportFile;
-};;
+    const pdfBlob = pdf.output("blob");
+    const reportFile = new File(
+      [pdfBlob],
+      `${form.endorsementFormat}-Report.pdf`,
+      { type: "application/pdf" },
+    );
+
+    if (shouldDownload) {
+      pdf.save(`${form.endorsementFormat}-Report.pdf`);
+    }
+    return reportFile;
+  };
+
   const handleSubmit = async () => {
-    // REQUIRED FIELD VALIDATION
-
     if (
       !form.fundingAgency ||
       !form.projectScheme ||
@@ -466,301 +714,130 @@ console.log("CREATING PDF");
       !form.dueDate
     ) {
       alert("Please fill all the necessary details before submitting.");
-
       return;
     }
 
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      //const user = JSON.parse(sessionStorage.getItem("user"));
 
-      // FORM DATA FOR FILE UPLOADS
+      //console.log("USER:", user);
 
       const payload = new FormData();
 
-      payload.append(
-        "user_id",
+      payload.append("user_id", 1);
+      payload.append("pi_user_id", piFacultyId || "");
 
-        user.id,
-      );
-
-      payload.append(
-        "funding_agency",
-
-        form.fundingAgency,
-      );
-
-      payload.append(
-        "funding_agency_type",
-
-        form.fundingType,
-      );
-
-      payload.append(
-        "project_type",
-
-        form.projectType,
-      );
-
-      payload.append(
-        "scheme",
-
-        form.projectScheme,
-      );
-
-      payload.append(
-        "full_project_title",
-
-        form.title,
-      );
-
-      payload.append(
-        "reference_number",
-
-        form.refNo || "",
-      );
-
-      payload.append(
-        "non_recurring",
-
-        form.nonRecurring || "",
-      );
-
-      payload.append(
-        "recurring",
-
-        form.recurring || "",
-      );
-
-      payload.append(
-        "overhead_percent",
-
-        form.overheadPct || "",
-      );
-
-      payload.append(
-        "gst_added",
-
-        form.gst === "yes",
-      );
-
-      payload.append(
-        "total_amount",
-
-        grandTotal || "",
-      );
-
-      payload.append(
-        "submission_due_date",
-
-        form.dueDate,
-      );
-
-      payload.append(
-        "is_pi_regular_faculty",
-
-        form.isPIRegular === "yes",
-      );
-
+      payload.append("funding_agency", form.fundingAgency);
+      payload.append("funding_agency_type", form.fundingType);
+      payload.append("project_type", form.projectType);
+      payload.append("scheme", form.projectScheme);
+      payload.append("full_project_title", form.title);
+      payload.append("reference_number", form.refNo || "");
+      payload.append("non_recurring", form.nonRecurring || "");
+      payload.append("recurring", form.recurring || "");
+      payload.append("overhead_percent", form.overheadPct || "");
+      payload.append("gst_added", form.gst === "yes");
+      payload.append("total_amount", grandTotal || "");
+      payload.append("submission_due_date", form.dueDate);
+      payload.append("is_pi_regular_faculty", form.isPIRegular === "yes");
       payload.append(
         "endorsement_required",
-
         form.endorsementRequired === "yes",
       );
+      payload.append("endorsement_format", form.endorsementFormat || "");
+      payload.append("overhead_exemption", form.overheadExemption || "");
 
-      // OPTIONAL
-
-      payload.append(
-        "endorsement_format",
-
-        form.endorsementFormat || "",
-      );
-
-      payload.append(
-        "overhead_exemption",
-
-        form.overheadExemption || "",
-      );
-
-      // FILES
-
-      if (files.proposal) {
-        payload.append(
-          "proposal_copy",
-
-          files.proposal,
-        );
-      }
-
-      if (files.writeup) {
-        payload.append(
-          "signed_writeup",
-
-          files.writeup,
-        );
-      }
-
-      if (files.budget) {
-        payload.append(
-          "signed_budget",
-
-          files.budget,
-        );
-      }
-
-      if (files.endorsementFile) {
-        payload.append(
-          "endorsement_format_file",
-
-          files.endorsementFile,
-        );
-      }
-
-      if (files.overhead) {
-        payload.append(
-          "overhead_exemption_file",
-
-          files.overhead,
-        );
-      }
-
-      // OPTIONAL Co-PI
+      if (files.proposal) payload.append("proposal_copy", files.proposal);
+      if (files.writeup) payload.append("signed_writeup", files.writeup);
+      if (files.budget) payload.append("signed_budget", files.budget);
+      if (files.endorsementFile)
+        payload.append("endorsement_format_file", files.endorsementFile);
+      if (files.overhead)
+        payload.append("overhead_exemption_file", files.overhead);
 
       payload.append(
         "coPrincipalInvestigators",
-
         JSON.stringify(
           coPIs.length > 0
-            ? coPIs.map((row) => ({
-                copi_user_id: row.facultyId || 1,
-
-                role: row.role || null,
-              }))
+            ? coPIs
+                .filter((row) => row.facultyId)
+                .map((row) => ({
+                  copi_user_id: row.facultyId,
+                  role: row.role || null,
+                }))
             : [],
         ),
       );
-
-      // OPTIONAL External Investigators
 
       payload.append(
         "externalInvestigators",
-
         JSON.stringify(
           extInvs.length > 0
-            ? extInvs.map((row) => ({
-                full_name: row.name || null,
-
-                designation: row.designation || null,
-
-                institute: row.institute || null,
-              }))
+            ? extInvs
+                .filter((row) => row.name)
+                .map((row) => ({
+                  full_name: row.name || null,
+                  designation: row.designation || null,
+                  institute: row.institute || null,
+                }))
             : [],
         ),
       );
 
-      // GENERATE REPORT FIRST
-      //const reportFile = await generateReportPdf(false);
-
-      // APPEND REPORT
-      
-
-      // THEN CREATE ENDORSEMENT
-      const res = await createEndorsement(payload);
-
-      console.log("CREATE RESPONSE:");
-      console.log(res.data);
+      const res = await axios.post(
+        "http://localhost:5100/api/endorsements",
+        payload,
+        { headers: { "Content-Type": "multipart/form-data" } },
+      );
 
       const endorsementId = res.data.endorsementId;
 
-      console.log("BEFORE PDF GENERATION");
-
       const generatedPdfFile = await generateReportPdf(false);
 
-      console.log("AFTER PDF GENERATION");
-
-      console.log(generatedPdfFile);
-
       if (generatedPdfFile) {
-        console.log("SENDING REPORT API");
-
         const reportPayload = new FormData();
-
         reportPayload.append("endorsementId", endorsementId);
-
         reportPayload.append(
           "report_pdf",
           generatedPdfFile,
           generatedPdfFile.name,
         );
 
-        const reportRes = await axios.post(
-          "http://localhost:5000/api/endorsements/save-report",
+        await axios.post(
+          "http://localhost:5100/api/endorsements/save-report",
           reportPayload,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          },
+          { headers: { "Content-Type": "multipart/form-data" } },
         );
-
-        console.log("REPORT RESPONSE:");
-
-        console.log(reportRes.data);
       }
 
       alert("Endorsement submitted successfully");
     } catch (err) {
-      console.log(err);
+      console.log("FULL ERROR:", err);
 
-      alert("Submission failed");
+      if (err.response) {
+        console.log("STATUS:", err.response.status);
+        console.log("DATA:", err.response.data);
+      }
+
+      alert(
+        err.response?.data?.error || err.response?.data?.message || err.message,
+      );
     }
-  };
-  const reportForm = {
-    ...form,
-
-    // PI DETAILS FROM PROFILE
-    piName: form.piName,
-piDesignation: form.piDesignation,
-piDept: form.piDept,
-piCampus: form.piCampus,
-piDob: form.piDob,
-piService: form.piService,
-piSuperannuation: form.piSuperannuation,
-
-    yearsService: profile?.superannuation_date
-      ? (
-          new Date(profile.superannuation_date).getFullYear() -
-          new Date().getFullYear()
-        ).toString()
-      : "",
-
-    // CO-PI + EXTERNALS
-    coPIs,
-
-    extInvs,
-
-    // FINANCIALS
-    calculatedTotal: grandTotal,
   };
 
   const formatComponents = {
-  CSRC: <div>CSRC Report Preview</div>,
-  DST: <div>DST Report Preview</div>,
-  CMRG: <div>CMRG Report Preview</div>,
-  ANRF: <div>ANRF Report Preview</div>,
-  "New Format": <div>New Format Report Preview</div>,
-};
-  
-  const formatDate = (date) => {
-    if (!date) return "";
-
-    return new Date(date)
-
-      .toLocaleDateString("en-GB")
-
-      .replace(/\//g, "-");
+    CSRC: <div>CSRC Report Preview</div>,
+    DST: <div>DST Report Preview</div>,
+    CMRG: <div>CMRG Report Preview</div>,
+    ANRF: <div>ANRF Report Preview</div>,
+    "New Format": <div>New Format Report Preview</div>,
   };
 
- 
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toLocaleDateString("en-GB").replace(/\//g, "-");
+  };
+
   return (
     <div className={`ep-page ${mounted ? "ep-loaded" : ""}`}>
       <div
@@ -813,10 +890,9 @@ piSuperannuation: form.piSuperannuation,
           <div className="ep-header-glow"></div>
         </div>
 
-        {/* ══ SECTION 1: Funding Information ══════════════════════════════════ */}
+        {/* ══ SECTION 1: Funding Information ══ */}
         <div className="ep-card ep-anim-1">
           <div className="ep-card-heading">Funding Information</div>
-
           <div className="ep-grid-2">
             <div className="ep-input-group">
               <label className="ep-label">Funding Agency</label>
@@ -891,7 +967,7 @@ piSuperannuation: form.piSuperannuation,
           </div>
         </div>
 
-        {/* ══ SECTION 2: Project Title ════════════════════════════════════════ */}
+        {/* ══ SECTION 2: Project Title ══ */}
         <div className="ep-card ep-anim-2">
           <div className="ep-card-heading">Project Details</div>
           <div className="ep-input-group">
@@ -916,10 +992,9 @@ piSuperannuation: form.piSuperannuation,
           </div>
         </div>
 
-        {/* ══ SECTION 3: Financial Details ════════════════════════════════════ */}
+        {/* ══ SECTION 3: Financial Details ══ */}
         <div className="ep-card ep-anim-3">
           <div className="ep-card-heading">Financial Breakdown</div>
-
           <div className="ep-grid-3">
             <div className="ep-input-group">
               <label className="ep-label">
@@ -975,7 +1050,6 @@ piSuperannuation: form.piSuperannuation,
             </div>
           </div>
 
-          {/* Premium Auto-calculation box */}
           <div className="ep-calc-box">
             <div className="ep-calc-header">
               <svg
@@ -1013,7 +1087,6 @@ piSuperannuation: form.piSuperannuation,
                   ₹ {formatCurrency(subTotal)}
                 </span>
               </div>
-
               <div
                 className={`ep-calc-row ep-gst-row ${form.gst === "yes" ? "visible" : ""}`}
               >
@@ -1022,7 +1095,6 @@ piSuperannuation: form.piSuperannuation,
                   + ₹ {formatCurrency(gstAmt)}
                 </span>
               </div>
-
               <div className="ep-calc-row ep-calc-total">
                 <span>Total Project Amount</span>
                 <span className="ep-total-highlight">
@@ -1033,7 +1105,7 @@ piSuperannuation: form.piSuperannuation,
           </div>
         </div>
 
-        {/* ══ SECTION 4: Submission & PI Details ══════════════════════════════ */}
+        {/* ══ SECTION 4: Submission & PI Details ══ */}
         <div className="ep-card ep-anim-4">
           <div className="ep-card-heading">Submission &amp; PI Details</div>
 
@@ -1120,101 +1192,143 @@ piSuperannuation: form.piSuperannuation,
               <input
                 className="ep-input"
                 placeholder="e.g. 11"
+                readOnly
                 value={
-                  profile?.superannuation_date
-                    ? new Date(profile.superannuation_date).getFullYear() -
-                      new Date().getFullYear()
+                  form.piSuperannuation
+                    ? Math.max(
+                        0,
+                        new Date(form.piSuperannuation).getFullYear() -
+                          new Date().getFullYear(),
+                      )
                     : ""
                 }
               />
             </div>
           </div>
 
+          {/* ── PI Details — faculty_profile backed dropdown, same pattern as Co-PI ── */}
           <div className="ep-grid-2 ep-mt24">
-  <div className="ep-input-group">
-    <label className="ep-label">PI Name</label>
-    <input
-      className="ep-input"
-      value={form.piName}
-      onChange={(e) => setField("piName", e.target.value)}
-    />
-  </div>
+            <div className="ep-input-group">
+              <label className="ep-label">PI Campus</label>
+              <select
+                className="ep-select"
+                value={form.piCampus}
+                onChange={(e) => {
+                  setField("piCampus", e.target.value);
+                  setField("piDept", "");
+                  setPiFacultyId("");
+                  fetchPiDepartments(e.target.value);
+                }}
+              >
+                <option value="">-- Select Campus --</option>
+                {piCampusList.map((c) => (
+                  <option key={c.campus} value={c.campus}>
+                    {c.campus}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-  <div className="ep-input-group">
-    <label className="ep-label">Designation</label>
-    <input
-      className="ep-input"
-      value={form.piDesignation}
-      onChange={(e) => setField("piDesignation", e.target.value)}
-    />
-  </div>
+            <div className="ep-input-group">
+              <label className="ep-label">PI Department</label>
+              <select
+                className="ep-select"
+                value={form.piDept}
+                onChange={(e) => {
+                  setField("piDept", e.target.value);
+                  setPiFacultyId("");
+                  fetchPiFaculties(form.piCampus, e.target.value);
+                }}
+                disabled={!form.piCampus}
+              >
+                <option value="">-- Select Department --</option>
+                {piDeptList.map((d) => (
+                  <option key={d.department} value={d.department}>
+                    {d.department}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-  <div className="ep-input-group">
-    <label className="ep-label">Department</label>
-    <input
-      className="ep-input"
-      value={form.piDept}
-      onChange={(e) => setField("piDept", e.target.value)}
-    />
-  </div>
+            <div className="ep-input-group">
+              <label className="ep-label">PI Name</label>
+              <select
+                className="ep-select"
+                value={piFacultyId}
+                onChange={(e) => {
+                  const fid = e.target.value;
+                  setPiFacultyId(fid);
+                  const fac = piFacultyList.find((f) => f.id === Number(fid));
+                  if (fac) {
+                    setField("piName", fac.staff_name || "");
+                    setField("piDesignation", fac.designation || "");
+                    setField("piDob", fac.dob ? fac.dob.split("T")[0] : "");
+                    setField("piService", fac.dos ? fac.dos.split("T")[0] : "");
+                    setField(
+                      "piSuperannuation",
+                      fac.superannuation_date
+                        ? fac.superannuation_date.split("T")[0]
+                        : "",
+                    );
+                  }
+                }}
+                disabled={!form.piDept}
+              >
+                <option value="">-- Select Faculty --</option>
+                {piFacultyList.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.staff_name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-  <div className="ep-input-group">
-    <label className="ep-label">Campus</label>
-    <input
-      className="ep-input"
-      value={form.piCampus}
-      onChange={(e) => setField("piCampus", e.target.value)}
-    />
-  </div>
+            <div className="ep-input-group">
+              <label className="ep-label">Designation</label>
+              <div className="ep-val" style={{ padding: "10px 14px" }}>
+                {form.piDesignation || "—"}
+              </div>
+            </div>
 
-  <div className="ep-input-group">
-    <label className="ep-label">Date of Birth</label>
-    <input
-      type="date"
-      className="ep-input"
-      value={form.piDob}
-      onChange={(e) => setField("piDob", e.target.value)}
-    />
-  </div>
+            <div className="ep-input-group">
+              <label className="ep-label">Date of Birth</label>
+              <div className="ep-val" style={{ padding: "10px 14px" }}>
+                {form.piDob || "—"}
+              </div>
+            </div>
 
-  <div className="ep-input-group">
-    <label className="ep-label">Date of Service</label>
-    <input
-      type="date"
-      className="ep-input"
-      value={form.piService}
-      onChange={(e) => setField("piService", e.target.value)}
-    />
-  </div>
+            <div className="ep-input-group">
+              <label className="ep-label">Date of Service</label>
+              <div className="ep-val" style={{ padding: "10px 14px" }}>
+                {form.piService || "—"}
+              </div>
+            </div>
 
-  <div className="ep-input-group">
-    <label className="ep-label">Superannuation Date</label>
-    <input
-      type="date"
-      className="ep-input"
-      value={form.piSuperannuation}
-      onChange={(e) => setField("piSuperannuation", e.target.value)}
-    />
-  </div>
+            <div className="ep-input-group">
+              <label className="ep-label">Superannuation Date</label>
+              <div className="ep-val" style={{ padding: "10px 14px" }}>
+                {form.piSuperannuation || "—"}
+              </div>
+            </div>
 
-  <div className="ep-input-group">
-    <label className="ep-label">Role</label>
-    <select
-      className="ep-select"
-      value={form.piRole}
-      onChange={(e) => setField("piRole", e.target.value)}
-    >
-      {CO_PI_ROLES.map((role) => (
-        <option key={role} value={role}>
-          {role}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
+            <div className="ep-input-group">
+              <label className="ep-label">Role</label>
+              <select
+                className="ep-select"
+                value={form.piRole}
+                onChange={(e) => setField("piRole", e.target.value)}
+              >
+                {CO_PI_ROLES.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
-        {/* ══ SECTION 5: Co-PI Table ═══════════════════════════════════════════ */}
+        {/* ══ SECTION 5: Co-PI Table ══ */}
         <div className="ep-card ep-anim-5">
           <div className="ep-card-heading ep-flex-between">
             Co-Principal Investigator (AU Faculty)
@@ -1250,136 +1364,103 @@ piSuperannuation: form.piSuperannuation,
                 </tr>
               </thead>
               <tbody>
-                {coPIs.map((row, i) => {
-                  return (
-                    <tr key={i} className="ep-table-row-anim">
-                      {/* CAMPUS */}
-
-                      <td>
-                        <select
-                          className="ep-select ep-select-sm"
-                          value={row.campus}
-                          onChange={(e) => {
-                            updateCoPI(i, "campus", e.target.value);
-
-                            fetchDepartments(e.target.value);
-                          }}
-                        >
-                          <option value="">Select</option>
-
-                          {campuses.map((c) => (
-                            <option key={c.campus} value={c.campus}>
-                              {c.campus}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      {/* DEPARTMENT */}
-
-                      <td>
-                        <select
-                          className="ep-select ep-select-sm"
-                          value={row.department}
-                          onChange={(e) => {
-                            updateCoPI(i, "department", e.target.value);
-
-                            fetchFaculties(row.campus, e.target.value);
-                          }}
-                          disabled={!row.campus}
-                        >
-                          <option value="">Select</option>
-
-                          {departments.map((d) => (
-                            <option key={d.department} value={d.department}>
-                              {d.department}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      {/* FACULTY */}
-
-                      <td>
-                        <select
-                          className="ep-select ep-select-sm"
-                          value={row.facultyId}
-                          onChange={(e) =>
-                            updateCoPI(i, "facultyId", e.target.value)
-                          }
-                          disabled={!row.department}
-                        >
-                          <option value="">Select</option>
-
-                          {faculties.map((f) => (
-                            <option key={f.id} value={f.id}>
-                              {f.staff_name}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      {/* DOB */}
-
-                      <td>
-                        {row.facultyId &&
-                          formatDate(
-                            faculties.find(
-                              (f) => f.id === Number(row.facultyId),
-                            )?.dob,
-                          )}
-                      </td>
-
-                      {/* DOS */}
-
-                      <td>
-                        {row.facultyId &&
-                          formatDate(
-                            faculties.find(
-                              (f) => f.id === Number(row.facultyId),
-                            )?.dos,
-                          )}
-                      </td>
-
-                      {/* SUPERANNUATION */}
-
-                      <td>
-                        {row.facultyId &&
-                          formatDate(
-                            faculties.find(
-                              (f) => f.id === Number(row.facultyId),
-                            )?.superannuation_date,
-                          )}
-                      </td>
-
-                      {/* ROLE */}
-
-                      <td>
-                        <select
-                          className="ep-select ep-select-sm"
-                          value={row.role}
-                          onChange={(e) =>
-                            updateCoPI(i, "role", e.target.value)
-                          }
-                        >
-                          <option value="">Select Role</option>
-
-                          {CO_PI_ROLES.map((r) => (
-                            <option key={r} value={r}>
-                              {r}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {coPIs.map((row, i) => (
+                  <tr key={i} className="ep-table-row-anim">
+                    <td>
+                      <select
+                        className="ep-select ep-select-sm"
+                        value={row.campus}
+                        onChange={(e) => {
+                          updateCoPI(i, "campus", e.target.value);
+                          fetchDepartments(e.target.value);
+                        }}
+                      >
+                        <option value="">Select</option>
+                        {campuses.map((c) => (
+                          <option key={c.campus} value={c.campus}>
+                            {c.campus}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        className="ep-select ep-select-sm"
+                        value={row.department}
+                        onChange={(e) => {
+                          updateCoPI(i, "department", e.target.value);
+                          fetchFaculties(row.campus, e.target.value);
+                        }}
+                        disabled={!row.campus}
+                      >
+                        <option value="">Select</option>
+                        {departments.map((d) => (
+                          <option key={d.department} value={d.department}>
+                            {d.department}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        className="ep-select ep-select-sm"
+                        value={row.facultyId}
+                        onChange={(e) =>
+                          updateCoPI(i, "facultyId", e.target.value)
+                        }
+                        disabled={!row.department}
+                      >
+                        <option value="">Select</option>
+                        {faculties.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.staff_name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      {row.facultyId &&
+                        formatDate(
+                          faculties.find((f) => f.id === Number(row.facultyId))
+                            ?.dob,
+                        )}
+                    </td>
+                    <td>
+                      {row.facultyId &&
+                        formatDate(
+                          faculties.find((f) => f.id === Number(row.facultyId))
+                            ?.dos,
+                        )}
+                    </td>
+                    <td>
+                      {row.facultyId &&
+                        formatDate(
+                          faculties.find((f) => f.id === Number(row.facultyId))
+                            ?.superannuation_date,
+                        )}
+                    </td>
+                    <td>
+                      <select
+                        className="ep-select ep-select-sm"
+                        value={row.role}
+                        onChange={(e) => updateCoPI(i, "role", e.target.value)}
+                      >
+                        <option value="">Select Role</option>
+                        {CO_PI_ROLES.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* ══ SECTION 6: External Investigators ═══════════════════════════════ */}
+        {/* ══ SECTION 6: External Investigators ══ */}
         <div className="ep-card ep-anim-6">
           <div className="ep-card-heading ep-flex-between">
             External Investigators
@@ -1450,7 +1531,7 @@ piSuperannuation: form.piSuperannuation,
           </div>
         </div>
 
-        {/* ══ SECTION 7: Document Uploads ══════════════════════════════════════ */}
+        {/* ══ SECTION 7: Document Uploads ══ */}
         <div className="ep-card ep-anim-7">
           <div className="ep-card-heading">Required Documents</div>
           <div className="ep-upload-grid">
@@ -1488,7 +1569,7 @@ piSuperannuation: form.piSuperannuation,
           </div>
         </div>
 
-        {/* ══ Generate Button ══════════════════════════════════════════════════ */}
+        {/* ══ Generate Button ══ */}
         <div className="ep-generate-wrap ep-anim-8">
           <button
             className="ep-btn-generate ep-glow-effect"

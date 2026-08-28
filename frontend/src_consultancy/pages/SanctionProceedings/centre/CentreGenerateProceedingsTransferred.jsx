@@ -1,10 +1,9 @@
-// PATH: frontend/src_consultancy/pages/SanctionProceedings/CentreProceedingsTransferred.jsx
+// PATH: frontend/src_consultancy/pages/SanctionProceedings/Centre/CentreGenerateProceedingsTransferred.jsx
 
 import React, { useMemo, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import FilterBar from '../../components/FilterBar';
-import SectionTrackTable from '../../components/SectionTrackTable';
-import { loadQueue, getTransferredRows } from '../../data/consultancyWorkflow';
+import FilterBar from '../../../components/FilterBar';
+import SectionTrackTable from '../../../components/SectionTrackTable';
+import { loadQueue, getTransferredRows } from '../../../data/consultancyWorkflow';
 
 const COLUMNS = [
   { key: 'id', label: 'ACF ID' },
@@ -14,15 +13,12 @@ const COLUMNS = [
   { key: 'ctdtRem', label: 'CTDT Rem' },
 ];
 
-const CentreProceedingsTransferred = () => {
+const CentreGenerateProceedingsTransferred = () => {
   const role = sessionStorage.getItem('consultancyUserRole');
-
-  if (role === 'director') return <Navigate to="/consultancy-office/proceedings-centre/list" replace />;
-
   const [queue] = useState(() => loadQueue());
   const [filters, setFilters] = useState({});
 
-  const allRows = getTransferredRows(queue, 'proceedings-centre', role);
+  const allRows = getTransferredRows(queue, 'proceedings-centre-generate', role);
   const rows = useMemo(() => allRows.filter((r) =>
     !filters.q || `${r.id} ${r.consultantName}`.toLowerCase().includes(filters.q.toLowerCase())
   ), [allRows, filters]);
@@ -31,7 +27,7 @@ const CentreProceedingsTransferred = () => {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Centre Proceedings — Transferred</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Centre Generate Proceedings — Transferred</h1>
       <p style={{ fontSize: 13.5, color: '#6b7280', margin: '0 0 18px' }}>Items you have reviewed and forwarded onward.</p>
       <FilterBar filters={filters} onChange={setFilters} />
       <SectionTrackTable columns={COLUMNS} rows={rows} onView={handleView} />
@@ -39,4 +35,4 @@ const CentreProceedingsTransferred = () => {
   );
 };
 
-export default CentreProceedingsTransferred;
+export default CentreGenerateProceedingsTransferred;

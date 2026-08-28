@@ -1,9 +1,9 @@
-// PATH: frontend/src_consultancy/pages/SanctionProceedings/DepartmentProceedingsCompleted.jsx
+// PATH: frontend/src_consultancy/pages/SanctionProceedings/Department/DepartmentGenerateProceedingsCompleted.jsx
 
 import React, { useMemo, useState } from 'react';
-import FilterBar from '../../components/FilterBar';
-import SectionTrackTable from '../../components/SectionTrackTable';
-import { loadQueue, getCompletedRows } from '../../data/consultancyWorkflow';
+import FilterBar from '../../../components/FilterBar';
+import SectionTrackTable from '../../../components/SectionTrackTable';
+import { loadQueue, getCompletedRows } from '../../../data/consultancyWorkflow';
 
 const COLUMNS = [
   { key: 'id', label: 'ACF ID' },
@@ -14,11 +14,11 @@ const COLUMNS = [
   { key: 'tapalDate', label: 'Proceeding Date' },
 ];
 
-const DepartmentProceedingsCompleted = () => {
+const DepartmentGenerateProceedingsCompleted = () => {
   const [queue] = useState(() => loadQueue());
   const [filters, setFilters] = useState({});
 
-  const allRows = getCompletedRows(queue, 'proceedings-department');
+  const allRows = getCompletedRows(queue, 'proceedings-department-generate');
   const rows = useMemo(() => allRows.filter((r) =>
     !filters.q || `${r.id} ${r.name}`.toLowerCase().includes(filters.q.toLowerCase())
   ), [allRows, filters]);
@@ -27,12 +27,12 @@ const DepartmentProceedingsCompleted = () => {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Department Proceedings — Completed</h1>
-      <p style={{ fontSize: 13.5, color: '#6b7280', margin: '0 0 18px' }}>Fully approved by the Director, visible to all roles.</p>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Department Generate Proceedings — Completed</h1>
+      <p style={{ fontSize: 13.5, color: '#6b7280', margin: '0 0 18px' }}>Fully approved by the Director — moved on to Sanction &amp; Bill.</p>
       <FilterBar filters={filters} onChange={setFilters} />
       <SectionTrackTable columns={COLUMNS} rows={rows} onView={handleView} />
     </div>
   );
 };
 
-export default DepartmentProceedingsCompleted;
+export default DepartmentGenerateProceedingsCompleted;

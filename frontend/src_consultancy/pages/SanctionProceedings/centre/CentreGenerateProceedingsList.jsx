@@ -1,13 +1,13 @@
-// PATH: frontend/src_consultancy/pages/SanctionProceedings/CentreProceedingsList.jsx
+// PATH: frontend/src_consultancy/pages/SanctionProceedings/Centre/CentreGenerateProceedingsList.jsx
 
 import React, { useMemo, useState } from 'react';
-import FilterBar from '../../components/FilterBar';
-import SectionListTable from '../../components/SectionListTable';
-import { loadQueue, saveQueue, getListRows, submitAction } from '../../data/consultancyWorkflow';
+import FilterBar from '../../../components/FilterBar';
+import SectionListTable from '../../../components/SectionListTable';
+import { loadQueue, saveQueue, getListRows, submitAction } from '../../../data/consultancyWorkflow';
 
 const selectStyle = { fontSize: 12.5, padding: '7px 10px', borderRadius: 7, border: '1px solid #d1d5db', background: '#fff', minWidth: 100 };
 
-const CentreProceedingsList = () => {
+const CentreGenerateProceedingsList = () => {
   const role = sessionStorage.getItem('consultancyUserRole');
   const [queue, setQueue] = useState(() => loadQueue());
   const [filters, setFilters] = useState({});
@@ -15,7 +15,7 @@ const CentreProceedingsList = () => {
 
   const setEdit = (id, patch) => setEdits((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
 
-  const allRows = getListRows(queue, 'proceedings-centre', role);
+  const allRows = getListRows(queue, 'proceedings-centre-generate', role);
   const rows = useMemo(() => allRows.filter((r) => {
     if (filters.q && !`${r.id} ${r.consultantName}`.toLowerCase().includes(filters.q.toLowerCase())) return false;
     if (filters.deptCampus && r.deptCampus !== filters.deptCampus) return false;
@@ -34,14 +34,9 @@ const CentreProceedingsList = () => {
     { key: 'amount', label: 'Amount', render: (r) => Number(r.amount || 0).toLocaleString('en-IN') },
     { key: 'remAmt', label: 'Rem Amt', render: (r) => (r.remAmt === '' || r.remAmt == null ? '' : Number(r.remAmt).toLocaleString('en-IN')) },
     {
-      key: 'pcr',
-      label: 'PCR',
+      key: 'pcr', label: 'PCR',
       render: (r) => (
-        <select
-          style={selectStyle}
-          value={edits[r.id]?.pcr ?? r.pcr ?? ''}
-          onChange={(e) => setEdit(r.id, { pcr: e.target.value })}
-        >
+        <select style={selectStyle} value={edits[r.id]?.pcr ?? r.pcr ?? ''} onChange={(e) => setEdit(r.id, { pcr: e.target.value })}>
           <option value="">--SELECT--</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -49,14 +44,9 @@ const CentreProceedingsList = () => {
       ),
     },
     {
-      key: 'ctdtRem',
-      label: 'CTDT Rem',
+      key: 'ctdtRem', label: 'CTDT Rem',
       render: (r) => (
-        <select
-          style={selectStyle}
-          value={edits[r.id]?.ctdtRem ?? r.ctdtRem ?? ''}
-          onChange={(e) => setEdit(r.id, { ctdtRem: e.target.value })}
-        >
+        <select style={selectStyle} value={edits[r.id]?.ctdtRem ?? r.ctdtRem ?? ''} onChange={(e) => setEdit(r.id, { ctdtRem: e.target.value })}>
           <option value="">--SELECT--</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -67,10 +57,8 @@ const CentreProceedingsList = () => {
 
   const handleSubmit = (row, action, extra) => {
     const edit = edits[row.id] || {};
-    const next = submitAction(queue, 'proceedings-centre', row.id, role, action, {
-      ...extra,
-      pcr: edit.pcr ?? row.pcr,
-      ctdtRem: edit.ctdtRem ?? row.ctdtRem,
+    const next = submitAction(queue, 'proceedings-centre-generate', row.id, role, action, {
+      ...extra, pcr: edit.pcr ?? row.pcr, ctdtRem: edit.ctdtRem ?? row.ctdtRem,
     });
     setQueue(next);
     saveQueue(next);
@@ -86,15 +74,9 @@ const CentreProceedingsList = () => {
         Review approved permissions/invoices for centre &amp; other campuses and generate sanction proceedings.
       </p>
       <FilterBar filters={filters} onChange={setFilters} deptCampusOptions={deptCampusOptions} typeOptions={typeOptions} />
-      <SectionListTable
-        columns={columns}
-        rows={rows}
-        actionOptions={['GENERATED']}
-        onSubmit={handleSubmit}
-        onView={handleView}
-      />
+      <SectionListTable columns={columns} rows={rows} actionOptions={['GENERATED']} onSubmit={handleSubmit} onView={handleView} />
     </div>
   );
 };
 
-export default CentreProceedingsList;
+export default CentreGenerateProceedingsList;

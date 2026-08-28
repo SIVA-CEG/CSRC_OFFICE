@@ -23,25 +23,43 @@ export default function AssignModalPT({ item, onClose, onAssign }) {
   };
 
   return (
-    <div className="et-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="et-overlay"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="et-modal">
         <div className="et-modal-header">
           <h2>Assign Project Transfer</h2>
-          <button className="et-close-btn" onClick={onClose}>✕</button>
+          <button className="et-close-btn" onClick={onClose}>
+            ✕
+          </button>
         </div>
 
         <div className="et-modal-body">
           <div className="et-info-card">
-            <div><strong>Tapal ID:</strong> #{item.id}</div>
-            <div><strong>File No:</strong> {item.fileNo}</div>
-            <div><strong>From PI:</strong> {item.fromFacultyName}</div>
-            <div><strong>To PI:</strong> {item.toFacultyName}</div>
-            <div><strong>Agency:</strong> {item.agency}</div>
+            <div>
+              <strong>Tapal ID:</strong> #{item.id}
+            </div>
+            <div>
+              <strong>File No:</strong> {item.file_no || "-"}
+            </div>
+            <div>
+              <strong>From PI:</strong> {item.from_name}
+            </div>
+            <div>
+              <strong>To PI:</strong> {item.to_name}
+            </div>
+            <div>
+              <strong>Agency:</strong> {item.funding_agency}
+            </div>
           </div>
 
           <div className="et-form-group">
             <label>Assign To</label>
-            <select value={staffId} onChange={(e) => setStaffId(e.target.value)}>
+            <select
+              value={staffId}
+              onChange={(e) => setStaffId(e.target.value)}
+            >
               <option value="">Select Staff</option>
               {STAFF_LIST.map((staff) => (
                 <option key={staff.id} value={staff.id}>
@@ -63,19 +81,33 @@ export default function AssignModalPT({ item, onClose, onAssign }) {
 
           {!confirming ? (
             <div className="et-modal-actions">
-              <button className="btn btn-outline" onClick={onClose}>Cancel</button>
-              <button className="btn btn-primary" disabled={!staffId} onClick={() => setConfirming(true)}>
+              <button className="btn btn-outline" onClick={onClose}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                disabled={!staffId}
+                onClick={() => setConfirming(true)}
+              >
                 Assign
               </button>
             </div>
           ) : (
             <div className="et-confirm-box">
               <p>
-                Assign Project Transfer #{item.id} to <strong>{selectedStaff?.name}</strong>?
+                Assign Project Transfer #{item.id} to{" "}
+                <strong>{selectedStaff?.name}</strong>?
               </p>
               <div className="et-modal-actions">
-                <button className="btn btn-outline" onClick={() => setConfirming(false)}>Back</button>
-                <button className="btn btn-primary" onClick={handleConfirm}>Confirm</button>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => setConfirming(false)}
+                >
+                  Back
+                </button>
+                <button className="btn btn-primary" onClick={handleConfirm}>
+                  Confirm
+                </button>
               </div>
             </div>
           )}

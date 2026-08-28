@@ -54,16 +54,6 @@ const projectItems = [
   { label: 'Reports', path: '/projects/reports', icon: '📑' },
 ];
 
-const navSections = [
-  { label: 'Master',               icon: '⚙️',  path: '/master',      children: masterItems },
-  { label: 'My Tapals',            icon: '📬',  path: '/my-tapals',   children: tapalItems },
-  { label: 'Endorsements',         icon: '📑',  path: '/endorsements',children: endorsementItems },
-  { label: 'Projects',             icon: '🔬',  path: '/projects',    children: projectItems },
-  { label: 'DST INSPIRE',          icon: '🌟',  path: '/dst-inspire' },
-  { label: 'DST INSPIRE Faculty',  icon: '👨‍🏫', path: '/dst-inspire-faculty' },
-  { label: 'Women Scientist',      icon: '👩‍🔬', path: '/women-scientist' },
-];
-
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -72,6 +62,28 @@ export default function Sidebar() {
 
   // Track which level-2 accordion is open (keyed by child path)
   const [openChildKey, setOpenChildKey] = useState(null);
+
+  // Role-based visibility: directors don't have a "transferred by me" concept
+  // in the endorsements workflow (endorsement_assign_history is filtered by
+  // assigned_from = username, which only applies to assistant/superintendent/dd).
+  // TODO: confirm your login flow actually does
+  //   sessionStorage.setItem("userRole", user.role)
+  // — if it stores role somewhere else, this filter silently no-ops.
+  const userRole = sessionStorage.getItem('userRole') || 'assistant';
+
+  const filteredEndorsementItems = endorsementItems.filter(
+    (item) => !(item.path === '/endorsements/transferred' && userRole === 'director')
+  );
+
+  const navSections = [
+    { label: 'Master',               icon: '⚙️',  path: '/master',      children: masterItems },
+    { label: 'My Tapals',            icon: '📬',  path: '/my-tapals',   children: tapalItems },
+    { label: 'Endorsements',         icon: '📑',  path: '/endorsements',children: filteredEndorsementItems },
+    { label: 'Projects',             icon: '🔬',  path: '/projects',    children: projectItems },
+    { label: 'DST INSPIRE',          icon: '🌟',  path: '/dst-inspire' },
+    { label: 'DST INSPIRE Faculty',  icon: '👨‍🏫', path: '/dst-inspire-faculty' },
+    { label: 'Women Scientist',      icon: '👩‍🔬', path: '/women-scientist' },
+  ];
 
   // Auto-expand top-level section on navigation
   useEffect(() => {

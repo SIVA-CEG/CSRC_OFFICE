@@ -1,251 +1,384 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useProjectContext, PROJECT_STAFF } from './ProjectContext';
-import ProjectApprovalTransferCell, { getProfileSignature } from './ProjectApprovalTransferCell';
-import SchemeSelectModal from './SchemeSelectModal';
-import './FreshSanction.css';
-import CSRCProceedingsReport, { assembleReportData } from './CSRCProceedingsReport.jsx';
-import html2pdf from 'html2pdf.js';
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import ProjectApprovalTransferCell from "./ProjectApprovalTransferCell";
+import "./FreshSanction.css";
+import html2pdf from "html2pdf.js";
+import CSRCProceedingsReport, {
+  assembleReportData,
+} from "./CSRCProceedingsReport";
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const userRole = () => localStorage.getItem('userRole') || 'assistant';
-const userName = () => localStorage.getItem('userName') || 'Office';
-
+const userRole = () => sessionStorage.getItem("userRole") || "assistant";
+const currentUser = () => {
+  try {
+    const u = JSON.parse(sessionStorage.getItem("proceedings_user") || "{}");
+    return u.name || userRole();
+  } catch {
+    return userRole();
+  }
+};
+const initialSchemes = [
+  {
+    schemeCode: "4211",
+    schemeName: "Advanced Research Grant (ARG) Program",
+    accountType: "TSA(H)",
+    bank: "UNION BANK OF INDIA",
+    accountNo: "349902010052015",
+    mobile: "0",
+  },
+  {
+    schemeCode: "0150",
+    schemeName: "BIOTECH RESEARCH AND DEVELOPMENT",
+    accountType: "ZBA",
+    bank: "ICICI BANK",
+    accountNo: "000105037681",
+    mobile: "0",
+  },
+  {
+    schemeCode: "4306",
+    schemeName:
+      "Biotechnology Research Innovation and Entrepreneurship Development (Bio-Ride)",
+    accountType: "ZBA",
+    bank: "ICICI BANK",
+    accountNo: "000105037681",
+    mobile: "0",
+  },
+  {
+    schemeCode: "1827",
+    schemeName: "Capacity Building and Human Resources Development",
+    accountType: "TSA(H)",
+    bank: "STATE BANK OF INDIA",
+    accountNo: "43549381038",
+    mobile: "0",
+  },
+  {
+    schemeCode: "4197",
+    schemeName: "Capacity Building and Skill Development Scheme",
+    accountType: "ZBA",
+    bank: "RESERVE BANK OF INDIA",
+    accountNo: "10687701262",
+    mobile: "0",
+  },
+  {
+    schemeCode: "3989",
+    schemeName:
+      "CONSERVATION DEVELOPMENT AND SUSTAINABLE MANAGEMENT OF MEDICINAL PLANTS",
+    accountType: "ZBA",
+    bank: "STATE BANK OF INDIA",
+    accountNo: "41676562772",
+    mobile: "0",
+  },
+  {
+    schemeCode: "1023",
+    schemeName: "Core Research Grant (erstwhile SERB Scheme)",
+    accountType: "TSA(H)",
+    bank: "UNION BANK OF INDIA, SDA",
+    accountNo: "349902010052378",
+    mobile: "0",
+  },
+  {
+    schemeCode: "0538",
+    schemeName: "Cyber Security Projects (NCCC & Others)",
+    accountType: "ZBA",
+    bank: "RESERVE BANK OF INDIA",
+    accountNo: "10687701461",
+    mobile: "0",
+  },
+  {
+    schemeCode: "1819",
+    schemeName: "Innovation, Technology, Development and Deployment",
+    accountType: "ZBA",
+    bank: "UNION BANK OF INDIA",
+    accountNo: "70312010000105",
+    mobile: "0",
+  },
+  {
+    schemeCode: "3655",
+    schemeName: "O-SMART",
+    accountType: "ZBA",
+    bank: "CANARA BANK",
+    accountNo: "110114748456",
+    mobile: "0",
+  },
+  {
+    schemeCode: "4308",
+    schemeName: "Prithvi Vighyan (Prithvi)",
+    accountType: "ZBA",
+    bank: "CANARA BANK",
+    accountNo: "110114748456",
+    mobile: "0",
+  },
+  {
+    schemeCode: "3943",
+    schemeName: "PUBLIC HEALTH ENGINEERING (PHE) SECTOR DEPARTMENT",
+    accountType: "ZBA",
+    bank: "INDIAN BANK",
+    accountNo: "7454683896",
+    mobile: "0",
+  },
+  {
+    schemeCode: "2354",
+    schemeName: "R and D in IT/Electronics/CCBT",
+    accountType: "ZBA",
+    bank: "RESERVE BANK OF INDIA",
+    accountNo: "10687701067",
+    mobile: "0",
+  },
+  {
+    schemeCode: "3237",
+    schemeName: "Research & Development",
+    accountType: "ZBA",
+    bank: "BANK OF MAHARASHTRA",
+    accountNo: "60421798582",
+    mobile: "0",
+  },
+  {
+    schemeCode: "1166",
+    schemeName:
+      "Research & Development Programme in Water Sector and Implementation of National Water Mission",
+    accountType: "ZBA",
+    bank: "STATE BANK OF INDIA",
+    accountNo: "41394101312",
+    mobile: "0",
+  },
+  {
+    schemeCode: "1166A",
+    schemeName:
+      "Research and Development and Implementation of National Water Mission",
+    accountType: "ZBA",
+    bank: "STATE BANK OF INDIA",
+    accountNo: "41394401312",
+    mobile: "0",
+  },
+  {
+    schemeCode: "1817",
+    schemeName: "S & T Institutional And Human Capacity Building",
+    accountType: "ZBA",
+    bank: "BANK OF MAHARASHTRA",
+    accountNo: "60424806080",
+    mobile: "0",
+  },
+  {
+    schemeCode: "3668",
+    schemeName: "Scheme for Transformation and Advanced Research in Sciences",
+    accountType: "ZBA",
+    bank: "STATE BANK OF INDIA",
+    accountNo: "41119661474",
+    mobile: "0",
+  },
+  {
+    schemeCode: "2792",
+    schemeName: "Space Science Promotion",
+    accountType: "ZBA",
+    bank: "STATE BANK OF INDIA",
+    accountNo: "42804026343",
+    mobile: "0",
+  },
+  {
+    schemeCode: "3614",
+    schemeName: "SPARC",
+    accountType: "ZBA",
+    bank: "STATE BANK OF INDIA",
+    accountNo: "41257726976",
+    mobile: "0",
+  },
+  {
+    schemeCode: "4305",
+    schemeName: "Vigyan Dhara",
+    accountType: "ZBA",
+    bank: "UNION BANK OF INDIA",
+    accountNo: "070312010000105",
+    mobile: "0",
+  },
+];
 const fmtINRStrict = (n) => {
   const num = parseFloat(n) || 0;
-  return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return num.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
-// Sum the `amount` field across an items array (equipment[] or manpowerList[]).
-const sumAmounts = (items) =>
-  (items || []).reduce((acc, it) => acc + (parseFloat(it.amount) || 0), 0);
-
-// ── Dummy placeholder data ─────────────────────────────────────────────────
-// Used only to seed brand-new items / a standalone preview, so the "Report"
-// tab always has something representative to render before real data exists.
-const DUMMY_EQUIPMENT = [
-  { name: 'High Performance Workstation', amount: 300000 },
-  { name: 'GPU Server', amount: 200000 },
-];
-const DUMMY_MANPOWER = [
-  { type: 'Project Associate-I', amount: 200000 },
-  { type: 'Junior Research Fellow', amount: 100000 },
-];
-const DUMMY_INSTALLMENT = {
-  label: '1st Installment',
-
-  consumables: '150000',
-  travel: '50000',
-  contingency: '25000',
-  ssrBudget: '30000',
-  overheadTotal: '120000',
-
-  equipment: DUMMY_EQUIPMENT,
-  manpowerList: DUMMY_MANPOWER,
-
-  // Proceedings
-  proceedingNo: 'CSRC/CTDT/2026/OBS',
-  proceedingDate: '18-06-2026',
-  letterRefDate: '15-06-2026',
-  directorName: 'THE DIRECTOR, CSRC',
-
-  // Bank
-  bankAccount: '123456789012',
-  ifscCode: 'SBIN0006756',
-  bankBranch: 'Anna University Branch',
+const fmtDateGB = (d) => {
+  if (!d) return "";
+  return new Date(d).toLocaleDateString("en-GB");
 };
 
-// ── Make sure an item carries every field the CSRC Proceedings Report needs ───
-// (so the "Details" tab always has something to edit and the "Report" tab
-//  always has something to render, even for items created before this shape
-//  existed)
-function ensureReportShape(item) {
-  const base = JSON.parse(JSON.stringify(item));
-  base.pi = base.pi || {};
-  if (base.pi.designation === undefined) base.pi.designation = '';
+const today = () => new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
 
-  if (!base.installments || base.installments.length === 0) {
-    // Brand-new item: seed with dummy placeholder data so the Report tab
-    // has something representative to show before the user enters real values.
-    base.installments = [{ ...DUMMY_INSTALLMENT }];
-  } else {
-    base.installments = base.installments.map(inst => ({
-  label: inst.label ?? '1st Installment',
+const sumAmounts = (items, key) =>
+  (items || []).reduce((acc, it) => acc + (parseFloat(it[key]) || 0), 0);
 
-  nonRecurringTotal: inst.nonRecurringTotal ?? '',
-  manpower: inst.manpower ?? '',
-
-  consumables: inst.consumables || DUMMY_INSTALLMENT.consumables,
-  travel: inst.travel || DUMMY_INSTALLMENT.travel,
-  contingency: inst.contingency || DUMMY_INSTALLMENT.contingency,
-  ssrBudget: inst.ssrBudget || DUMMY_INSTALLMENT.ssrBudget,
-  overheadTotal: inst.overheadTotal || DUMMY_INSTALLMENT.overheadTotal,
-
-  equipment:
-    inst.equipment?.length > 0
-      ? inst.equipment
-      : DUMMY_EQUIPMENT,
-
-  manpowerList:
-    inst.manpowerList?.length > 0
-      ? inst.manpowerList
-      : DUMMY_MANPOWER,
-
-  heads: inst.heads || [],
-}));
-  }
-
-base.proceedingNo =
-  base.proceedingNo || 'CSRC/CTDT/2026/OBS';
-
-base.proceedingDate =
-  base.proceedingDate || '18-06-2026';
-
-base.letterRefDate =
-  base.letterRefDate || '15-06-2026';
-
-base.directorName =
-  base.directorName || 'THE DIRECTOR, CSRC';
-
-base.bankAccount =
-  base.bankAccount || '123456789012';
-
-base.ifscCode =
-  base.ifscCode || 'SBIN0006756';
-
-base.bankBranch =
-  base.bankBranch || 'Anna University Branch';
-  return base;
-}
-
-// ── Build the live report data straight from the (possibly unsaved) draft ─────
-function buildLiveReportData(draft) {
-  return assembleReportData(
-    {
-      name: draft?.pi?.name,
-      designation: draft?.pi?.designation,
-      department: draft?.pi?.department,
-      campus: draft?.pi?.campus,
-      accountNumber: draft?.bankAccount,
-      ifscCode: draft?.ifscCode,
-      bankBranch: draft?.bankBranch,
-    },
-    {
-      fundingAgency: draft?.fundingAgency,
-      title: draft?.title,
-      refNo: draft?.refNo,
-      refDate: draft?.refDate,
-      projectScheme: draft?.projectScheme,
-      period: draft?.period,
-      directorName: draft?.directorName,
-    },
-    {
-      projectTitle: draft?.title,
-      fundingAgency: draft?.fundingAgency,
-      proceedingNo: draft?.proceedingNo || draft?.refNo || 'CSRC/CTDT/2026/OBS',
-      proceedingDate: draft?.proceedingDate || new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
-      period: draft?.period,
-      installments: draft?.installments || [],
-      toDean: draft?.toDean,
-    },
-    0,
-    [],
-  );
-}
-
-// ── Transfer Timeline (visual) ─────────────────────────────────────────────────
-function TransferTimeline({ item }) {
-  const history = item.transferHistory || [];
-
+// ── Transfer Timeline ─────────────────────────────────────────────────────────
+function TransferTimeline({ history, currentHolder, isCompleted }) {
   const timelineStyle = {
-    wrap: { padding: '8px 0' },
-    entry: { display: 'flex', gap: '12px', marginBottom: '14px' },
-    dotWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' },
-    dot: (approved) => ({
-      width: '24px', height: '24px', borderRadius: '50%',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '12px', fontWeight: 'bold', flexShrink: 0,
-      background: approved ? '#dcfce7' : '#dbeafe',
-      color: approved ? '#16a34a' : '#2563eb',
-      border: `2px solid ${approved ? '#16a34a' : '#2563eb'}`,
-    }),
-    line: { width: '2px', flex: 1, background: '#e2e8f0', marginTop: '4px', minHeight: '14px' },
-    content: { flex: 1, paddingBottom: '4px' },
-    date: { fontSize: '11px', color: '#888', marginBottom: '2px' },
-    transfer: { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' },
-    from: { fontSize: '12px', color: '#555' },
-    arrow: { fontSize: '13px', color: '#999' },
-    to: { fontSize: '12px', fontWeight: 600, color: '#1e293b' },
-    roleBadge: (role) => ({
-      fontSize: '10px', padding: '1px 6px', borderRadius: '999px', fontWeight: 600,
-      background: role === 'superintendent' ? '#dbeafe' : role === 'director' ? '#fce7f3' : '#dcfce7',
-      color: role === 'superintendent' ? '#1d4ed8' : role === 'director' ? '#be185d' : '#15803d',
-    }),
-    statusBadge: (approved) => ({
-      marginTop: '4px', fontSize: '10px', padding: '1px 8px', borderRadius: '999px',
-      background: approved ? '#f0fdf4' : '#eff6ff',
-      color: approved ? '#16a34a' : '#2563eb',
-      border: `1px solid ${approved ? '#bbf7d0' : '#bfdbfe'}`,
-      display: 'inline-block',
-    }),
-    pendingEntry: { display: 'flex', gap: '12px' },
-    pendingDot: {
-      width: '24px', height: '24px', borderRadius: '50%',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '12px', background: '#fef9c3', color: '#ca8a04',
-      border: '2px solid #ca8a04', flexShrink: 0,
+    wrap: { padding: "8px 0" },
+    entry: { display: "flex", gap: "12px", marginBottom: "14px" },
+    dotWrap: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      minWidth: "28px",
     },
-    pendingLabel: { fontSize: '12px', color: '#92400e', fontWeight: 500, paddingTop: '4px' },
+    dot: (approved) => ({
+      width: "24px",
+      height: "24px",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "12px",
+      fontWeight: "bold",
+      flexShrink: 0,
+      background: approved ? "#dcfce7" : "#dbeafe",
+      color: approved ? "#16a34a" : "#2563eb",
+      border: `2px solid ${approved ? "#16a34a" : "#2563eb"}`,
+    }),
+    line: {
+      width: "2px",
+      flex: 1,
+      background: "#e2e8f0",
+      marginTop: "4px",
+      minHeight: "14px",
+    },
+    content: { flex: 1, paddingBottom: "4px" },
+    date: { fontSize: "11px", color: "#888", marginBottom: "2px" },
+    transfer: {
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      flexWrap: "wrap",
+    },
+    from: { fontSize: "12px", color: "#555" },
+    arrow: { fontSize: "13px", color: "#999" },
+    to: { fontSize: "12px", fontWeight: 600, color: "#1e293b" },
+    statusBadge: (approved) => ({
+      marginTop: "4px",
+      fontSize: "10px",
+      padding: "1px 8px",
+      borderRadius: "999px",
+      background: approved ? "#f0fdf4" : "#eff6ff",
+      color: approved ? "#16a34a" : "#2563eb",
+      border: `1px solid ${approved ? "#bbf7d0" : "#bfdbfe"}`,
+      display: "inline-block",
+    }),
+    pendingEntry: { display: "flex", gap: "12px" },
+    pendingDot: {
+      width: "24px",
+      height: "24px",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "12px",
+      background: "#fef9c3",
+      color: "#ca8a04",
+      border: "2px solid #ca8a04",
+      flexShrink: 0,
+    },
+    pendingLabel: {
+      fontSize: "12px",
+      color: "#92400e",
+      fontWeight: 500,
+      paddingTop: "4px",
+    },
   };
 
-  if (history.length === 0) {
+  if (!history || history.length === 0) {
     return (
-      <div style={{ color: '#888', fontSize: '13px', textAlign: 'center', padding: '24px 0' }}>
+      <div
+        style={{
+          color: "#888",
+          fontSize: "13px",
+          textAlign: "center",
+          padding: "24px 0",
+        }}
+      >
         No transfer history yet. This item is still with the assistant.
       </div>
     );
   }
 
+  const actionLabel = (action) => {
+    if (action === "APPROVE_AND_ASSIGN")
+      return "Approved & Forwarded to Supervisor";
+    if (action === "APPROVE_AND_ASSIGN_DD") return "Approved & Forwarded to DD";
+    if (action === "APPROVE_AND_ASSIGN_DIRECTOR")
+      return "Approved & Forwarded to Director";
+    if (action === "FINAL_APPROVE") return "Final Approved — Completed";
+    if (action === "TRANSFER") return "Forwarded (Pending Approval)";
+    return action;
+  };
+
+  const isApprovedAction = (action) =>
+    [
+      "APPROVE_AND_ASSIGN",
+      "APPROVE_AND_ASSIGN_DD",
+      "APPROVE_AND_ASSIGN_DIRECTOR",
+      "FINAL_APPROVE",
+    ].includes(action);
+
   return (
     <div style={timelineStyle.wrap}>
       {history.map((entry, i) => {
-        const toName  = typeof entry.to   === 'object' ? entry.to?.name   : entry.to;
-        const toRole  = typeof entry.to   === 'object' ? entry.to?.role   : null;
-        const fromName = typeof entry.from === 'object' ? entry.from?.name : entry.from;
+        const approved = isApprovedAction(entry.action);
         return (
-          <div key={i} style={timelineStyle.entry}>
+          <div key={entry.id || i} style={timelineStyle.entry}>
             <div style={timelineStyle.dotWrap}>
-              <div style={timelineStyle.dot(entry.approved)}>{entry.approved ? '✔' : '↪'}</div>
+              <div style={timelineStyle.dot(approved)}>
+                {approved ? "✔" : "↪"}
+              </div>
               {i < history.length - 1 && <div style={timelineStyle.line} />}
             </div>
             <div style={timelineStyle.content}>
-              <div style={timelineStyle.date}>{entry.date}</div>
+              <div style={timelineStyle.date}>
+                {fmtDateGB(entry.created_at)}
+              </div>
               <div style={timelineStyle.transfer}>
-                <span style={timelineStyle.from}>{fromName}</span>
+                <span style={timelineStyle.from}>{entry.assigned_from}</span>
                 <span style={timelineStyle.arrow}>→</span>
-                <span style={timelineStyle.to}>{toName}</span>
-                {toRole && <span style={timelineStyle.roleBadge(toRole)}>{toRole}</span>}
+                <span style={timelineStyle.to}>{entry.assigned_to}</span>
               </div>
-              <div style={timelineStyle.statusBadge(entry.approved)}>
-                {entry.approved ? '✔ Approved & Forwarded' : '↪ Forwarded (Pending Approval)'}
+              <div style={timelineStyle.statusBadge(approved)}>
+                {approved
+                  ? `✔ ${actionLabel(entry.action)}`
+                  : `↪ ${actionLabel(entry.action)}`}
               </div>
+              {entry.remarks && (
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#94a3b8",
+                    marginTop: "2px",
+                  }}
+                >
+                  Remarks: {entry.remarks}
+                </div>
+              )}
             </div>
           </div>
         );
       })}
-      {/* Terminal node */}
-      {item.currentHolder ? (
+      {!isCompleted ? (
         <div style={timelineStyle.pendingEntry}>
           <div style={timelineStyle.pendingDot}>⏳</div>
           <div style={timelineStyle.pendingLabel}>
-            Waiting for action from{' '}
-            <strong>{item.currentHolder?.name || 'Next Approver'}</strong>
-            {item.currentHolder?.role && ` (${item.currentHolder.role})`}
+            Waiting for action from{" "}
+            <strong>{currentHolder || "Next Approver"}</strong>
           </div>
         </div>
       ) : (
         <div style={timelineStyle.pendingEntry}>
-          <div style={{ ...timelineStyle.pendingDot, background: '#dcfce7', color: '#16a34a', border: '2px solid #16a34a' }}>✔</div>
-          <div style={{ ...timelineStyle.pendingLabel, color: '#15803d' }}>
+          <div
+            style={{
+              ...timelineStyle.pendingDot,
+              background: "#dcfce7",
+              color: "#16a34a",
+              border: "2px solid #16a34a",
+            }}
+          >
+            ✔
+          </div>
+          <div style={{ ...timelineStyle.pendingLabel, color: "#15803d" }}>
             Process Completed — Fully Approved
           </div>
         </div>
@@ -255,439 +388,891 @@ function TransferTimeline({ item }) {
 }
 
 // ── Stage Badge ───────────────────────────────────────────────────────────────
-function StageBadge({ role }) {
-  const map = {
-    superintendent: { label: 'With Superintendent', cls: 'fs-stage-supdt' },
-    director:       { label: 'With Director',       cls: 'fs-stage-dir'   },
-    assistant:      { label: 'With Assistant',      cls: 'fs-stage-asst'  },
-  };
-  const { label, cls } = map[role] || { label: 'Pending', cls: 'fs-stage-asst' };
-  return <span className={`fs-stage-badge ${cls}`}>{label}</span>;
+function StageBadge({ status }) {
+  const s = (status || "").toUpperCase();
+  if (s === "COMPLETED")
+    return <span className="fs-stage-badge fs-stage-completed">Completed</span>;
+  if (s === "ASSIGNED TO DIRECTOR")
+    return <span className="fs-stage-badge fs-stage-dir">With Director</span>;
+  if (s === "ASSIGNED TO SUPERVISOR")
+    return (
+      <span className="fs-stage-badge fs-stage-supdt">With Supervisor</span>
+    );
+  if (s === "ASSIGNED TO DD")
+    return <span className="fs-stage-badge fs-stage-dd">With DD</span>;
+  if (s === "ASSIGNED")
+    return <span className="fs-stage-badge fs-stage-asst">With Assistant</span>;
+  return <span className="fs-stage-badge fs-stage-asst">{status}</span>;
 }
 
-// ── Small repeatable-list editor (equipment / manpower types) — now with amount ─
-function ListFieldEditor({ label, items, onAdd, onRemove, onChange, placeholder, disabled, nameKey, totalAmount }) {
-  return (
-    <div style={{ marginBottom: '14px' }}>
-      <label style={{ fontSize: '12px', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '6px' }}>
-        {label}
-        <span style={{ fontWeight: 700, color: '#1d4ed8' }}> (₹ {fmtINRStrict(totalAmount)})</span>
-      </label>
-      {(items || []).map((val, i) => (
-        <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
-          <input
-            className="edit-input"
-            value={val[nameKey]}
-            disabled={disabled}
-            placeholder={placeholder}
-            onChange={e => onChange(i, { ...val, [nameKey]: e.target.value })}
-            style={{ flex: 2 }}
-          />
-          <input
-            className="edit-input"
-            type="number"
-            value={val.amount ?? ''}
-            disabled={disabled}
-            placeholder="Amount (₹)"
-            onChange={e => onChange(i, { ...val, amount: e.target.value })}
-            style={{ flex: 1 }}
-          />
-          {!disabled && (
-            <button type="button" onClick={() => onRemove(i)}
-              style={{ border: '1px solid #fecaca', background: '#fef2f2', color: '#b91c1c', borderRadius: '8px', padding: '0 10px', cursor: 'pointer' }}>
-              ✕
-            </button>
-          )}
-        </div>
-      ))}
-      {!disabled && (
-        <button type="button" onClick={onAdd}
-          style={{ border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
-          ➕ Add {label.replace(/s$/, '')}
-        </button>
-      )}
-      {(!items || items.length === 0) && disabled && (
-        <div style={{ fontSize: '12px', color: '#94a3b8' }}>None added</div>
-      )}
-    </div>
-  );
-}
-
-// ── Manage Modal — combines View + Edit + Track into one modal, two tabs ──────
-function ManageModal({ item, editable, onSave, onClose }) {
-  const [tab, setTab] = useState('details');
-  const [draft, setDraft] = useState(() => ensureReportShape(item));
-  // Whether the Details tab is currently unlocked for editing.
-  // Always starts read-only; the user must press "Edit" to change anything.
+// ── Manage Modal ──────────────────────────────────────────────────────────────
+function ManageModal({ installmentId, editable, onClose, onSaved }) {
+  const [tab, setTab] = useState("details");
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [signatures, setSignatures] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+
+  // Separate draft state for each editable table so amounts can be changed
+  const [draft, setDraft] = useState(null); // installment row
+  const [draftRecurring, setDraftRecurring] = useState(null); // recurring_heads row
+  const [draftOverhead, setDraftOverhead] = useState(null); // overheads row
+  const [draftEquipment, setDraftEquipment] = useState([]);
+  const [draftManpower, setDraftManpower] = useState([]);
+  // ── FIX 3: history is fetched separately so tracking always works even if
+  // the detail endpoint doesn't join/return installment_assign_history rows.
+  const [history, setHistory] = useState([]);
 
   const reportRef = useRef(null);
 
-const downloadPDF = () => {
-  if (!reportRef.current) return;
+  useEffect(() => {
+    loadDetail();
+  }, [installmentId]);
 
-  html2pdf()
-    .set({
-      margin: 10,
-      filename: `${draft.refNo || "Proceedings"}-Report.pdf`,
-      image: { type: "jpeg", quality: 1 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait",
-      },
-    })
-    .from(reportRef.current)
-    .save();
-};
+  const loadDetail = async () => {
+    try {
+      setLoading(true);
+      const [detailRes, sigRes, histRes] = await Promise.all([
+        fetch(`http://localhost:5100/api/sanctions/detail/${installmentId}`),
+        fetch(
+          `http://localhost:5100/api/sanctions/signatures/${installmentId}`,
+        ),
+        // ── FIX 3: separate history fetch ──────────────────────────────────
+        fetch(
+          `http://localhost:5100/api/sanctions/assign-history/${installmentId}`,
+        ),
+      ]);
+      const detail = await detailRes.json();
+      const sigs = await sigRes.json();
+      const hist = await histRes.json();
 
-  useEffect(() => { setDraft(ensureReportShape(item)); setIsEditing(false); }, [item]);
+      setData(detail);
+      setSignatures(sigs);
+      setHistory(Array.isArray(hist) ? hist : detail.history || []);
 
-  const inst = draft.installments[0];
+      // ── FIX 1: initialise all three draft states ───────────────────────
+      setDraft({ ...detail.installment });
+      setDraftRecurring({ ...(detail.recurringHeads?.[0] || {}) });
+      setDraftOverhead({ ...(detail.overheads?.[0] || {}) });
 
-  // Fields are only actually editable when the parent says this item CAN be
-  // edited (e.g. it's in the "active" tab) AND the user has pressed Edit.
-  const fieldsEditable = editable && isEditing;
-
-  const patchInst = (patch) => setDraft(d => ({ ...d, installments: [{ ...d.installments[0], ...patch }] }));
-  const patchPI   = (patch) => setDraft(d => ({ ...d, pi: { ...d.pi, ...patch } }));
-
-  // Equipment items now carry { name, amount } — amount feeds Non-Recurring Total
-  const addEquipment    = () => patchInst({ equipment: [...(inst.equipment || []), { name: '', amount: '' }] });
-  const removeEquipment = (i) => patchInst({ equipment: inst.equipment.filter((_, idx) => idx !== i) });
-  const editEquipment   = (i, val) => patchInst({ equipment: inst.equipment.map((e, idx) => idx === i ? val : e) });
-
-  // Manpower items now carry { type, amount } — amount feeds Manpower (Recurring) total
-  const addManpower    = () => patchInst({ manpowerList: [...(inst.manpowerList || []), { type: '', amount: '' }] });
-  const removeManpower = (i) => patchInst({ manpowerList: inst.manpowerList.filter((_, idx) => idx !== i) });
-  const editManpower   = (i, val) => patchInst({ manpowerList: inst.manpowerList.map((m, idx) => idx === i ? val : m) });
-
-  // Derived totals — Non-Recurring Total and Manpower are no longer manual
-  // inputs; they're computed live from the equipment / manpower item amounts.
-  const nonRecurringTotal = useMemo(() => sumAmounts(inst.equipment), [inst.equipment]);
-  const manpowerTotal     = useMemo(() => sumAmounts(inst.manpowerList), [inst.manpowerList]);
-  const recurringTotal    = manpowerTotal
-    + (parseFloat(inst.consumables) || 0)
-    + (parseFloat(inst.travel) || 0)
-    + (parseFloat(inst.contingency) || 0);
-
-  const holderRole = draft.currentHolder?.role;
-  const stageColors = {
-    superintendent: { bg: '#dbeafe', color: '#1d4ed8' },
-    director:       { bg: '#fce7f3', color: '#be185d' },
-    assistant:      { bg: '#dcfce7', color: '#15803d' },
+      setDraftEquipment(detail.nonRecurring || []);
+      setDraftManpower(detail.manpower || []);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Failed to load installment detail", err);
+    } finally {
+      setLoading(false);
+    }
   };
-  const sc = stageColors[holderRole] || { bg: '#f3f4f6', color: '#374151' };
-  const isCompleted = !draft.currentHolder && (draft.transferHistory?.length > 0);
 
+  const downloadPDF = () => {
+    if (!reportRef.current) return;
+
+    html2pdf()
+      .set({
+        margin: [5, 5, 5, 5],
+
+        pagebreak: {
+          mode: ["avoid-all", "css", "legacy"],
+        },
+        pagebreak: {
+          mode: ["avoid-all", "css", "legacy"],
+        },
+        filename: `${inst.sanction_reference_no || "Proceedings"}.pdf`,
+
+        image: {
+          type: "jpeg",
+          quality: 1,
+        },
+
+        html2canvas: {
+          scale: 1,
+          useCORS: true,
+        },
+
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+        },
+      })
+      .from(reportRef.current)
+      .save();
+  };
+
+  const handleSaveClick = async () => {
+    try {
+      // Save the main installment row
+      await fetch(`http://localhost:5100/api/sanctions/${installmentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+      });
+      for (const eq of draftEquipment) {
+        await fetch(`http://localhost:5100/api/sanctions/equipment/${eq.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(eq),
+        });
+      }
+      for (const mp of draftManpower) {
+        await fetch(`http://localhost:5100/api/sanctions/manpower/${mp.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mp),
+        });
+      }
+      // ── FIX 1: also persist recurring heads and overheads if they exist ──
+      if (draftRecurring?.id) {
+        await fetch(
+          `http://localhost:5100/api/sanctions/recurring-heads/${draftRecurring.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draftRecurring),
+          },
+        );
+      }
+      if (draftOverhead?.id) {
+        await fetch(
+          `http://localhost:5100/api/sanctions/overheads/${draftOverhead.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draftOverhead),
+          },
+        );
+      }
+
+      setIsEditing(false);
+      await loadDetail();
+      onSaved && onSaved();
+    } catch (err) {
+      console.error("Failed to save", err);
+      alert("Failed to save changes");
+    }
+  };
+
+  // ── Derived totals — always recalculate from the current draft values so
+  // they update live as the user types in edit mode. ─────────────────────────
+  const nonRecurringTotal = sumAmounts(data?.nonRecurring, "amount");
+  const manpowerTotal = sumAmounts(data?.manpower, "amount");
+
+  const consumables = parseFloat(draftRecurring?.consumables) || 0;
+  const travel = parseFloat(draftRecurring?.travel) || 0;
+  const contingency = parseFloat(draftRecurring?.contingency) || 0;
+  const ssrBudget = parseFloat(draftRecurring?.ssr_budget) || 0;
+  const overheadAmt = parseFloat(draftOverhead?.total_overhead) || 0;
+
+  const recurringTotal = manpowerTotal + consumables + travel + contingency;
+
+  // ── FIX 2: Grand total ────────────────────────────────────────────────────
+  const grandTotal =
+    nonRecurringTotal + recurringTotal + ssrBudget + overheadAmt;
+
+  // ── Styles ────────────────────────────────────────────────────────────────
   const overlayStyle = {
-    position: 'fixed', inset: 0, zIndex: 100000,
-    background: 'rgba(0,0,0,0.6)',
-    display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-    padding: '16px',
+    position: "fixed",
+    inset: 0,
+    zIndex: 100000,
+    background: "rgba(0,0,0,0.6)",
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    padding: "16px",
   };
   const modalStyle = {
-    background: '#f8fafc', borderRadius: '16px', width: 'min(960px, 96vw)',
-    height: 'calc(100vh - 32px)', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-    boxShadow: '0 40px 100px rgba(0,0,0,0.4)',
+    background: "#f8fafc",
+    borderRadius: "16px",
+    width: "min(960px, 96vw)",
+    height: "calc(100vh - 32px)",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    boxShadow: "0 40px 100px rgba(0,0,0,0.4)",
   };
   const headerStyle = {
-    padding: '14px 20px', background: '#1e293b',
-    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-    borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0,
+    padding: "14px 20px",
+    background: "#1e293b",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    flexShrink: 0,
   };
   const tabBarStyle = {
-    display: 'flex', gap: '4px', padding: '0 20px', background: '#fff',
-    borderBottom: '1px solid #e2e8f0', flexShrink: 0,
+    display: "flex",
+    gap: "4px",
+    padding: "0 20px",
+    background: "#fff",
+    borderBottom: "1px solid #e2e8f0",
+    flexShrink: 0,
   };
   const tabBtnStyle = (active) => ({
-    padding: '12px 16px', border: 'none', background: 'none', cursor: 'pointer',
-    fontSize: '13px', fontWeight: 700, color: active ? '#1d4ed8' : '#64748b',
-    borderBottom: active ? '3px solid #1d4ed8' : '3px solid transparent',
+    padding: "12px 16px",
+    border: "none",
+    background: "none",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: 700,
+    color: active ? "#1d4ed8" : "#64748b",
+    borderBottom: active ? "3px solid #1d4ed8" : "3px solid transparent",
   });
-  const bodyStyle = { flex: 1, overflowY: 'auto', padding: '20px 24px', background: tab === 'report' ? '#e5e7eb' : '#f8fafc' };
+  const bodyStyle = {
+    flex: 1,
+    overflowY: "auto",
+    padding: "20px 24px",
+    background: tab === "report" ? "#e5e7eb" : "#f8fafc",
+  };
   const closeBtnStyle = {
-    background: '#ef4444', border: 'none', color: '#fff', borderRadius: '8px',
-    padding: '6px 13px', cursor: 'pointer', fontWeight: 700, fontSize: '12px',
+    background: "#ef4444",
+    border: "none",
+    color: "#fff",
+    borderRadius: "8px",
+    padding: "6px 13px",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: "12px",
   };
   const editBtnStyle = {
-    background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px',
-    padding: '6px 13px', cursor: 'pointer', fontWeight: 700, fontSize: '12px',
+    background: "#2563eb",
+    border: "none",
+    color: "#fff",
+    borderRadius: "8px",
+    padding: "6px 13px",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: "12px",
   };
 
-  const handleSaveClick = () => {
-    onSave(draft);
-    setIsEditing(false);
-  };
+  if (loading || !data) {
+    return (
+      <div
+        style={overlayStyle}
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <div
+          style={{
+            ...modalStyle,
+            alignItems: "center",
+            justifyContent: "center",
+            display: "flex",
+          }}
+        >
+          <div style={{ color: "#64748b", fontWeight: 600 }}>Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
+  const inst = data.installment;
+  const isCompleted = (inst.status || "").toUpperCase() === "COMPLETED";
+  const installmentIndexMap = {
+    I: 0,
+    II: 1,
+    III: 2,
+    IV: 3,
+    V: 4,
+  };
+  const reportData = {
+    ...assembleReportData(
+      {
+        name: inst.pi_name,
+        designation: inst.pi_designation,
+        department: inst.pi_dept,
+        campus: inst.pi_campus,
+      },
+      {
+        title: inst.project_title,
+        fundingAgency: inst.funding_agency,
+      },
+      {
+        installments: [
+          {
+            equipment: (data.nonRecurring || []).map((e) => ({
+              name: e.equipment,
+              amount: e.amount,
+            })),
+            manpowerList: (data.manpower || []).map((m) => ({
+              type: m.manpower_type,
+              amount: m.amount,
+            })),
+            consumables,
+            travel,
+            contingency,
+            ssrBudget,
+            overheadTotal: overheadAmt,
+          },
+        ],
+        proceedingNo: inst.sanction_reference_no,
+        proceedingDate: today(),
+      },
+      installmentIndexMap[inst.installment] || 0,
+    ),
+
+    assistantApproved: [
+      "ASSIGNED TO SUPERVISOR",
+      "ASSIGNED TO DIRECTOR",
+      "COMPLETED",
+      "APPROVED",
+    ].includes((inst.status || "").toUpperCase()),
+
+    superintendentApproved: [
+      "ASSIGNED TO DIRECTOR",
+      "COMPLETED",
+      "APPROVED",
+    ].includes((inst.status || "").toUpperCase()),
+
+    directorApproved: ["COMPLETED", "APPROVED"].includes(
+      (inst.status || "").toUpperCase(),
+    ),
+  };
   return (
-    <div style={overlayStyle} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div
+      style={overlayStyle}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div style={modalStyle}>
+        {/* Header */}
         <div style={headerStyle}>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-              FRESH SANCTION — {draft.refNo}
+            <div
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.55)",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                marginBottom: "4px",
+              }}
+            >
+              FRESH SANCTION —{" "}
+              {inst.sanction_reference_no || `Installment #${inst.id}`}
             </div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1.3, maxWidth: '640px' }}>
-              {draft.title}
+            <div
+              style={{
+                fontSize: "14px",
+                fontWeight: 700,
+                color: "#fff",
+                lineHeight: 1.3,
+                maxWidth: "640px",
+              }}
+            >
+              {inst.project_title}
             </div>
-            {draft.currentHolder ? (
-              <div style={{ marginTop: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', background: sc.bg, color: sc.color }}>
-                  {holderRole === 'superintendent' ? '🔵' : holderRole === 'director' ? '🔴' : '🟢'}
-                  {' '}Currently with {draft.currentHolder?.name} ({holderRole})
-                </span>
-              </div>
-            ) : draft.transferHistory?.length > 0 && (
-              <div style={{ marginTop: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', background: '#dcfce7', color: '#15803d' }}>
-                  ✔ Completed
-                </span>
-              </div>
-            )}
+            <div style={{ marginTop: "8px" }}>
+              <StageBadge status={inst.status} />
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {editable && tab === 'details' && !isEditing && (
-              <button style={editBtnStyle} onClick={() => setIsEditing(true)}>✏️ Edit</button>
+          <div style={{ display: "flex", gap: "8px" }}>
+            {editable && tab === "details" && !isEditing && (
+              <button style={editBtnStyle} onClick={() => setIsEditing(true)}>
+                ✏️ Edit
+              </button>
             )}
             {tab === "report" && (
-  <button
-    onClick={downloadPDF}
-    style={{
-      background: "#16a34a",
-      border: "none",
-      color: "#fff",
-      borderRadius: "8px",
-      padding: "6px 13px",
-      cursor: "pointer",
-      fontWeight: 700,
-      fontSize: "12px",
-    }}
-  >
-    📄 Download PDF
-  </button>
-)}
-
-<button style={closeBtnStyle} onClick={onClose}>
-  ✕ Close
-</button>
+              <button
+                onClick={downloadPDF}
+                style={{
+                  background: "#16a34a",
+                  border: "none",
+                  color: "#fff",
+                  borderRadius: "8px",
+                  padding: "6px 13px",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                }}
+              >
+                📄 Download PDF
+              </button>
+            )}
+            <button style={closeBtnStyle} onClick={onClose}>
+              ✕ Close
+            </button>
           </div>
         </div>
 
+        {/* Tab bar */}
         <div style={tabBarStyle}>
-          <button style={tabBtnStyle(tab === 'details')} onClick={() => setTab('details')}>📋 Full Details &amp; Tracking</button>
-          <button style={tabBtnStyle(tab === 'report')}  onClick={() => setTab('report')}>📄 Proceedings Report</button>
+          <button
+            style={tabBtnStyle(tab === "details")}
+            onClick={() => setTab("details")}
+          >
+            📋 Full Details &amp; Tracking
+          </button>
+          <button
+            style={tabBtnStyle(tab === "report")}
+            onClick={() => setTab("report")}
+          >
+            📄 Proceedings Report
+          </button>
         </div>
 
+        {/* Body */}
         <div style={bodyStyle}>
-          {tab === 'details' ? (
-            <div className="detail-card" style={{ boxShadow: 'none', padding: 0, background: 'transparent' }}>
+          {tab === "details" ? (
+            <div
+              className="detail-card"
+              style={{
+                boxShadow: "none",
+                padding: 0,
+                background: "transparent",
+              }}
+            >
+              {/* ── Project Details ── */}
               <h3 style={{ marginTop: 0 }}>Project Details</h3>
               <div className="detail-grid">
                 <div>
-                  <label>Reference No</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.refNo || ''}
-                    onChange={e => setDraft({ ...draft, refNo: e.target.value })} />
+                  <label>Sanction Reference No</label>
+                  <input
+                    className="edit-input"
+                    disabled={!isEditing}
+                    value={draft.sanction_reference_no || ""}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        sanction_reference_no: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div>
                   <label>Funding Agency</label>
-                  <select className="edit-input" disabled={!fieldsEditable} value={draft.fundingAgency || ''}
-                    onChange={e => setDraft({ ...draft, fundingAgency: e.target.value })}>
-                    {['SERB','DST','DRDO','ISRO','ICMR','CSIR','MeitY','DBT','MNRE'].map(a =>
-                      <option key={a}>{a}</option>)}
-                  </select>
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={inst.funding_agency || ""}
+                    readOnly
+                  />
                 </div>
-                <div style={{ gridColumn: '1 / -1' }}>
+                <div style={{ gridColumn: "1 / -1" }}>
                   <label>Project Title</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.title || ''}
-                    onChange={e => setDraft({ ...draft, title: e.target.value })} />
-                </div>
-                <div>
-                  <label>Project Scheme</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.projectScheme || ''}
-                    placeholder="e.g. SPC / Core Research Grant"
-                    onChange={e => setDraft({ ...draft, projectScheme: e.target.value })} />
-                </div>
-                <div>
-                  <label>Total Cost (₹)</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.cost || ''}
-                    onChange={e => setDraft({ ...draft, cost: e.target.value })} />
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={inst.project_title || ""}
+                    readOnly
+                  />
                 </div>
                 <div>
                   <label>PI Name</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.pi.name || ''}
-                    onChange={e => patchPI({ name: e.target.value })} />
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={inst.pi_name || ""}
+                    readOnly
+                  />
                 </div>
                 <div>
                   <label>PI Designation</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.pi.designation || ''}
-                    placeholder="e.g. Professor"
-                    onChange={e => patchPI({ designation: e.target.value })} />
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={inst.pi_designation || ""}
+                    readOnly
+                  />
                 </div>
                 <div>
                   <label>Department</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.pi.department || ''}
-                    onChange={e => patchPI({ department: e.target.value })} />
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={inst.pi_dept || ""}
+                    readOnly
+                  />
                 </div>
                 <div>
                   <label>Campus</label>
-                  <select className="edit-input" disabled={!fieldsEditable} value={draft.pi.campus || ''}
-                    onChange={e => patchPI({ campus: e.target.value })}>
-                    {['CEG Campus','MIT Campus','ACT Campus','SAP Campus'].map(c =>
-                      <option key={c}>{c}</option>)}
-                  </select>
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={inst.pi_campus || ""}
+                    readOnly
+                  />
                 </div>
                 <div>
-                  <label>Project Period</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.period || ''}
-                    onChange={e => setDraft({ ...draft, period: e.target.value })} />
+                  <label>Project Start Date</label>
+                  <input
+                    type="date"
+                    className="edit-input"
+                    disabled={!isEditing}
+                    value={
+                      draft.project_start_date
+                        ? draft.project_start_date.split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setDraft({ ...draft, project_start_date: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label>Project End Date</label>
+                  <input
+                    type="date"
+                    className="edit-input"
+                    disabled={!isEditing}
+                    value={
+                      draft.project_end_date
+                        ? draft.project_end_date.split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setDraft({ ...draft, project_end_date: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label>Installment</label>
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={inst.installment || ""}
+                    readOnly
+                  />
                 </div>
               </div>
 
-              <h3>Proceedings &amp; Reference</h3>
+              {/* ── Budget Breakdown (FIX 1 + FIX 2) ── */}
+              <h3>Installment Budget Breakdown</h3>
               <div className="detail-grid">
+                {/* Manpower — derived from manpower sub-table, always read-only */}
                 <div>
-                  <label>Proceeding No</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.proceedingNo || ''}
-                    placeholder="CSRC/CTDT/2026/OBS"
-                    onChange={e => setDraft({ ...draft, proceedingNo: e.target.value })} />
+                  <label>
+                    Manpower (₹){" "}
+                    <span style={{ fontWeight: 400, color: "#94a3b8" }}>
+                      — from Manpower
+                    </span>
+                  </label>
+                  <input
+                    className="edit-input"
+                    disabled
+                    value={fmtINRStrict(manpowerTotal)}
+                  />
                 </div>
-                <div>
-                  <label>Proceeding Date</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.proceedingDate || ''}
-                    placeholder="DD-MM-YYYY"
-                    onChange={e => setDraft({ ...draft, proceedingDate: e.target.value })} />
-                </div>
-                <div>
-                  <label>Letter Ref. Date</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.refDate || ''}
-                    placeholder="DD-MM-YYYY"
-                    onChange={e => setDraft({ ...draft, refDate: e.target.value })} />
-                </div>
-                <div>
-                  <label>Director Name</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.directorName || ''}
-                    placeholder="THE DIRECTOR, CSRC"
-                    onChange={e => setDraft({ ...draft, directorName: e.target.value })} />
-                </div>
-              </div>
 
-              <h3>Bank Details</h3>
-              <div className="detail-grid">
-                <div>
-                  <label>Bank Account No.</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.bankAccount || ''}
-                    onChange={e => setDraft({ ...draft, bankAccount: e.target.value })} />
-                </div>
-                <div>
-                  <label>IFSC Code</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.ifscCode || ''}
-                    onChange={e => setDraft({ ...draft, ifscCode: e.target.value })} />
-                </div>
-                <div>
-                  <label>Bank Branch</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={draft.bankBranch || ''}
-                    onChange={e => setDraft({ ...draft, bankBranch: e.target.value })} />
-                </div>
-              </div>
-
-              <h3>Installment Budget Breakdown — {inst.label}</h3>
-              <div className="detail-grid">
-                <div>
-                  <label>Installment Label</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={inst.label || ''}
-                    onChange={e => patchInst({ label: e.target.value })} />
-                </div>
-                <div>
-                  <label>Non-Recurring Total (₹) <span style={{ fontWeight: 400, color: '#94a3b8' }}>— auto from Equipment</span></label>
-                  <input className="edit-input" disabled value={fmtINRStrict(nonRecurringTotal)} />
-                </div>
-                <div>
-                  <label>Manpower (₹) <span style={{ fontWeight: 400, color: '#94a3b8' }}>— auto from Manpower Types</span></label>
-                  <input className="edit-input" disabled value={fmtINRStrict(manpowerTotal)} />
-                </div>
+                {/* ── FIX 1: recurring fields now use draftRecurring and respect isEditing ── */}
                 <div>
                   <label>Consumables &amp; Accessories (₹)</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={inst.consumables}
-                    onChange={e => patchInst({ consumables: e.target.value })} />
+                  <input
+                    className="edit-input"
+                    type="number"
+                    disabled={!isEditing}
+                    value={draftRecurring?.consumables ?? ""}
+                    onChange={(e) =>
+                      setDraftRecurring({
+                        ...draftRecurring,
+                        consumables: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div>
                   <label>Travel (₹)</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={inst.travel}
-                    onChange={e => patchInst({ travel: e.target.value })} />
+                  <input
+                    className="edit-input"
+                    type="number"
+                    disabled={!isEditing}
+                    value={draftRecurring?.travel ?? ""}
+                    onChange={(e) =>
+                      setDraftRecurring({
+                        ...draftRecurring,
+                        travel: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div>
                   <label>Contingency (₹)</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={inst.contingency}
-                    onChange={e => patchInst({ contingency: e.target.value })} />
-                </div>
-                <div>
-                  <label>Overhead Total (₹)</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={inst.overheadTotal}
-                    onChange={e => patchInst({ overheadTotal: e.target.value })} />
-                </div>
-                <div>
-                  <label>Scientific Social Responsibility Budget (₹)</label>
-                  <input className="edit-input" disabled={!fieldsEditable} value={inst.ssrBudget}
-                    onChange={e => patchInst({ ssrBudget: e.target.value })} />
-                </div>
-                <div>
-                  <label>Recurring Heads Total (₹) <span style={{ fontWeight: 400, color: '#94a3b8' }}>— auto</span></label>
-                  <input className="edit-input" disabled value={fmtINRStrict(recurringTotal)} />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '8px' }}>
-                <div style={{ flex: 1, minWidth: '240px' }}>
-                  <ListFieldEditor
-                    label="Equipment Items"
-                    items={inst.equipment || []}
-                    nameKey="name"
-                    totalAmount={nonRecurringTotal}
-                    onAdd={addEquipment}
-                    onRemove={removeEquipment}
-                    onChange={editEquipment}
-                    placeholder="e.g. High Performance Workstation"
-                    disabled={!fieldsEditable}
+                  <input
+                    className="edit-input"
+                    type="number"
+                    disabled={!isEditing}
+                    value={draftRecurring?.contingency ?? ""}
+                    onChange={(e) =>
+                      setDraftRecurring({
+                        ...draftRecurring,
+                        contingency: e.target.value,
+                      })
+                    }
                   />
                 </div>
-                <div style={{ flex: 1, minWidth: '240px' }}>
-                  <ListFieldEditor
-                    label="Manpower Types"
-                    items={inst.manpowerList || []}
-                    nameKey="type"
-                    totalAmount={manpowerTotal}
-                    onAdd={addManpower}
-                    onRemove={removeManpower}
-                    onChange={editManpower}
-                    placeholder="e.g. Project Associate-I"
-                    disabled={!fieldsEditable}
+                <div>
+                  <label>SSR Budget (₹)</label>
+                  <input
+                    className="edit-input"
+                    type="number"
+                    disabled={!isEditing}
+                    value={draftRecurring?.ssr_budget ?? ""}
+                    onChange={(e) =>
+                      setDraftRecurring({
+                        ...draftRecurring,
+                        ssr_budget: e.target.value,
+                      })
+                    }
                   />
                 </div>
+
+                {/* ── FIX 1: overhead field now uses draftOverhead and respects isEditing ── */}
               </div>
 
+              {/* ── FIX 2: Grand Total row ── */}
+
+              {/* Equipment + Manpower breakdowns */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "24px",
+                  flexWrap: "wrap",
+                  marginTop: "20px",
+                }}
+              >
+                <div style={{ flex: 1, minWidth: "240px" }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "#475569",
+                      display: "block",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Equipment Items{" "}
+                    <span style={{ fontWeight: 700, color: "#1d4ed8" }}>
+                      (₹ {fmtINRStrict(nonRecurringTotal)})
+                    </span>
+                  </label>
+                  {(data.nonRecurring || []).length === 0 ? (
+                    <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                      None added
+                    </div>
+                  ) : (
+                    draftEquipment.map((eq, i) => (
+                      <div
+                        key={eq.id || i}
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          padding: "4px 0",
+                          borderBottom: "1px solid #e2e8f0",
+                        }}
+                      >
+                        <input
+                          disabled={!isEditing}
+                          value={eq.equipment || ""}
+                          onChange={(e) => {
+                            const temp = [...draftEquipment];
+                            temp[i].equipment = e.target.value;
+                            setDraftEquipment(temp);
+                          }}
+                          style={{ flex: 1 }}
+                        />
+
+                        <input
+                          type="number"
+                          disabled={!isEditing}
+                          value={eq.amount || ""}
+                          onChange={(e) => {
+                            const temp = [...draftEquipment];
+                            temp[i].amount = e.target.value;
+                            setDraftEquipment(temp);
+                          }}
+                          style={{ width: "120px" }}
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: "240px" }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "#475569",
+                      display: "block",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Manpower Types{" "}
+                    <span style={{ fontWeight: 700, color: "#1d4ed8" }}>
+                      (₹ {fmtINRStrict(manpowerTotal)})
+                    </span>
+                  </label>
+                  {(data.manpower || []).length === 0 ? (
+                    <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                      None added
+                    </div>
+                  ) : (
+                    draftManpower.map((mp, i) => (
+                      <div
+                        key={mp.id || i}
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          padding: "4px 0",
+                          borderBottom: "1px solid #e2e8f0",
+                        }}
+                      >
+                        <input
+                          disabled={!isEditing}
+                          value={mp.manpower_type || ""}
+                          onChange={(e) => {
+                            const temp = [...draftManpower];
+                            temp[i].manpower_type = e.target.value;
+                            setDraftManpower(temp);
+                          }}
+                          style={{ flex: 1 }}
+                        />
+
+                        <input
+                          type="number"
+                          disabled={!isEditing}
+                          value={mp.amount || ""}
+                          onChange={(e) => {
+                            const temp = [...draftManpower];
+                            temp[i].amount = e.target.value;
+                            setDraftManpower(temp);
+                          }}
+                          style={{ width: "120px" }}
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+                {/* Non-Recurring — derived from equipment sub-table, always read-only */}
+              </div>
+              <br />
+              <div>
+                <label>
+                  Non-Recurring Total (₹){" "}
+                  <span style={{ fontWeight: 400, color: "#94a3b8" }}>
+                    — from Equipment
+                  </span>
+                </label>
+                <input
+                  className="edit-input"
+                  disabled
+                  value={fmtINRStrict(nonRecurringTotal)}
+                />
+              </div>
+              <br />
+              <div>
+                <label>
+                  Recurring Heads Total (₹){" "}
+                  <span style={{ fontWeight: 400, color: "#94a3b8" }}>
+                    — auto
+                  </span>
+                </label>
+                <input
+                  className="edit-input"
+                  disabled
+                  value={fmtINRStrict(recurringTotal)}
+                />
+              </div>
+              <br />
+              <div>
+                <label>Overhead Total (₹)</label>
+                <input
+                  className="edit-input"
+                  type="number"
+                  disabled={!isEditing}
+                  value={draftOverhead?.total_overhead ?? ""}
+                  onChange={(e) =>
+                    setDraftOverhead({
+                      ...draftOverhead,
+                      total_overhead: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div
+                style={{
+                  marginTop: "12px",
+                  padding: "14px 16px",
+                  background: "#1e293b",
+                  borderRadius: "10px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#94a3b8",
+                    fontWeight: 600,
+                    fontSize: "13px",
+                  }}
+                >
+                  Grand Total (Non-Recurring + Recurring + SSR + Overhead)
+                </span>
+                <span
+                  style={{
+                    color: "#34d399",
+                    fontWeight: 800,
+                    fontSize: "17px",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  ₹ {fmtINRStrict(grandTotal)}
+                </span>
+              </div>
+              {/* ── FIX 3: Transfer Tracking — now uses separately-fetched history ── */}
               <h3>Transfer Tracking</h3>
-              <TransferTimeline item={draft} />
+              <TransferTimeline
+                history={history}
+                currentHolder={inst.assigned_to}
+                isCompleted={isCompleted}
+              />
 
               {editable && isEditing && (
-                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-                  <button className="btn-approve" onClick={handleSaveClick}>💾 Save Changes</button>
-                  <button className="btn-edit" onClick={() => { setDraft(ensureReportShape(item)); setIsEditing(false); }}>Cancel</button>
+                <div
+                  style={{ display: "flex", gap: "12px", marginTop: "20px" }}
+                >
+                  <button className="btn-approve" onClick={handleSaveClick}>
+                    💾 Save Changes
+                  </button>
+                  <button
+                    className="btn-edit"
+                    onClick={() => {
+                      setDraft({ ...inst });
+                      setDraftRecurring({
+                        ...(data.recurringHeads?.[0] || {}),
+                      });
+                      setDraftOverhead({ ...(data.overheads?.[0] || {}) });
+                      setIsEditing(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
                 </div>
               )}
             </div>
           ) : (
             <div ref={reportRef}>
-  <CSRCProceedingsReport
-    reportData={buildLiveReportData(draft)}
-    signatures={draft.signatures || {}}
-    isCompleted={isCompleted}
-  />
-</div>
+              <CSRCProceedingsReport
+                reportData={reportData}
+                signatures={{
+                  assistant: signatures.asstSig
+                    ? `http://localhost:5100/${signatures.asstSig.replace(/\\/g, "/")}`
+                    : null,
+                  superintendent: signatures.supdtSig
+                    ? `http://localhost:5100/${signatures.supdtSig.replace(/\\/g, "/")}`
+                    : null,
+                  dd: signatures.ddSig
+                    ? `http://localhost:5100/${signatures.ddSig.replace(/\\/g, "/")}`
+                    : null,
+                  director: signatures.dirSig
+                    ? `http://localhost:5100/${signatures.dirSig.replace(/\\/g, "/")}`
+                    : null,
+                }}
+                isCompleted={isCompleted}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -697,215 +1282,295 @@ const downloadPDF = () => {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function FreshSanction() {
-  const navigate  = useNavigate();
-  const role      = userRole();
+  const navigate = useNavigate();
+  const role = userRole();
   const [mounted, setMounted] = useState(false);
 
-  const {
-    freshActive,   setFreshActive,
-    freshTransferred,
-    freshCompleted,
-    fresh_transfer,
-    fresh_complete,
-    fresh_updateTransferred,
-    fresh_forwardToDirector,
-  } = useProjectContext();
+  const [activeTab, setActiveTab] = useState("active");
+  const [search, setSearch] = useState("");
+  const [rows, setRows] = useState([]);
+  const [tabCounts, setTabCounts] = useState({
+    active: 0,
+    transferred: 0,
+    completed: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [manageId, setManageId] = useState(null);
+  const [selectedSchemes, setSelectedSchemes] = useState({});
+  const [schemeSearch, setSchemeSearch] = useState({});
+  const [showSchemeDropdown, setShowSchemeDropdown] = useState({});
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 50);
+  }, []);
 
-  const [search, setSearch]               = useState('');
-  const [activeTab, setActiveTab]         = useState('active');
-  const [schemeModalItem, setSchemeModalItem] = useState(null);
+  useEffect(() => {
+    loadRows();
+    loadCounts();
+  }, [role, activeTab]);
+  const loadCounts = async () => {
+    try {
+      const name = currentUser();
 
-  // Single combined View/Edit/Track modal
-  const [manageItem, setManageItem] = useState(null);
+      const activeUrl =
+        role === "assistant"
+          ? `http://localhost:5100/api/sanctions/assigned-to-me?username=${encodeURIComponent(name)}`
+          : role === "superintendent"
+            ? `http://localhost:5100/api/sanctions/assigned-to-supervisor?username=${encodeURIComponent(name)}`
+            : role === "dd"
+              ? `http://localhost:5100/api/sanctions/assigned-to-dd?username=${encodeURIComponent(name)}`
+              : `http://localhost:5100/api/sanctions/assigned-to-director?username=${encodeURIComponent(name)}`;
 
-  useEffect(() => { setTimeout(() => setMounted(true), 50); }, []);
+      const transferredUrl = `http://localhost:5100/api/sanctions/transferred-by-me?username=${encodeURIComponent(name)}`;
 
-  // ── Data source by role and tab ────────────────────────────────────────────
-  const myTransferred = useMemo(() =>
-    freshTransferred.filter(i =>
-      role === 'superintendent' ? i.currentHolder?.role === 'superintendent' :
-      role === 'director'       ? i.currentHolder?.role === 'director'       :
-      true
-    ), [freshTransferred, role]);
+      const completedUrl = `http://localhost:5100/api/sanctions/completed-by-me?username=${encodeURIComponent(name)}`;
 
-  const activeSource =
-    activeTab === 'active'      ? (role === 'assistant' ? freshActive : myTransferred) :
-    activeTab === 'transferred' ? freshTransferred :
-    freshCompleted;
+      const [a, t, c] = await Promise.all([
+        fetch(activeUrl).then((r) => r.json()),
+        fetch(transferredUrl).then((r) => r.json()),
+        fetch(completedUrl).then((r) => r.json()),
+      ]);
+
+      setTabCounts({
+        active: Array.isArray(a) ? a.length : 0,
+        transferred: Array.isArray(t) ? t.length : 0,
+        completed: Array.isArray(c) ? c.length : 0,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const loadRows = async () => {
+    try {
+      setLoading(true);
+      const name = currentUser();
+      let url = "";
+
+      if (activeTab === "active") {
+        url =
+          role === "assistant"
+            ? `http://localhost:5100/api/sanctions/assigned-to-me?username=${encodeURIComponent(name)}`
+            : role === "superintendent"
+              ? `http://localhost:5100/api/sanctions/assigned-to-supervisor?username=${encodeURIComponent(name)}`
+              : role === "dd"
+                ? `http://localhost:5100/api/sanctions/assigned-to-dd?username=${encodeURIComponent(name)}`
+                : `http://localhost:5100/api/sanctions/assigned-to-director?username=${encodeURIComponent(name)}`;
+      } else if (activeTab === "transferred") {
+        url = `http://localhost:5100/api/sanctions/transferred-by-me?username=${encodeURIComponent(name)}`;
+      } else {
+        url = `http://localhost:5100/api/sanctions/completed-by-me?username=${encodeURIComponent(name)}`;
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+      setRows(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load installments", err);
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     const s = search.toLowerCase();
-    if (!s) return activeSource;
-    return activeSource.filter(i =>
-      i.title?.toLowerCase().includes(s) ||
-      i.refNo?.toLowerCase().includes(s) ||
-      i.fundingAgency?.toLowerCase().includes(s) ||
-      i.pi?.name?.toLowerCase().includes(s)
+    if (!s) return rows;
+    return rows.filter(
+      (i) =>
+        i.project_title?.toLowerCase().includes(s) ||
+        i.sanction_reference_no?.toLowerCase().includes(s) ||
+        i.funding_agency?.toLowerCase().includes(s) ||
+        i.pi_name?.toLowerCase().includes(s),
     );
-  }, [activeSource, search]);
+  }, [rows, search]);
 
-  // ── Scheme assignment ──────────────────────────────────────────────────────
-  const handleAssignScheme = (scheme) => {
-    if (!schemeModalItem) return;
-    const updated = {
-      ...schemeModalItem,
-      assignedScheme: scheme,
-      assignedAccount: scheme.accountType,
-      accountCode: scheme.schemeCode,
-    };
-    setFreshActive(prev => prev.map(i => i.id === updated.id ? updated : i));
-    setSchemeModalItem(null);
-  };
-
-  // ── Transfer handlers ──────────────────────────────────────────────────────
-  const today = () => new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-
-  const handleApproveTransfer = (item, staff) => {
-    const mySig = getProfileSignature(role);
-    const stamped = {
-      ...item,
-      signatures: { ...(item.signatures || {}), [role]: mySig || true },
-      transferHistory: [
-        ...(item.transferHistory || []),
-        { from: userName(), fromRole: role, to: staff, date: today(), approved: true },
-      ],
-    };
-    fresh_transfer(stamped, staff);
-  };
-
-  const handlePlainTransferAssistant = (item, staff) => {
-    const updated = {
-      ...item,
-      transferHistory: [
-        ...(item.transferHistory || []),
-        { from: userName(), fromRole: role, to: staff, date: today(), approved: false },
-      ],
-    };
-    fresh_transfer(updated, staff);
-  };
-
-  const handleApproveForward = (item, staff) => {
-    const mySig = getProfileSignature(role);
-    const stamped = {
-      ...item,
-      signatures: { ...(item.signatures || {}), [role]: mySig || true },
-      transferHistory: [
-        ...(item.transferHistory || []),
-        { from: userName(), fromRole: role, to: staff, date: today(), approved: true },
-      ],
-    };
-    fresh_forwardToDirector(stamped, staff);
-  };
-
-  const handlePlainTransferSuperintendent = (item, staff) => {
-    const updated = {
-      ...item,
-      currentHolder: staff,
-      transferHistory: [
-        ...(item.transferHistory || []),
-        { from: userName(), fromRole: role, to: staff, date: today(), approved: false },
-      ],
-    };
-    fresh_updateTransferred(updated);
-  };
-
-  const handleComplete = (item) => {
-    // Stamp director signature on final approval
-    const mySig = getProfileSignature(role);
-    const stamped = {
-      ...item,
-      signatures: { ...(item.signatures || {}), director: mySig || true },
-      currentHolder: null,      // cleared so isCompleted=true in report
-      transferHistory: [
-        ...(item.transferHistory || []),
-        { from: userName(), fromRole: role, to: { name: 'Completed', role: 'completed' }, date: today(), approved: true },
-      ],
-    };
-    fresh_complete(stamped);
-  };
-
-  const handleSaveManaged = (updated) => {
-    if (role === 'assistant' && activeTab === 'active') {
-      setFreshActive(prev => prev.map(i => i.id === updated.id ? updated : i));
-    } else {
-      fresh_updateTransferred(updated);
+  const handleApproveTransfer = async (item, staff) => {
+    try {
+      const endpoint =
+        role === "assistant"
+          ? `http://localhost:5100/api/sanctions/${item.id}/approve-and-assign`
+          : role === "superintendent"
+            ? `http://localhost:5100/api/sanctions/${item.id}/approve-and-assign-dd`
+            : role === "dd"
+              ? `http://localhost:5100/api/sanctions/${item.id}/approve-and-assign-director`
+              : `http://localhost:5100/api/sanctions/${item.id}/final-approve`;
+      const res = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assigned_to: staff ? staff.name : "APPROVED",
+          assigned_from: currentUser(),
+          remarks: "",
+          scheme: `${selectedSchemes[item.id]?.schemeCode} - ${selectedSchemes[item.id]?.schemeName}`,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Request failed (${res.status})`);
+      }
+      loadRows();
+    } catch (err) {
+      console.error("Failed to approve and transfer", err);
+      alert(err.message || "Failed to approve and transfer.");
     }
-    setManageItem(null);
   };
 
-  // ── Tab labels ─────────────────────────────────────────────────────────────
+  const handlePlainTransfer = async (item, staff) => {
+    try {
+      // DD's "no approval" transfer sends the record BACK a stage to the
+      // superviser; every other role's plain transfer stays at the same
+      // stage and just reassigns who holds it.
+      const endpoint =
+        role === "dd"
+          ? `http://localhost:5100/api/sanctions/${item.id}/transfer-to-supervisor`
+          : `http://localhost:5100/api/sanctions/${item.id}/transfer`;
+      const res = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assigned_to: staff.name,
+          assigned_from: currentUser(),
+          remarks: "",
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Request failed (${res.status})`);
+      }
+      loadRows();
+    } catch (err) {
+      console.error("Failed to transfer", err);
+      alert(err.message || "Failed to transfer.");
+    }
+  };
+
+  const handleFinalApprove = async (item) => {
+    try {
+      await fetch(
+        `http://localhost:5100/api/sanctions/${item.id}/final-approve`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            assigned_from: currentUser(),
+            remarks: "",
+          }),
+        },
+      );
+      loadRows();
+    } catch (err) {
+      console.error("Failed to final approve", err);
+    }
+  };
+
   const tabs =
-    role === 'assistant'
+    role === "assistant"
       ? [
-          { key: 'active',      label: `New Requests (${freshActive.length})` },
-          { key: 'transferred', label: `Transferred (${freshTransferred.length})` },
-          { key: 'completed',   label: `Completed (${freshCompleted.length})` },
+          { key: "active", label: "New Requests" },
+          { key: "transferred", label: "Transferred" },
+          { key: "completed", label: "Completed" },
         ]
-      : role === 'superintendent'
-      ? [
-          { key: 'active',      label: `In My Queue (${myTransferred.length})` },
-          { key: 'transferred', label: `All Transferred (${freshTransferred.length})` },
-          { key: 'completed',   label: `Completed (${freshCompleted.length})` },
-        ]
-      : [
-          { key: 'active',      label: `Awaiting Approval (${myTransferred.length})` },
-          { key: 'completed',   label: `Completed (${freshCompleted.length})` },
-        ];
+      : role === "superintendent"
+        ? [
+            { key: "active", label: "In My Queue" },
+            { key: "transferred", label: "All Transferred" },
+            { key: "completed", label: "Completed" },
+          ]
+        : role === "dd"
+          ? [
+              { key: "active", label: "In My Queue" },
+              { key: "transferred", label: "All Transferred" },
+              { key: "completed", label: "Completed" },
+            ]
+          : [
+              { key: "active", label: "Awaiting Approval" },
+              { key: "completed", label: "Completed" },
+            ];
 
   return (
-    <div className={`project-dashboard ${mounted ? 'fs-loaded' : ''}`}>
-      {/* Top Nav */}
+    <div className={`project-dashboard ${mounted ? "fs-loaded" : ""}`}>
       <div className="fs-top-nav">
-        <button className="fs-btn-back" onClick={() => navigate('/projects/dashboard')}>
-          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        <button
+          className="fs-btn-back"
+          onClick={() => navigate("/projects/dashboard")}
+        >
+          <svg
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Back to Dashboard
         </button>
         <div className="fs-nav-right">
           <span className={`fs-role-chip fs-role-${role}`}>
-            {role === 'assistant' ? '🟢' : role === 'superintendent' ? '🔵' : '🔴'} {role}
+            {role === "assistant"
+              ? "🟢"
+              : role === "superintendent"
+                ? "🔵"
+                : "🔴"}{" "}
+            {role}
           </span>
         </div>
       </div>
 
-      {/* Header */}
       <div className="fs-header">
         <h1 className="fs-header-title">Fresh Sanctions</h1>
-        <p className="fs-header-sub">First installment sanction requests — review, assign account, and transfer</p>
+        <p className="fs-header-sub">
+          First installment sanction requests — review, assign account, and
+          transfer
+        </p>
       </div>
 
-      {/* Tabs */}
       <div className="tab-switcher">
-        {tabs.map(t => (
+        {tabs.map((t) => (
           <button
             key={t.key}
-            className={activeTab === t.key ? 'active' : ''}
+            className={activeTab === t.key ? "active" : ""}
             onClick={() => setActiveTab(t.key)}
           >
-            {t.label}
+            {t.label} ({tabCounts[t.key] || 0})
           </button>
         ))}
       </div>
 
-      {/* Search */}
       <div className="fs-search-bar">
         <div className="fs-search-inner">
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
           <input
             type="text"
             placeholder="Search by title, ref no, agency, PI name..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          {search && <button className="fs-search-clear" onClick={() => setSearch('')}>✕</button>}
+          {search && (
+            <button className="fs-search-clear" onClick={() => setSearch("")}>
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Table */}
       <table className="sanctioned-table">
         <thead>
           <tr>
@@ -915,122 +1580,188 @@ export default function FreshSanction() {
             <th>PI</th>
             <th>Agency</th>
             <th>Cost (₹)</th>
-            {role === 'assistant' && activeTab === 'active' && <th>Account / Scheme</th>}
-            {(activeTab === 'transferred' || (role !== 'assistant' && activeTab === 'active')) && <th>Stage</th>}
+            <th>Scheme</th>
+            {(activeTab === "transferred" || activeTab === "active") && (
+              <th>Stage</th>
+            )}
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filtered.length === 0 && (
+          {loading && (
             <tr>
-              <td colSpan={10} style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
-                {search ? `No results for "${search}"` : 'No items to display'}
+              <td
+                colSpan={8}
+                style={{ textAlign: "center", padding: "32px", color: "#888" }}
+              >
+                Loading...
               </td>
             </tr>
           )}
-          {filtered.map((item, idx) => (
-            <tr key={item.id}>
-              <td>{idx + 1}</td>
-              <td>{item.refNo}</td>
-              <td>
-                <div style={{ fontWeight: 600 }}>{item.title}</div>
-                <div style={{ fontSize: '12px', color: '#888' }}>{item.pi?.campus}</div>
-              </td>
-              <td>
-                <div>{item.pi?.name}</div>
-                <div style={{ fontSize: '12px', color: '#888' }}>{item.pi?.department}</div>
-              </td>
-              <td>{item.fundingAgency}</td>
-              <td>₹ {item.cost}</td>
-
-              {/* Account / Scheme — assistant only, active tab */}
-              {role === 'assistant' && activeTab === 'active' && (
-                <td>
-                  <div className="fs-scheme-cell">
-                    {item.assignedScheme ? (
-                      <div className="fs-scheme-chip">
-                        <div className="fs-scheme-code">{item.assignedScheme.schemeCode}</div>
-                        <div className="fs-scheme-name">{item.assignedScheme.schemeName}</div>
-                        <div className="fs-scheme-type">{item.assignedScheme.accountType}</div>
-                      </div>
-                    ) : (
-                      <span className="fs-scheme-empty">Not assigned</span>
-                    )}
-                    <button className="fs-scheme-action-btn" onClick={() => setSchemeModalItem(item)}>
-                      {item.assignedScheme ? '✏️ Change' : '➕ Action'}
-                    </button>
-                  </div>
-                </td>
-              )}
-
-              {/* Stage column */}
-              {(activeTab === 'transferred' || (role !== 'assistant' && activeTab === 'active')) && (
-                <td><StageBadge role={item.currentHolder?.role} /></td>
-              )}
-
-              {/* Actions */}
-              <td>
-                <div className="fs-actions">
-
-                  {/* ── Single combined View / Edit / Track button ── */}
-                  <button
-                    className="btn-view"
-                    onClick={() => setManageItem(item)}
-                    title="View full details, track progress, and edit"
-                  >
-                    👁 View
-                  </button>
-
-                  {/* ── Assistant: Approve & Transfer / Plain Transfer ── */}
-                  {role === 'assistant' && activeTab === 'active' && (
-                    <ProjectApprovalTransferCell
-                      item={item}
-                      userRole={role}
-                      onApproveTransfer={handleApproveTransfer}
-                      onPlainTransfer={handlePlainTransferAssistant}
-                    />
-                  )}
-
-                  {/* ── Superintendent: Approve & Forward / Plain Transfer ── */}
-                  {role === 'superintendent' && activeTab === 'active' && (
-                    <ProjectApprovalTransferCell
-                      item={item}
-                      userRole={role}
-                      onApproveTransfer={handleApproveForward}
-                      onPlainTransfer={handlePlainTransferSuperintendent}
-                    />
-                  )}
-
-                  {/* ── Director: Final Approve ── */}
-                  {role === 'director' && activeTab === 'active' && (
-                    <button className="btn-approve"
-                      onClick={() => handleComplete(item)}>
-                      ✓ Approve
-                    </button>
-                  )}
-
-                </div>
+          {!loading && filtered.length === 0 && (
+            <tr>
+              <td
+                colSpan={8}
+                style={{ textAlign: "center", padding: "32px", color: "#888" }}
+              >
+                {search ? `No results for "${search}"` : "No items to display"}
               </td>
             </tr>
-          ))}
+          )}
+          {!loading &&
+            filtered.map((item, idx) => (
+              <tr key={item.id}>
+                <td>{idx + 1}</td>
+                <td>{item.sanction_reference_no || "—"}</td>
+                <td>
+                  <div style={{ fontWeight: 600 }}>{item.project_title}</div>
+                  <div style={{ fontSize: "12px", color: "#888" }}>
+                    {item.pi_campus}
+                  </div>
+                </td>
+                <td>
+                  <div>{item.pi_name}</div>
+                  <div style={{ fontSize: "12px", color: "#888" }}>
+                    {item.pi_dept}
+                  </div>
+                </td>
+                <td>{item.funding_agency}</td>
+
+                <td>₹ {fmtINRStrict(item.total_amount)}</td>
+
+                <td>
+                  {role === "assistant" && activeTab === "active" ? (
+                    <div style={{ position: "relative", minWidth: "250px" }}>
+                      <input
+                        type="text"
+                        placeholder="Search Scheme..."
+                        value={
+                          schemeSearch[item.id] ??
+                          selectedSchemes[item.id]?.schemeName ??
+                          ""
+                        }
+                        onFocus={() =>
+                          setShowSchemeDropdown((prev) => ({
+                            ...prev,
+                            [item.id]: true,
+                          }))
+                        }
+                        onChange={(e) => {
+                          setSchemeSearch((prev) => ({
+                            ...prev,
+                            [item.id]: e.target.value,
+                          }));
+
+                          setShowSchemeDropdown((prev) => ({
+                            ...prev,
+                            [item.id]: true,
+                          }));
+                        }}
+                      />
+
+                      {showSchemeDropdown[item.id] && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            zIndex: 9999,
+                            background: "#fff",
+                            border: "1px solid #ddd",
+                            maxHeight: "250px",
+                            overflowY: "auto",
+                            width: "100%",
+                          }}
+                        >
+                          {initialSchemes
+                            .filter((s) =>
+                              `${s.schemeCode} ${s.schemeName}`
+                                .toLowerCase()
+                                .includes(
+                                  (schemeSearch[item.id] || "").toLowerCase(),
+                                ),
+                            )
+                            .map((scheme) => (
+                              <div
+                                key={scheme.schemeCode}
+                                style={{
+                                  padding: "8px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  setSelectedSchemes((prev) => ({
+                                    ...prev,
+                                    [item.id]: scheme,
+                                  }));
+
+                                  setSchemeSearch((prev) => ({
+                                    ...prev,
+                                    [item.id]: `${scheme.schemeCode} - ${scheme.schemeName}`,
+                                  }));
+
+                                  setShowSchemeDropdown((prev) => ({
+                                    ...prev,
+                                    [item.id]: false,
+                                  }));
+                                }}
+                              >
+                                <strong>{scheme.schemeCode}</strong>
+                                <br />
+                                {scheme.schemeName}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    item.scheme || "-"
+                  )}
+                </td>
+
+                {(activeTab === "transferred" || activeTab === "active") && (
+                  <td>
+                    <StageBadge status={item.status} />
+                  </td>
+                )}
+
+                <td>
+                  <div className="fs-actions">
+                    <button
+                      className="btn-view"
+                      onClick={() => setManageId(item.id)}
+                      title="View full details, track progress, and edit"
+                    >
+                      👁 View
+                    </button>
+
+                    {role !== "director" && activeTab === "active" && (
+                      <ProjectApprovalTransferCell
+                        item={item}
+                        userRole={role}
+                        onApproveTransfer={handleApproveTransfer}
+                        onPlainTransfer={handlePlainTransfer}
+                      />
+                    )}
+
+                    {role === "director" && activeTab === "active" && (
+                      <button
+                        className="btn-approve"
+                        onClick={() => handleFinalApprove(item)}
+                      >
+                        ✓ Final Approve
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
-      {/* Scheme selection modal */}
-      <SchemeSelectModal
-        open={!!schemeModalItem}
-        onClose={() => setSchemeModalItem(null)}
-        onSelect={handleAssignScheme}
-        currentScheme={schemeModalItem?.assignedScheme}
-      />
-
-      {/* Combined View / Edit / Track Modal */}
-      {manageItem && (
+      {manageId && (
         <ManageModal
-          item={manageItem}
-          editable={activeTab === 'active'}
-          onSave={handleSaveManaged}
-          onClose={() => setManageItem(null)}
+          installmentId={manageId}
+          editable={activeTab === "active"}
+          onClose={() => setManageId(null)}
+          onSaved={loadRows}
         />
       )}
     </div>

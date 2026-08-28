@@ -9,6 +9,7 @@ const COLUMNS = [
   { key: 'id', label: 'ACF ID', render: (r) => r.acfId },
   { key: 'consultantName', label: 'Consultant Name' },
   { key: 'amount', label: 'Amount', render: (r) => Number(r.amount || 0).toLocaleString('en-IN') },
+  { key: 'permissionDate', label: 'Permission Date', render: (r) => r.permissionDate || '-' },
 ];
 
 const PermissionsCompleted = () => {
